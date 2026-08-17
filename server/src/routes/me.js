@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/', requireAuthenticated, (req, res) => {
   const { userId } = getAuth(req);
-  res.status(200).json({ clerkUserId: userId });
+  res.status(200).json({ clerk_user_id: userId });
 });
 
 export default router;
