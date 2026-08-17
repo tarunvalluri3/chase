@@ -1,13 +1,24 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from './Home';
+import Root from './Root';
+import Login from './auth/Login';
+import Signup from './auth/Signup';
+import Profile from './Profile';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 
-// Route definitions only — real screens land in Phase 11+ (§6 nav table).
-// /tasks/:status, /insights, /profile are added when those phases build the
-// screens they render; this phase proves routing works end to end.
+// Public: "/" (Landing for signed-out, Home for signed-in — see Root.jsx),
+// "/login/*", "/signup/*" (wildcard: Clerk's path-routed SignIn/SignUp own
+// their own sub-steps, e.g. /login/factor-one).
+// Protected: everything behind ProtectedRoute redirects to /login.
+// /tasks/:status, /insights land when Phase 11+ builds the screens they render.
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Root />} />
+      <Route path="/login/*" element={<Login />} />
+      <Route path="/signup/*" element={<Signup />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/profile" element={<Profile />} />
+      </Route>
     </Routes>
   );
 }

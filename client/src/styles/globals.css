@@ -45,92 +45,130 @@
   font-display: swap;
 }
 
-/* ---- reset ---- */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ---- reset ----
+ * Wrapped in Tailwind's own `base` layer: unlayered CSS always beats layered
+ * CSS regardless of specificity, so a plain `*,*::before,*::after{padding:0}`
+ * here would silently win over every Tailwind spacing utility (px-*, mt-*,
+ * gap-*, ...) app-wide. Layering it lets `@layer utilities` override it as
+ * intended. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh; /* never 100vh — exceeds the visible viewport on mobile Safari (§9) */
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* ---- mono numerals never jitter (§3.2) ---- */
+  .font-mono,
+  [class*='font-mono'] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- mobile hygiene (§9) ---- */
+  body,
+  button,
+  a,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+
+  /* ---- focus ring (§8) — 2px accent ring, 2px canvas-colored offset, never removed without replacement ---- */
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
 }
 
-html {
-  height: 100%;
-  -webkit-text-size-adjust: 100%;
+@layer utilities {
+  .overscroll-contain {
+    overscroll-behavior-y: contain;
+  }
+
+  /* ---- safe areas (§9) ---- */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* ---- skeleton shimmer (§5.5) — a 1.4s sweep, never a pulsing opacity ---- */
+  .shimmer {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-surface) 40%,
+      var(--color-overlay) 50%,
+      var(--color-surface) 60%
+    );
+    background-size: 250% 100%;
+    animation: shimmer-sweep 1.4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer {
+      animation: none;
+      background-image: none;
+      background-color: var(--color-surface);
+    }
+  }
 }
 
-body {
-  min-height: 100dvh; /* never 100vh — exceeds the visible viewport on mobile Safari (§9) */
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  overscroll-behavior-y: none;
-}
-
-#root {
-  min-height: 100dvh;
-}
-
-img,
-svg {
-  display: block;
-  max-width: 100%;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-}
-
-/* ---- mono numerals never jitter (§3.2) ---- */
-.font-mono,
-[class*='font-mono'] {
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---- mobile hygiene (§9) ---- */
-body,
-button,
-a,
-[role='button'] {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button,
-a,
-[role='button'] {
-  touch-action: manipulation;
-}
-
-.overscroll-contain {
-  overscroll-behavior-y: contain;
-}
-
-/* ---- safe areas (§9) ---- */
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
-}
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.pl-safe {
-  padding-left: env(safe-area-inset-left);
-}
-.pr-safe {
-  padding-right: env(safe-area-inset-right);
-}
-
-/* ---- focus ring (§8) — 2px accent ring, 2px canvas-colored offset, never removed without replacement ---- */
-:focus {
-  outline: none;
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+@keyframes shimmer-sweep {
+  from {
+    background-position: -120% 0;
+  }
+  to {
+    background-position: 120% 0;
+  }
 }
