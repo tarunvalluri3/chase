@@ -184,3 +184,4 @@ Vitest + Supertest. Coverage should include: auth, authorization/ownership (incl
 - `STATE.md` — current phase, status of all phases, decisions log, how to resume.
 - `PHASES.md` — full roadmap description of phases 0–16, plus future phases 17–30 (out of scope).
 - `prompts/phase-XX.md` — the self-contained, ready-to-approve prompt for each phase. Do not build a phase whose prompt has not been explicitly approved by the user.
+- `client/DESIGN.md` — **the authoritative design system for all frontend work (Phases 9–16).** Color, typography, space, motion, navigation, component inventory and behavior, copy voice, accessibility, and the mobile production checklist. Read it in full before starting any frontend phase. This file (`CLAUDE.md`) still governs architecture, lifecycle rules, and the approval workflow and wins on those; `DESIGN.md` governs everything visual and interactive. Its "Approved decisions" table is settled — do not relitigate those mid-phase.
