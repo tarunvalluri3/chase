@@ -47,3 +47,26 @@ export const apiClient = {
   patch: (path, body, options) => request(path, { ...options, method: 'PATCH', body }),
   delete: (path, body, options) => request(path, { ...options, method: 'DELETE', body }),
 };
+
+// Route-slug (lowercase, matches /tasks/:status) -> API status value.
+const STATUS_QUERY_VALUE = {
+  active: 'ACTIVE',
+  missed: 'MISSED',
+  completed: 'COMPLETED',
+  incomplete: 'INCOMPLETE',
+  deleted: 'DELETED',
+};
+
+// Task-specific API methods — server/API.md is the source of truth for shapes.
+export const tasksApi = {
+  list: (routeStatus) => {
+    const query = routeStatus ? `?status=${STATUS_QUERY_VALUE[routeStatus] ?? routeStatus}` : '';
+    return apiClient.get(`/tasks${query}`);
+  },
+  get: (id) => apiClient.get(`/tasks/${id}`),
+  create: (body) => apiClient.post('/tasks', body),
+  patch: (id, body) => apiClient.patch(`/tasks/${id}`, body),
+  complete: (id) => apiClient.post(`/tasks/${id}/complete`),
+  resolveMissed: (id, body) => apiClient.post(`/tasks/${id}/resolve-missed`, body),
+  remove: (id, reason) => apiClient.delete(`/tasks/${id}`, { reason }),
+};

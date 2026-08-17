@@ -30,3 +30,24 @@ export function formatDeadline(isoUtc, { now = new Date() } = {}) {
 export function formatTimestamp(isoUtc) {
   return absoluteFormatter.format(new Date(isoUtc));
 }
+
+const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+
+// AppBar's mono uppercase context line for the Home screen (DESIGN.md §6.2).
+export function formatTodayContext(now = new Date()) {
+  return dayFormatter.format(now).toUpperCase();
+}
+
+// Converts an ISO UTC string to the local value a native
+// <input type="datetime-local"> expects (no timezone, minute precision).
+export function toDatetimeLocalValue(isoUtc) {
+  const d = new Date(isoUtc);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// Converts a <input type="datetime-local"> value (interpreted as local time
+// by the browser) back to an ISO UTC string for the API.
+export function fromDatetimeLocalValue(localValue) {
+  return new Date(localValue).toISOString();
+}
