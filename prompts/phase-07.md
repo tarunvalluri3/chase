@@ -10,16 +10,16 @@ Build an automated backend test suite with Vitest + Supertest covering auth, aut
 - Set up a test database strategy (e.g. a separate test schema/database, or transactional rollback per test) so tests don't pollute real data — document the chosen approach in `STATE.md`'s Decisions log.
 - Write tests covering:
   - **Auth:** unauthenticated requests are rejected (401) on all task routes.
-  - **Authorization / cross-user:** a second test user cannot read/edit/complete/miss/delete a first user's task; responses don't leak existence.
+  - **Authorization / cross-user:** a second test user cannot read/edit/complete/resolve-missed/delete a first user's task; responses don't leak existence.
   - **Creation:** valid task creation succeeds; invalid payloads are rejected with 400.
   - **Listing & filtering:** `GET /api/tasks` returns only the requesting user's tasks; `?status=` filtering works for each status value.
   - **Get one:** valid id returns the task; foreign/nonexistent id returns the consistent not-found response.
   - **Editing:** PATCH updates allowed fields on ACTIVE tasks; rejects edits to COMPLETED/MISSED/DELETED tasks; rejects attempts to set system-controlled fields.
   - **Completion:** ACTIVE → COMPLETED works and sets correct fields; re-completing fails; completing a MISSED/DELETED task fails.
-  - **Missed (manual):** requires non-empty reason; ACTIVE → MISSED works and sets correct fields; invalid transitions rejected.
-  - **Missed (automatic, from Phase 6):** an ACTIVE task past its deadline is transitioned to MISSED on read; COMPLETED tasks past deadline are untouched.
+  - **Missed (automatic, from Phase 6):** an ACTIVE task past its deadline is transitioned to MISSED on read (not treated as a verdict of "never completed" — just a checkpoint); COMPLETED and DELETED tasks past deadline are untouched; already-MISSED tasks aren't reprocessed. Confirm there is no way for a client to set `status=MISSED` directly (no `/miss` endpoint exists).
+  - **Missed resolution (`POST /api/tasks/:id/resolve-missed`, from Phase 6):** only callable on a MISSED task (rejecting ACTIVE/COMPLETED/INCOMPLETE/DELETED with a clear error); `resolution: "INCOMPLETE"` without a non-empty `reason` is rejected with 400; `resolution: "INCOMPLETE"` with a reason moves to `status=INCOMPLETE`, sets `incomplete_reason`/`incomplete_at`, and preserves the original `missed_reason`/`missed_at`; `resolution: "COMPLETED"` moves to `status=COMPLETED`, sets `completed_at`, updates `updated_at`, leaves `missed_at`/`missed_reason` intact as history, and leaves `incomplete_reason`/`incomplete_at` null; invalid/missing `resolution` values are rejected with 400; resolving twice (on an already-INCOMPLETE or already-COMPLETED task) is rejected.
   - **Deletion:** requires non-empty reason; soft-delete confirmed (row still exists in DB, `status=DELETED`); invalid transitions rejected.
-  - **Validation edge cases:** empty/whitespace reasons, invalid enum values, missing required fields, malformed ids.
+  - **Validation edge cases:** empty/whitespace reasons (including the `resolve-missed` INCOMPLETE reason), invalid `resolution`/enum/status values, missing required fields, malformed ids.
 - Wire a test script into `server/package.json` (e.g. `npm test`).
 
 ## Out of scope
@@ -35,7 +35,7 @@ Build an automated backend test suite with Vitest + Supertest covering auth, aut
 
 ## Acceptance criteria
 - [ ] `npm test` runs the full suite and passes against a clean test database.
-- [ ] All coverage areas listed above (auth, cross-user, CRUD, completion, missed manual + automatic, deletion, validation, filtering) have corresponding passing tests.
+- [ ] All coverage areas listed above (auth, cross-user, CRUD, completion, automatic missed detection, missed resolution, deletion, validation, filtering) have corresponding passing tests.
 - [ ] Tests don't depend on real Clerk network calls (auth is mocked/stubbed appropriately for test speed and reliability).
 - [ ] Tests clean up after themselves / don't leak state between runs.
 - [ ] `STATE.md` updated: Phase 7 marked `Done`, next phase noted, test-database strategy and auth-mocking approach logged as decisions.

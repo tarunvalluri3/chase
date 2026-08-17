@@ -7,8 +7,8 @@ Build a Home/Dashboard view giving the user a quick overview of their task lands
 
 ## In scope
 - Build the Home route (placeholder since Phase 11) into a real dashboard.
-- Show task counts by status (Active/Completed/Missed/Deleted) — computed client-side from existing list endpoints, or via lightweight additional `GET /api/tasks?status=` calls per status (avoid adding new backend aggregation endpoints in this phase — keep it simple, revisit if performance becomes a real issue).
-- Show a short "recent activity" list (e.g. most recently updated/completed/missed/deleted tasks) using existing data sorted client-side.
+- Show task counts by status (Active/Completed/Missed/Incomplete/Deleted) — computed client-side from existing list endpoints, or via lightweight additional `GET /api/tasks?status=` calls per status (avoid adding new backend aggregation endpoints in this phase — keep it simple, revisit if performance becomes a real issue).
+- Show a short "recent activity" list (e.g. most recently updated/completed/missed/confirmed-incomplete/deleted tasks) using existing data sorted client-side.
 - Highlight anything time-sensitive if easy to derive from existing data (e.g. active tasks with near/passed deadlines) — keep this simple, not a full analytics feature.
 - Keep the dashboard visually simple, mobile-first, consistent with the app shell from Phase 11.
 
@@ -22,7 +22,7 @@ Build a Home/Dashboard view giving the user a quick overview of their task lands
 - Possibly a small client-side data-aggregation utility (e.g. `client/src/lib/taskStats.js`) for computing counts/recency from fetched task lists.
 
 ## Acceptance criteria
-- [ ] Home/Dashboard shows accurate counts for Active/Completed/Missed/Deleted tasks for the authenticated user.
+- [ ] Home/Dashboard shows accurate counts for Active/Completed/Missed/Incomplete/Deleted tasks for the authenticated user.
 - [ ] A recent-activity summary is shown, reflecting real recent task events.
 - [ ] All data is correctly scoped to the authenticated user (relies on existing backend scoping — no new security surface introduced).
 - [ ] No new backend endpoints added without explicit user approval/discussion.

@@ -3,11 +3,11 @@
 > ⚠️ Do not start this phase until the user has explicitly approved it (e.g. "Approved — build Phase 12"). On completion, update `STATE.md` and stop — do not proceed to Phase 13 without separate approval.
 
 ## Goal
-Build the real task management UI: creating tasks, listing them per section (Active/Completed/Missed/Deleted from Phase 11), task cards/items, a task detail view, editing, and proper deadline/priority display — including loading, empty, and error states. Lifecycle actions (complete/miss/delete) are Phase 13; this phase is about viewing and editing.
+Build the real task management UI: creating tasks, listing them per section (Active/Completed/Missed/Incomplete/Deleted from Phase 11), task cards/items, a task detail view, editing, and proper deadline/priority display — including loading, empty, and error states. Lifecycle actions (complete/resolve-missed/delete) are Phase 13; this phase is about viewing and editing.
 
 ## In scope
 - Build a task creation form (title required, description optional, deadline required with a sensible date/time input, priority required as LOW/MEDIUM/HIGH selector) that calls `POST /api/tasks` via the API client.
-- Build task list views for each section (Active/Completed/Missed/Deleted), fetching from `GET /api/tasks?status=...` and rendering task cards/items.
+- Build task list views for each section (Active/Completed/Missed/Incomplete/Deleted), fetching from `GET /api/tasks?status=...` and rendering task cards/items.
 - Build a task detail view (`GET /api/tasks/:id`) showing full task info.
 - Build an edit flow for ACTIVE tasks only (title/description/deadline/priority), calling `PATCH /api/tasks/:id`. The edit UI must not be reachable/usable for non-ACTIVE tasks.
 - Display deadline and priority clearly and consistently across list and detail views (e.g. priority as a color-coded badge, deadline formatted in local time for the user while the API deals in UTC).
@@ -15,7 +15,7 @@ Build the real task management UI: creating tasks, listing them per section (Act
 - Use 21st.dev MCP to source/build polished components where it speeds up building cards, forms, badges, etc., consistent with mobile-first design.
 
 ## Out of scope
-- No complete/miss/delete action UI (Phase 13) — though it's fine if the detail/card components leave visual room for these actions to be added next phase.
+- No complete/resolve-missed/delete action UI (Phase 13) — though it's fine if the detail/card components leave visual room for these actions to be added next phase.
 - No dashboard/summary views (Phase 14).
 - No analytics (Phase 15).
 
@@ -29,7 +29,7 @@ Build the real task management UI: creating tasks, listing them per section (Act
 
 ## Acceptance criteria
 - [ ] Users can create a task with all required/optional fields, validated client-side before submission (though the server remains the source of truth).
-- [ ] Each section (Active/Completed/Missed/Deleted) correctly lists only tasks of that status for the authenticated user.
+- [ ] Each section (Active/Completed/Missed/Incomplete/Deleted) correctly lists only tasks of that status for the authenticated user.
 - [ ] Task detail view shows full task info correctly.
 - [ ] Editing works only for ACTIVE tasks, correctly restricted to the four editable fields, and reflects updates immediately after save.
 - [ ] Priority and deadline are displayed clearly and consistently everywhere a task appears.

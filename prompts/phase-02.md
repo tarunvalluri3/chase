@@ -5,6 +5,8 @@
 ## Goal
 Set up Supabase as the database, accessed from the backend exclusively via `@supabase/supabase-js` (no ORM, no `pg`, no direct Postgres connection). Create the `users` and `tasks` schema in Supabase through Supabase's own migration flow, matching the data model in `CLAUDE.md` exactly, including constraints and indexes — then verify the resulting tables in Supabase itself.
 
+> Note (added after this phase was completed): the `status` CHECK constraint here does not yet include `INCOMPLETE`, and `incomplete_reason`/`incomplete_at` don't exist yet. Both are added by a follow-up migration in Phase 6, once the missed-task resolution flow needs them — see `prompts/phase-06.md` and `CLAUDE.md`'s Data Model section for the current, complete schema.
+
 ## In scope
 - Install `@supabase/supabase-js`.
 - Create a Supabase client module (e.g. `server/src/db/supabaseClient.js`) configured from `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, as documented in `example.env`. This is the only way the backend touches the database — no `pg`, no `pg.Pool`, no Postgres connection string.

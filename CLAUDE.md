@@ -81,15 +81,17 @@ REST under **`/api`**. There is **no `/v1`** segment anywhere in the API.
 
 ```
 POST   /api/tasks
-GET    /api/tasks            # supports ?status=ACTIVE|COMPLETED|MISSED|DELETED
+GET    /api/tasks               # supports ?status=ACTIVE|COMPLETED|MISSED|INCOMPLETE|DELETED
 GET    /api/tasks/:id
 PATCH  /api/tasks/:id
 POST   /api/tasks/:id/complete
-POST   /api/tasks/:id/miss   # body: { "reason": "..." }
-DELETE /api/tasks/:id        # body: { "reason": "..." }
+POST   /api/tasks/:id/resolve-missed   # body: { "resolution": "INCOMPLETE", "reason": "..." } | { "resolution": "COMPLETED" }
+DELETE /api/tasks/:id           # body: { "reason": "..." }
 ```
 
-Do not add a generic status-update endpoint. Each lifecycle transition (complete / miss / delete) is its own dedicated operation.
+Do not add a generic status-update endpoint. Each lifecycle transition (complete / resolve-missed / delete) is its own dedicated operation.
+
+There is **no** `POST /api/tasks/:id/miss` endpoint. `MISSED` is never set directly by a client — see Lifecycle Rules below. `resolve-missed` is the only path into both `INCOMPLETE` and a MISSED-originated `COMPLETED`.
 
 ---
 
@@ -109,13 +111,15 @@ tasks
 ├── description         # optional
 ├── deadline            # required
 ├── priority            # LOW | MEDIUM | HIGH (required)
-├── status              # ACTIVE | COMPLETED | MISSED | DELETED
-├── missed_reason
+├── status              # ACTIVE | COMPLETED | MISSED | INCOMPLETE | DELETED
+├── missed_reason        # auto-generated when ACTIVE -> MISSED; preserved forever, even past resolution
+├── incomplete_reason    # user-provided when resolving MISSED -> INCOMPLETE; required, non-empty
 ├── deletion_reason
 ├── created_at
 ├── updated_at
-├── completed_at
+├── completed_at         # set on ACTIVE -> COMPLETED, or on MISSED -> COMPLETED via resolve-missed
 ├── missed_at
+├── incomplete_at         # set on MISSED -> INCOMPLETE via resolve-missed
 └── deleted_at
 ```
 
@@ -124,24 +128,35 @@ Rules:
 - Use proper Postgres types, constraints, indexes, and enums/CHECK constraints for `status` and `priority`.
 - Recommended indexes: `user_id`, `(user_id, status)`, `(user_id, deadline)`.
 - UTC timestamps everywhere.
+- `missed_reason`/`missed_at` and `incomplete_reason`/`incomplete_at` are distinct and both preserved: the former records *when/why the system detected the task as overdue*, the latter records *the user's own account of why it wasn't actually done*. Neither is overwritten by the other.
 
 ---
 
 ## Lifecycle Rules (enforced server-side, in the Service layer)
 
-Allowed transitions only:
 ```
-ACTIVE → COMPLETED
-ACTIVE → MISSED
-ACTIVE → DELETED
+ACTIVE
+  ├─ user marks Complete            → COMPLETED
+  ├─ user deletes (with reason)     → DELETED
+  └─ deadline passes while ACTIVE   → MISSED   (automatic, never client-initiated; pending resolution)
+
+MISSED  (a pending-resolution checkpoint, not itself a verdict)
+  ├─ user resolves, with reason: "I didn't actually complete this" → INCOMPLETE (terminal)
+  └─ user resolves: "I actually completed this"                    → COMPLETED  (terminal)
 ```
-No other transition is valid. Specifically disallowed: `COMPLETED → MISSED`, `MISSED → COMPLETED`, `DELETED → anything`, or any transition out of a terminal state.
+
+**`MISSED` does not mean "the work was never done."** It means only: *the deadline passed without the system receiving a completion confirmation.* A user can forget to tap Complete on work they actually finished, so an overdue ACTIVE task must never be treated as a definitive "incomplete" verdict on its own — it's a checkpoint that always requires the user to resolve it one way or the other. `INCOMPLETE` is the actual, explicit "this was never done" verdict, and it only exists once the user has confirmed it and stated why. Do not write logic anywhere (service, docs, UI copy) that treats "deadline passed" (i.e. `MISSED`) as synonymous with "task was never completed" (i.e. `INCOMPLETE`) — they are different statuses with different meanings.
+
+Allowed transitions only: `ACTIVE→COMPLETED`, `ACTIVE→DELETED`, `ACTIVE→MISSED` (automatic only — see Phase 6), `MISSED→INCOMPLETE` and `MISSED→COMPLETED` (only via the explicit resolution flow below). No other transition is valid. Specifically disallowed: `COMPLETED → anything`, `DELETED → anything`, `INCOMPLETE → anything`, `MISSED → DELETED`, `MISSED → ACTIVE`, or any transition out of a terminal state. `ACTIVE`, `COMPLETED`, `DELETED`, and `INCOMPLETE` are all terminal-or-normal states with no further transitions except the ones listed; `MISSED` is the one non-terminal, pending state — every MISSED task must eventually be resolved to either `INCOMPLETE` or `COMPLETED`.
 
 - **Complete:** only allowed on an ACTIVE task. Sets `status=COMPLETED`, `completed_at`, `updated_at` — all server-controlled. The task must leave the active collection.
-- **Miss:** requires a non-empty reason. Sets `status=MISSED`, `missed_reason`, `missed_at`, `updated_at`. Never allow a miss without a reason. `missed_reason` cannot be edited via the normal update (PATCH) endpoint.
-- **Delete:** soft delete only — the row stays in the database. Requires a non-empty reason. Sets `status=DELETED`, `deletion_reason`, `deleted_at`, `updated_at`. No restore functionality in Phase 1.
-- Deleted, completed, and missed tasks cannot be edited or transitioned further.
-- **Edit (PATCH):** only `title`, `description`, `deadline`, `priority` are editable, and only while the task is ACTIVE. The client must never be able to set `user_id`, `status`, any timestamp, `missed_reason`, or `deletion_reason` — these are always server-controlled.
+- **Automatic missed detection (`ACTIVE → MISSED`):** never client-initiated — there is no endpoint for a user or client to directly set `status=MISSED`. The system transitions an ACTIVE task to MISSED once its `deadline` has passed (mechanism defined in Phase 6). Sets `status=MISSED`, an auto-generated `missed_reason` (e.g. `"Deadline passed while task was still ACTIVE"`), `missed_at`, `updated_at`.
+- **Resolve missed (`POST /api/tasks/:id/resolve-missed`):** only allowed on a task currently `MISSED`.
+  - `{ "resolution": "INCOMPLETE", "reason": "..." }` — user confirms the task genuinely was never completed, and must supply a non-empty reason (same "reject empty/meaningless reasons with 400" rule as delete). Sets `status=INCOMPLETE`, `incomplete_reason`, `incomplete_at`, `updated_at`. The original `missed_reason`/`missed_at` are kept untouched as the record of when/why it was auto-detected as overdue. Terminal — an `INCOMPLETE` task cannot be edited or transitioned further.
+  - `{ "resolution": "COMPLETED" }` — user confirms the work was actually done; no reason needed. Sets `status=COMPLETED`, `completed_at`, `updated_at`. `missed_at`/`missed_reason` are **not** cleared — they remain as history showing the task passed through MISSED before being confirmed complete. Terminal — an ordinary COMPLETED task from here on, cannot be edited or transitioned further.
+- **Delete:** soft delete only — the row stays in the database. Requires a non-empty reason. Sets `status=DELETED`, `deletion_reason`, `deleted_at`, `updated_at`. No restore functionality in Phase 1. (Delete is only reachable from ACTIVE — a MISSED task must be resolved, not deleted, and INCOMPLETE/COMPLETED/DELETED are already terminal.)
+- Deleted, completed, and incomplete tasks cannot be edited or transitioned further. A MISSED task cannot be edited, but can be transitioned exactly once, via `resolve-missed`.
+- **Edit (PATCH):** only `title`, `description`, `deadline`, `priority` are editable, and only while the task is ACTIVE. The client must never be able to set `user_id`, `status`, any timestamp, `missed_reason`, `incomplete_reason`, or `deletion_reason` — these are always server-controlled.
 
 ---
 
@@ -152,7 +167,7 @@ No other transition is valid. Specifically disallowed: `COMPLETED → MISSED`, `
 - A user must never be able to read, edit, complete, miss, or delete another user's task.
 - Always use the Supabase client's query builder — never build raw SQL strings from user input.
 - Validate every request body, query param, and route param with Zod on the server.
-- Reject empty or meaningless reasons (miss/delete) with `400`.
+- Reject empty or meaningless reasons (`resolve-missed` with `resolution=INCOMPLETE` / delete) with `400`.
 - Never expose raw SQL, Supabase/Postgres error messages, stack traces, secrets, or other internals in API responses.
 - Consistent JSON error shapes and correct HTTP status codes across all endpoints.
 
@@ -160,7 +175,7 @@ No other transition is valid. Specifically disallowed: `COMPLETED → MISSED`, `
 
 ## Testing
 
-Vitest + Supertest. Coverage should include: auth, authorization/ownership (including cross-user access attempts), task creation, editing, completion, missed (with reason), deletion (with reason), input validation, state-transition enforcement, and status filtering.
+Vitest + Supertest. Coverage should include: auth, authorization/ownership (including cross-user access attempts), task creation, editing, completion, automatic missed detection, missed-resolution to `INCOMPLETE` (with required reason) and to `COMPLETED`, deletion (with reason), input validation, state-transition enforcement, and status filtering.
 
 ---
 
