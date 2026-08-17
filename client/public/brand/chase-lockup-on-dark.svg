@@ -1,0 +1,12 @@
+<svg viewBox="0 0 300 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chase">
+  <g transform="translate(0,8) scale(0.8333)">
+    <g transform="rotate(-9 48 48)">
+      <rect x="20" y="14" width="56" height="6" rx="3" fill="#F2EDEA"/>
+      <path d="M20,20 L76,20 C76,34 62,42 48,46 C34,42 20,34 20,20 Z" fill="#F2EDEA"/>
+      <path d="M20,76 L76,76 C76,62 62,54 48,50 C34,54 20,62 20,76 Z" fill="#6C9BAD"/>
+      <path d="M20,76 L76,76 C76,62 62,54 48,50 C34,54 20,62 20,76 Z" fill="none" stroke="#F2EDEA" stroke-width="3" stroke-linejoin="round"/>
+      <rect x="20" y="76" width="56" height="6" rx="3" fill="#F2EDEA"/>
+    </g>
+  </g>
+  <text x="108" y="48" dominant-baseline="central" font-family="'Geist Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="600" font-size="48" letter-spacing="-1.2" fill="#F2EDEA">Chase</text>
+</svg>

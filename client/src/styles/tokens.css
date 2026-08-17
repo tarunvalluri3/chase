@@ -1,0 +1,124 @@
+/* client/src/styles/tokens.css
+ * Chase design tokens — DESIGN.md §2–5, §10.1.
+ * No component may write a hex value. Every color, size, and motion
+ * value used anywhere in the app must come from a token defined here.
+ */
+@theme {
+  /* ---- ground (§2.3) ---- */
+  --color-canvas: #0d0d0d;
+  --color-surface: #161616;
+  --color-raised: #1e1e1e;
+  --color-overlay: #262626;
+
+  /* ---- ink (§2.3) ---- */
+  --color-ink: #f2edea;
+  --color-ink-2: #a6a6a6;
+  --color-ink-3: #898989;
+  --color-ink-disabled: #5c5c5c;
+
+  /* ---- accent (§2.2, §2.3) ---- */
+  --color-accent: #6c9bad;
+  --color-accent-solid: #60899b;
+  --color-accent-press: #517380;
+  --color-indigo: #1f4657;
+  --color-foggy: #b1af9a;
+
+  /* ---- status (§2.4) ---- */
+  --color-active: #6c9bad;
+  --color-completed: #4fa97a;
+  --color-review: #e0a64e;
+  --color-notdone: #b1af9a;
+  --color-deleted: #898989;
+  --color-danger: #d9635e;
+
+  /* ---- priority — monochrome only (§2.5) ---- */
+  --color-priority-high: #f2edea;
+  --color-priority-medium: #b1af9a;
+  --color-priority-low-rail: #757575;
+  --color-priority-low-label: #898989;
+
+  /* ---- borders (§2.3) ---- */
+  --border-hairline: rgba(108, 155, 173, 0.14);
+  --border-strong: rgba(108, 155, 173, 0.26);
+
+  /* ---- font families (§3) ---- */
+  --font-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ---- type scale (§3.1) — size / line-height / tracking ---- */
+  --text-display: 2rem;
+  --text-display--line-height: 2.25rem;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 600;
+
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.875rem;
+  --text-title--letter-spacing: -0.025em;
+  --text-title--font-weight: 600;
+
+  --text-section: 1.125rem;
+  --text-section--line-height: 1.5rem;
+  --text-section--letter-spacing: -0.012em;
+  --text-section--font-weight: 600;
+
+  --text-task: 1rem;
+  --text-task--line-height: 1.375rem;
+  --text-task--letter-spacing: -0.008em;
+  --text-task--font-weight: 500;
+
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.375rem;
+  --text-body--letter-spacing: 0em;
+  --text-body--font-weight: 400;
+
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.125rem;
+  --text-meta--letter-spacing: 0em;
+  --text-meta--font-weight: 400;
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 0.875rem;
+  --text-micro--letter-spacing: 0.11em;
+  --text-micro--font-weight: 600;
+
+  /* ---- space (§4) ---- */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-7: 2rem; /* 32px */
+  --spacing-8: 2.5rem; /* 40px */
+  --spacing-9: 3rem; /* 48px */
+  --spacing-10: 4rem; /* 64px */
+
+  --spacing-gutter: 1rem; /* 16px */
+  --spacing-stack-gap: 0.625rem; /* 10px */
+
+  /* ---- shape (§4) ---- */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-md: 0.75rem; /* 12px */
+  --radius-lg: 1rem; /* 16px */
+  --radius-xl: 1.375rem; /* 22px */
+  --radius-pill: 999px;
+
+  /* ---- motion easing (§5.1, §10.1) ---- */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ---- motion duration (§5.2, §10.1) ---- */
+  --dur-instant: 90ms;
+  --dur-fast: 140ms;
+  --dur-base: 200ms;
+  --dur-slow: 280ms;
+  --dur-sheet: 320ms;
+}
+
+/* Tap-target floors (§4) — referenced via arbitrary-value utilities,
+ * e.g. min-h-(--size-tap-min), since Tailwind v4 has no generic size-* theme namespace. */
+:root {
+  --size-tap-min: 2.75rem; /* 44px absolute floor */
+  --size-tap-nav: 3rem; /* 48px in the bottom nav */
+}
