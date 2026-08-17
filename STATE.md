@@ -8,8 +8,8 @@ At the start of any session, Claude Code reads `CLAUDE.md` then `STATE.md` befor
 
 ## Current Phase
 
-**Phase:** 0 — Project Foundation. Done.
-**Overall status:** Server skeleton stood up and verified (`GET /api/health` returns 200). Awaiting approval to begin Phase 1 (Authentication).
+**Phase:** 2 — Database. Done.
+**Overall status:** Supabase schema (`users`, `tasks`) created via SQL run in the Supabase SQL Editor; `@supabase/supabase-js` client wired up from `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`; connectivity smoke-tested successfully (`npm run db:smoke-test` in `server/`). Awaiting approval to begin Phase 3 (Core Task REST API).
 
 ---
 
@@ -18,8 +18,8 @@ At the start of any session, Claude Code reads `CLAUDE.md` then `STATE.md` befor
 | Phase | Name | Status |
 |-------|------|--------|
 | 0 | Project Foundation | Done |
-| 1 | Authentication | Prompt ready |
-| 2 | Database | Prompt ready |
+| 1 | Authentication | Done |
+| 2 | Database | Done |
 | 3 | Core Task REST API | Prompt ready |
 | 4 | Validation & Error Handling | Prompt ready |
 | 5 | Authorization & Security | Prompt ready |
@@ -44,9 +44,16 @@ Status values: `Not started` → `Prompt ready` → `Approved` → `In progress`
 - **2026-08-17, Phase 0:** Server uses ESM (`"type": "module"` in `server/package.json`), not CommonJS.
 - **2026-08-17, Phase 0:** Entrypoint split into `server/src/index.js` (env load + `app.listen`) and `server/src/app.js` (Express app/middleware/route wiring), for testability in later phases.
 - **2026-08-17, Phase 0:** `PORT` falls back to `8080` if unset in env.
+- **2026-08-17, Phase 1:** Used `@clerk/express` (`clerkMiddleware()` + `getAuth()`), not the deprecated `requireAuth()` helper — `requireAuth()` redirects to a sign-in URL on failure rather than returning JSON, which doesn't fit an API-only backend. Auth is enforced via a small custom `requireAuthenticated` middleware (`server/src/middleware/auth.js`) that checks `getAuth(req).userId` and returns a generic `401` JSON error if absent.
+- **2026-08-17, Phase 1:** `withClerkAuth` (`clerkMiddleware()`) is applied globally in `app.js` (before route mounting) so `getAuth(req)` is available anywhere; `requireAuthenticated` is applied per-route (currently only `/api/me`) so unauthenticated routes like `/api/health` stay open.
+- **2026-08-17, Phase 1:** No `users` table lookup yet — `/api/me` returns the raw Clerk user id straight from the verified session, per Phase 1 scope. Mapping to internal `users.id` via `users.clerk_user_id` happens starting Phase 2.
+- **2026-08-17, Phase 2:** `status` and `priority` enforced via Postgres `CHECK` constraints (not enum types) — simpler to alter later (`ALTER TABLE ... DROP/ADD CONSTRAINT`) than `ALTER TYPE`, and the value sets are still fully controlled by `CLAUDE.md`.
+- **2026-08-17, Phase 2:** Migration applied by hand through the Supabase SQL Editor, not `supabase db push` — the Supabase CLI's `db push` requires an interactive `supabase login` + `supabase link` (project access token / DB password), which isn't available non-interactively in this session. Migration SQL still lives in the repo at `server/supabase/migrations/` for review, per the Supabase CLI's own file convention.
+- **2026-08-17, Phase 2:** `supabase/migrations/` lives under `server/supabase/migrations/`, not at the repo root, per user preference (keeps all backend-owned artifacts under `server/`).
+- **2026-08-17, Phase 2:** Connectivity smoke test lives at `server/src/db/smokeTest.js` (run via `npm run db:smoke-test` in `server/`) rather than a temporary route — a one-off script that queries `users` through `@supabase/supabase-js`. It's a real script kept in the repo, not something to strip before merge.
 
 ---
 
 ## Next Step
 
-Review `prompts/phase-01.md`. When ready, reply with approval (e.g. "Approved — build Phase 1") to begin.
+Review `prompts/phase-03.md`. When ready, reply with approval (e.g. "Approved — build Phase 3") to begin.

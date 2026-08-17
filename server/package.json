@@ -6,9 +6,12 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "db:smoke-test": "node src/db/smokeTest.js"
   },
   "dependencies": {
+    "@clerk/express": "^2.1.57",
+    "@supabase/supabase-js": "^2.112.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"

@@ -3,7 +3,7 @@
 > ⚠️ Do not start this phase until the user has explicitly approved it (e.g. "Approved — build Phase 3"). On completion, update `STATE.md` and stop — do not proceed to Phase 4 without separate approval.
 
 ## Goal
-Build the full task REST API end-to-end through all layers (route → middleware → controller → service → repository → Postgres), implementing create, list, get-one, edit, complete, miss, and soft-delete, with correct lifecycle enforcement.
+Build the full task REST API end-to-end through all layers (route → middleware → controller → service → repository → Supabase), implementing create, list, get-one, edit, complete, miss, and soft-delete, with correct lifecycle enforcement.
 
 ## In scope
 - Implement the full endpoint set from `CLAUDE.md`:

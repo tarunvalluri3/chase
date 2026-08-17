@@ -42,25 +42,36 @@ It must preserve meaningful history: completed, missed (with reason), and delete
 
 ## Tech Stack
 
-**Backend:** Clerk (auth) · Supabase Postgres accessed **directly via `pg`** (NO ORM — no Prisma) · Node + Express · Zod (validation) · REST · JavaScript.
+**Backend:** Clerk (auth) · Supabase (database) accessed **via `@supabase/supabase-js`** — NO ORM (no Prisma, no Sequelize, no Drizzle, no TypeORM), NO `pg`, NO direct Postgres connection · Node + Express · Zod (validation) · REST · JavaScript.
 
 **Frontend:** React + Vite · Tailwind · Framer Motion · 21st.dev MCP for components · mobile-first (treat as mobile-only).
+
+---
+
+## Database Architecture (non-negotiable)
+
+- **Database:** Supabase.
+- **Database client:** `@supabase/supabase-js`, used server-side only (the frontend never talks to Supabase directly — all data access goes through the Express API).
+- **ORM:** none. Do not introduce Prisma, Sequelize, Drizzle, TypeORM, or any other ORM in this project unless the user explicitly approves it in a future session.
+- **PostgreSQL driver (`pg`):** not used. No `pg.Pool`, no raw Postgres connection string, no direct Postgres connection of any kind.
+- **Schema/migrations:** created and applied through Supabase's own migration flow (Supabase CLI migrations and/or the Supabase SQL editor) — plain SQL, reviewable in-repo. Do not introduce a separate Node/`pg`-based migration runner or an ORM migration system.
+- **Required env vars:** `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (documented in `example.env`). Use these exact names consistently across code, `CLAUDE.md`, and phase prompts.
 
 ---
 
 ## Layered Architecture (enforce strictly)
 
 ```
-Client → Route → Middleware → Controller → Service → Repository → Postgres/Supabase
+Client → Route → Middleware → Controller → Service → Repository → Supabase
 ```
 
 - **Routes** — define endpoints and wire up middleware/controllers. No business logic.
 - **Middleware** — Clerk auth, request validation, error handling, other shared concerns.
 - **Controllers** — thin. Read the request, get the authenticated user context, invoke validation, call services, return the HTTP response. No heavy logic, no raw SQL.
 - **Services** — all business/application logic and state-transition rules live here.
-- **Repositories** — parameterized SQL only. Nothing else.
+- **Repositories** — Supabase client (`@supabase/supabase-js`) calls only. Nothing else.
 
-Do not let logic leak between layers (e.g. no SQL in controllers, no HTTP concerns in services).
+Do not let logic leak between layers (e.g. no Supabase calls in controllers, no HTTP concerns in services).
 
 ---
 
@@ -139,10 +150,10 @@ No other transition is valid. Specifically disallowed: `COMPLETED → MISSED`, `
 - Ownership comes from the authenticated Clerk identity only — **never** from the request body.
 - Every query must be scoped to the authenticated user.
 - A user must never be able to read, edit, complete, miss, or delete another user's task.
-- Always use parameterized SQL — never interpolate user input into a query string.
+- Always use the Supabase client's query builder — never build raw SQL strings from user input.
 - Validate every request body, query param, and route param with Zod on the server.
 - Reject empty or meaningless reasons (miss/delete) with `400`.
-- Never expose raw SQL, Postgres error messages, stack traces, secrets, or other internals in API responses.
+- Never expose raw SQL, Supabase/Postgres error messages, stack traces, secrets, or other internals in API responses.
 - Consistent JSON error shapes and correct HTTP status codes across all endpoints.
 
 ---

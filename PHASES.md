@@ -13,7 +13,7 @@ Create `client/` & `server/`, `.gitkeep` in `client/`, init Node/Express backend
 Clerk integration, auth middleware, protected routes, authenticated user context, user identity handling.
 
 **Phase 2 — Database**
-Supabase Postgres setup, `pg` config, connection pool, schema/migrations, `users` table, `tasks` table, relationships/constraints/indexes.
+Supabase setup via `@supabase/supabase-js` (no ORM, no `pg`), schema/migrations through Supabase's own migration flow, `users` table, `tasks` table, relationships/constraints/indexes.
 
 **Phase 3 — Core Task REST API**
 Create / list / get-one / edit, complete, miss (require reason), soft delete (require reason), status filtering, full lifecycle enforcement.
