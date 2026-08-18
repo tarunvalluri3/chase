@@ -12,7 +12,7 @@ export const axisTickStyle = {
 };
 
 export const tooltipContentStyle = {
-  background: 'var(--color-raised)',
+  background: 'var(--color-surface)',
   border: '1px solid var(--border-hairline)',
   borderRadius: 'var(--radius-md)',
   fontFamily: 'var(--font-mono)',

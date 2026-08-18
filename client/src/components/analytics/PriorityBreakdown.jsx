@@ -32,7 +32,7 @@ export function PriorityBreakdown({ tasks }) {
               <Tooltip
                 contentStyle={tooltipContentStyle}
                 labelStyle={tooltipLabelStyle}
-                cursor={{ fill: 'var(--color-overlay)' }}
+                cursor={{ fill: 'var(--color-surface-sunken)' }}
                 formatter={(_, __, item) => {
                   const d = item.payload;
                   return [`${d.incomplete} of ${d.total}`, 'Not done'];

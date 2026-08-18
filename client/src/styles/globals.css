@@ -1,49 +1,15 @@
 @import 'tailwindcss';
-@import './tokens.css';
 
-/* ---- fonts (§3) — self-hosted, no CDN ---- */
-@font-face {
-  font-family: 'Geist Sans';
-  src: url('/fonts/Geist-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Sans';
-  src: url('/fonts/Geist-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Sans';
-  src: url('/fonts/Geist-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMono-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
+/* ---- fonts (§3, §11.1) — self-hosted via @fontsource, no CDN link.
+ * Literata 500 only (headings/numerals), Manrope Variable (body/UI, the
+ * variable axis covers 400/500/600 in one file), JetBrains Mono 400/500
+ * (data/timestamps). ---- */
+@import '@fontsource/literata/500.css';
+@import '@fontsource-variable/manrope/wght.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+@import './tokens.css';
 
 /* ---- reset ----
  * Wrapped in Tailwind's own `base` layer: unlayered CSS always beats layered
@@ -148,7 +114,7 @@
     background-image: linear-gradient(
       100deg,
       var(--color-surface) 40%,
-      var(--color-overlay) 50%,
+      var(--color-surface-sunken) 50%,
       var(--color-surface) 60%
     );
     background-size: 250% 100%;

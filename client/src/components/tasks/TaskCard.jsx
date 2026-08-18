@@ -12,7 +12,7 @@ import { CompleteConfirmSheet } from './CompleteAction';
 import { DeleteSheet } from './DeleteSheet';
 import { ResolveSheet } from './ResolveSheet';
 import { useTaskLifecycle } from '../../hooks/useTaskLifecycle';
-import { EASE_EXIT, EASE_OUT } from '../../lib/motion';
+import { DURATION, EASE_EXIT, EASE_OUT } from '../../lib/motion';
 
 // DESIGN.md §7/§7.3/§8 — priority rail + two-line title + meta row +
 // conditional action row. `onSettled(taskId)`/`onRollback()` let the
@@ -78,11 +78,13 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
     <motion.article
       layout
       aria-label={accessibleName}
-      className="relative flex gap-3 overflow-hidden rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-4"
+      className="relative flex gap-3 overflow-hidden rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
       animate={{ opacity: isExiting ? 0 : 1, scale: isPressed ? 0.97 : 1 }}
+      whileHover={reducedMotion ? undefined : { y: -2 }}
       transition={{
         duration: isExiting ? (reducedMotion ? 0.12 : stage === 'exit' ? 0.24 : 0.2) : 0.09,
         ease: isExiting ? EASE_EXIT : EASE_OUT,
+        y: { duration: DURATION.base, ease: EASE_OUT },
       }}
     >
       {showWash && (

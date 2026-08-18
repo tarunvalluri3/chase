@@ -32,7 +32,7 @@ export function ReasonBreakdownChart({ title, description, data, color, emptyMes
               <Tooltip
                 contentStyle={tooltipContentStyle}
                 labelStyle={tooltipLabelStyle}
-                cursor={{ fill: 'var(--color-overlay)' }}
+                cursor={{ fill: 'var(--color-surface-sunken)' }}
                 formatter={(value) => [value, 'Count']}
               />
               <Bar dataKey="count" fill={color} radius={[0, 4, 4, 0]} maxBarSize={16}>

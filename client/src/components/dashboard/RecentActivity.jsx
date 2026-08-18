@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
 import { computeRecentActivity } from '../../lib/taskStats';
-import { formatDeadline } from '../../lib/datetime';
+import { TaskCard } from '../tasks/TaskCard';
 
 // Maps a task's current status to the route its detail page lives under
 // (DESIGN.md §6 status-filter routes) — same lowercase slugs TaskList uses.
@@ -12,32 +11,24 @@ const SECTION_ROUTE = {
   DELETED: 'deleted',
 };
 
-// DESIGN.md §7 `RecentActivity` — the most-recently-touched tasks across
-// every status, sorted client-side from the same unfiltered fetch
-// StatusCounts uses. formatDeadline already renders relative-vs-absolute
-// for any ISO timestamp, past or future, so it's reused as-is here.
+// DESIGN.md §4.1/§9 — the most-recently-touched tasks across every status,
+// sorted client-side from the same unfiltered fetch StatusCounts uses.
+// Upgraded from a plain row (v1) to a real TaskCard per §4.1: this is the
+// one place a summary section renders individually-actioned task records,
+// so it gets card treatment, not ledger rows. TaskCard's own lifecycle
+// rules already render actions only on ACTIVE/MISSED tasks, so a
+// COMPLETED/INCOMPLETE/DELETED entry here shows no action row.
 export function RecentActivity({ tasks }) {
   const activity = computeRecentActivity(tasks);
   if (activity.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-3 px-gutter">
-      <h2 className="text-section text-ink">Recent activity</h2>
-      <ul className="flex flex-col gap-2">
-        {activity.map(({ task, verb, timestamp }) => (
+      <h2 className="font-serif text-section text-ink">Recent activity</h2>
+      <ul className="flex flex-col gap-(--spacing-stack-gap)">
+        {activity.map(({ task }) => (
           <li key={task.id}>
-            <Link
-              to={`/tasks/${SECTION_ROUTE[task.status]}/${task.id}`}
-              className="flex items-center justify-between gap-3 rounded-(--radius-md) border border-(--border-hairline) bg-surface px-4 py-3"
-            >
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <span className="line-clamp-1 text-task text-ink">{task.title}</span>
-                <span className="text-meta text-ink-3">{verb}</span>
-              </div>
-              <time dateTime={timestamp} className="shrink-0 font-mono text-meta text-ink-3">
-                {formatDeadline(timestamp)}
-              </time>
-            </Link>
+            <TaskCard task={task} sectionStatus={SECTION_ROUTE[task.status]} />
           </li>
         ))}
       </ul>

@@ -81,9 +81,9 @@ function ChoiceButton({ label, selected, onClick }) {
       onClick={onClick}
       className="min-h-(--size-tap-min) rounded-(--radius-md) border px-4 text-left text-body transition-colors"
       style={{
-        borderColor: selected ? 'var(--color-accent)' : 'var(--border-strong)',
-        color: selected ? 'var(--color-ink)' : 'var(--color-ink-2)',
-        backgroundColor: selected ? 'var(--color-overlay)' : 'transparent',
+        borderColor: selected ? 'var(--color-pine)' : 'var(--border-strong)',
+        color: selected ? 'var(--color-pine)' : 'var(--color-ink-2)',
+        backgroundColor: selected ? 'var(--color-pine-tint)' : 'transparent',
       }}
     >
       {label}

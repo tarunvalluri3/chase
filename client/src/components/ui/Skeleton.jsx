@@ -30,17 +30,13 @@ export function TaskCardSkeletonList() {
   );
 }
 
-// Dashboard's loading state (DESIGN.md §7.1/§14 — a skeleton for the stat
-// grid is an explicit Phase 14 acceptance criterion). Same 2-up + full-width
-// fifth-tile shape as the real StatusCounts grid.
+// Dashboard's loading state (DESIGN.md §7.1/§4.1 — a skeleton for the
+// ledger strip is an explicit acceptance criterion). Same single-row
+// shape as the real StatusCounts ledger strip.
 export function DashboardStatSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-3 px-gutter pt-4">
-      <Skeleton className="h-20" />
-      <Skeleton className="h-20" />
-      <Skeleton className="h-20" />
-      <Skeleton className="h-20" />
-      <Skeleton className="h-20 col-span-2" />
+    <div className="px-gutter pt-4">
+      <Skeleton className="h-24 w-full" />
     </div>
   );
 }

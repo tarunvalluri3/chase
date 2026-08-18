@@ -26,7 +26,7 @@ export function IncompleteTrendChart({ tasks }) {
               <Tooltip
                 contentStyle={tooltipContentStyle}
                 labelStyle={tooltipLabelStyle}
-                cursor={{ fill: 'var(--color-overlay)' }}
+                cursor={{ fill: 'var(--color-surface-sunken)' }}
                 formatter={(value) => [value, 'Not done']}
               />
               <Bar dataKey="count" fill="var(--color-notdone)" radius={[4, 4, 0, 0]} maxBarSize={28} />

@@ -37,6 +37,22 @@ export function computeRecentActivity(tasks, limit = 5) {
     .slice(0, limit);
 }
 
+// DESIGN.md §8 — Profile's ledger strip (Completed count, on-time rate).
+// "On time" means completed without ever having passed through MISSED
+// first (missed_at unset) — the same distinction computeCompletionTrend
+// already draws in lib/analyticsStats.js, restated here as a single
+// all-time percentage rather than a weekly trend.
+export function computeCompletedCount(tasks) {
+  return tasks.filter((task) => task.status === 'COMPLETED').length;
+}
+
+export function computeOnTimeRate(tasks) {
+  const completed = tasks.filter((task) => task.status === 'COMPLETED');
+  if (completed.length === 0) return null;
+  const onTime = completed.filter((task) => !task.missed_at).length;
+  return Math.round((onTime / completed.length) * 100);
+}
+
 const DUE_SOON_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 // Active tasks whose deadline is still ahead but within the next 24h.

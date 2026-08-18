@@ -1,6 +1,7 @@
 // Shared Framer Motion variants + reduced-motion helpers — DESIGN.md §5.
 
-export const EASE_OUT = [0.22, 0.61, 0.36, 1];
+// DESIGN.md §5 — default ease is gentler in v2 (was [0.22, 0.61, 0.36, 1]).
+export const EASE_OUT = [0.25, 0.7, 0.4, 1];
 export const EASE_ENTER = [0.16, 1, 0.3, 1];
 export const EASE_EXIT = [0.4, 0, 1, 1];
 

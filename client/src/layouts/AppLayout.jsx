@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AppBar } from '../components/nav/AppBar';
 import { BottomNav } from '../components/nav/BottomNav';
+import { Sidebar } from '../components/nav/Sidebar';
 import { FilterRow } from '../components/nav/FilterRow';
 import { ToastViewport } from '../components/ui/Toast';
 import { OfflineBar } from '../components/ui/OfflineBar';
@@ -42,22 +43,32 @@ export function AppLayout({ children }) {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <AppBar
-        title={title}
-        context={context}
-        onBack={isTaskDetail ? () => navigate(`/tasks/${status}`) : undefined}
-      />
-      {isTasksList && <FilterRow selected={status} counts={counts} />}
+      <Sidebar needsReviewCount={counts.missed ?? 0} />
 
-      <main className="flex-1 pb-24">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={location.pathname} {...routeVariants(reducedMotion)}>
-            {children ?? <Outlet />}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <div className="flex min-h-dvh flex-col min-[960px]:ml-[220px]">
+        <div className="w-full min-[960px]:mx-auto min-[960px]:max-w-2xl min-[960px]:px-8">
+          <AppBar
+            title={title}
+            context={context}
+            onBack={isTaskDetail ? () => navigate(`/tasks/${status}`) : undefined}
+          />
+          {isTasksList && <FilterRow selected={status} counts={counts} />}
+        </div>
 
-      <BottomNav needsReviewCount={counts.missed ?? 0} />
+        <main className="flex-1 pb-24 min-[960px]:pb-10">
+          <div className="w-full min-[960px]:mx-auto min-[960px]:max-w-2xl min-[960px]:px-8">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={location.pathname} {...routeVariants(reducedMotion)}>
+                {children ?? <Outlet />}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+
+        <div className="min-[960px]:hidden">
+          <BottomNav needsReviewCount={counts.missed ?? 0} />
+        </div>
+      </div>
       <OfflineBar />
       <ToastViewport />
     </div>

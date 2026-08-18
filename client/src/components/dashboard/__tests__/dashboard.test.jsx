@@ -5,10 +5,17 @@ import { StatTile } from '../StatTile';
 import { StatusCounts } from '../StatusCounts';
 import { DueSoon } from '../DueSoon';
 import { RecentActivity } from '../RecentActivity';
-import { buildTask } from '../../../test/testUtils';
+import { buildTask, renderWithProviders } from '../../../test/testUtils';
 
 function renderWithRouter(ui) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
+
+// RecentActivity renders real TaskCards (DESIGN.md §4.1/§9), which reach
+// into TasksProvider/ToastProvider via useTaskLifecycle — the plain
+// MemoryRouter-only helper above is no longer enough for that section.
+function renderRecentActivity(ui) {
+  return renderWithProviders(ui);
 }
 
 describe('StatTile', () => {
@@ -55,7 +62,7 @@ describe('DueSoon', () => {
 
 describe('RecentActivity', () => {
   it('renders nothing given an empty task list', () => {
-    const { container } = renderWithRouter(<RecentActivity tasks={[]} />);
+    const { container } = renderRecentActivity(<RecentActivity tasks={[]} />);
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -70,7 +77,7 @@ describe('RecentActivity', () => {
       status: 'COMPLETED',
       completed_at: new Date(Date.now() - 60_000).toISOString(),
     });
-    renderWithRouter(<RecentActivity tasks={[older, newer]} />);
+    renderRecentActivity(<RecentActivity tasks={[older, newer]} />);
     const items = screen.getAllByRole('listitem').map((li) => li.textContent);
     expect(items[0]).toContain('Newer completion');
     expect(items[1]).toContain('Older completion');

@@ -1,85 +1,107 @@
 /* client/src/styles/tokens.css
- * Chase design tokens — DESIGN.md §2–5, §10.1.
+ * Chase design tokens — DESIGN.md v2 ("The Ledger") §2–5, §10.1.
  * No component may write a hex value. Every color, size, and motion
  * value used anywhere in the app must come from a token defined here.
  */
 @theme {
-  /* ---- ground (§2.3) ---- */
-  --color-canvas: #0d0d0d;
-  --color-surface: #161616;
-  --color-raised: #1e1e1e;
-  --color-overlay: #262626;
+  /* ---- ground (§2.1) ---- */
+  --color-canvas: #f6f1e5; /* warm parchment app background */
+  --color-surface: #fffdf7; /* cards, sheets, inputs, nav active capsule */
+  --color-surface-sunken: #efe8d8; /* pressed states, nav track, sunken inputs */
 
-  /* ---- ink (§2.3) ---- */
-  --color-ink: #f2edea;
-  --color-ink-2: #a6a6a6;
-  --color-ink-3: #898989;
-  --color-ink-disabled: #5c5c5c;
+  /* ---- ink (§2.1) ---- */
+  --color-ink: #241f18; /* titles, primary text — warm near-black */
+  --color-ink-2: #6b6255; /* body copy, descriptions, reasons */
+  --color-ink-3: #99907e; /* timestamps, inactive nav, helper text */
+  --color-ink-disabled: #b7af9c; /* disabled labels only */
 
-  /* ---- accent (§2.2, §2.3) ---- */
-  --color-accent: #6c9bad;
-  --color-accent-solid: #60899b;
-  --color-accent-press: #517380;
-  --color-indigo: #1f4657;
-  --color-foggy: #b1af9a;
+  /* ---- brand / priority (§2.2) ---- */
+  --color-pine: #24473e; /* brand accent · ACTIVE status · Low priority */
+  --color-pine-press: #1a342d; /* primary button pressed/hover */
+  --color-pine-tint: #e4ebe6; /* 14% tint background for Pine chips/pills */
+  --color-dusk: #4f6e85; /* Medium priority — the one place blue appears */
+  --color-dusk-tint: #e7edf1;
+  --color-clay: #ad5133; /* High priority + the only destructive-action color */
+  --color-clay-tint: #f5e7df;
 
-  /* ---- status (§2.4) ---- */
-  --color-active: #6c9bad;
-  --color-completed: #4fa97a;
-  --color-review: #e0a64e;
-  --color-notdone: #b1af9a;
-  --color-deleted: #898989;
-  --color-danger: #d9635e;
+  /* ---- status (§2.3) — unchanged roles from v1, new values ---- */
+  --color-moss: #62793f; /* COMPLETED */
+  --color-moss-tint: #ebeee0;
+  --color-ochre: #a87a2e; /* MISSED — "Needs review" */
+  --color-ochre-tint: #f3eada;
+  --color-sand: #8e7a4f; /* INCOMPLETE — "Not done" */
+  --color-sand-tint: #f0ead9;
+  --color-stone: #8b8474; /* DELETED */
+  --color-stone-tint: #ece9de;
 
-  /* ---- priority — monochrome only (§2.5) ---- */
-  --color-priority-high: #f2edea;
-  --color-priority-medium: #b1af9a;
-  --color-priority-low-rail: #757575;
-  --color-priority-low-label: #898989;
+  /* ---- semantic aliases — kept stable so components read by role, not
+   * by hue name; every alias below resolves to one of the tokens above,
+   * per DESIGN.md §2.2/§2.3. This is the only indirection layer: nothing
+   * outside this file ever writes a hex or a raw color literal. ---- */
+  --color-active: var(--color-pine); /* ACTIVE status */
+  --color-completed: var(--color-moss); /* COMPLETED status */
+  --color-review: var(--color-ochre); /* MISSED — "Needs review" */
+  --color-notdone: var(--color-sand); /* INCOMPLETE — "Not done" */
+  --color-deleted: var(--color-stone); /* DELETED status */
+  --color-danger: var(--color-clay); /* destructive action only, never a resting status */
 
-  /* ---- borders (§2.3) ---- */
-  --border-hairline: rgba(108, 155, 173, 0.14);
-  --border-strong: rgba(108, 155, 173, 0.26);
+  --color-accent: var(--color-pine); /* links, focus ring, selected state */
+  --color-accent-solid: var(--color-pine); /* primary button fill */
+  --color-accent-press: var(--color-pine-press); /* primary button pressed/hover */
 
-  /* ---- font families (§3) ---- */
-  --font-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* ---- priority — now colored (§2.2, reverses v1's monochrome rule) ---- */
+  --color-priority-high: var(--color-clay);
+  --color-priority-high-tint: var(--color-clay-tint);
+  --color-priority-medium: var(--color-dusk);
+  --color-priority-medium-tint: var(--color-dusk-tint);
+  --color-priority-low: var(--color-pine);
+  --color-priority-low-tint: var(--color-pine-tint);
 
-  /* ---- type scale (§3.1) — size / line-height / tracking ---- */
-  --text-display: 2rem;
-  --text-display--line-height: 2.25rem;
-  --text-display--letter-spacing: -0.03em;
-  --text-display--font-weight: 600;
+  /* ---- borders / rules (§2.1) ---- */
+  --color-rule: rgba(36, 31, 24, 0.09); /* ledger hairlines between rows */
+  --border-hairline: rgba(36, 31, 24, 0.1); /* card borders */
+  --border-strong: rgba(36, 31, 24, 0.18); /* input borders (focus/error), dividers */
 
-  --text-title: 1.5rem;
-  --text-title--line-height: 1.875rem;
-  --text-title--letter-spacing: -0.025em;
-  --text-title--font-weight: 600;
+  /* ---- font families (§3, §11.1) — self-hosted via @fontsource, no CDN ---- */
+  --font-serif: 'Literata', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Manrope Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  --text-section: 1.125rem;
-  --text-section--line-height: 1.5rem;
-  --text-section--letter-spacing: -0.012em;
-  --text-section--font-weight: 600;
+  /* ---- type scale (§3.1) — size / line-height / tracking / weight ---- */
+  --text-display: 2.375rem;
+  --text-display--line-height: 2.75rem;
+  --text-display--letter-spacing: -0.015em;
+  --text-display--font-weight: 500;
+
+  --text-title: 1.6875rem;
+  --text-title--line-height: 2.125rem;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 500;
+
+  --text-section: 1.1875rem;
+  --text-section--line-height: 1.625rem;
+  --text-section--letter-spacing: -0.008em;
+  --text-section--font-weight: 500;
 
   --text-task: 1rem;
-  --text-task--line-height: 1.375rem;
-  --text-task--letter-spacing: -0.008em;
-  --text-task--font-weight: 500;
+  --text-task--line-height: 1.4375rem;
+  --text-task--letter-spacing: -0.006em;
+  --text-task--font-weight: 600;
 
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.375rem;
+  --text-body: 0.96875rem;
+  --text-body--line-height: 1.5625rem;
   --text-body--letter-spacing: 0em;
   --text-body--font-weight: 400;
 
-  --text-meta: 0.8125rem;
+  --text-meta: 0.78125rem;
   --text-meta--line-height: 1.125rem;
   --text-meta--letter-spacing: 0em;
   --text-meta--font-weight: 400;
 
-  --text-micro: 0.6875rem;
+  --text-micro: 0.65625rem;
   --text-micro--line-height: 0.875rem;
-  --text-micro--letter-spacing: 0.11em;
-  --text-micro--font-weight: 600;
+  --text-micro--letter-spacing: 0.09em;
+  --text-micro--font-weight: 500;
 
   /* ---- space (§4) ---- */
   --spacing-1: 0.25rem; /* 4px */
@@ -94,21 +116,21 @@
   --spacing-10: 4rem; /* 64px */
 
   --spacing-gutter: 1rem; /* 16px */
-  --spacing-stack-gap: 0.625rem; /* 10px */
+  --spacing-stack-gap: 0.5625rem; /* 9px, card-gap §4 */
 
   /* ---- shape (§4) ---- */
-  --radius-sm: 0.5rem; /* 8px */
-  --radius-md: 0.75rem; /* 12px */
-  --radius-lg: 1rem; /* 16px */
+  --radius-sm: 0.625rem; /* 10px */
+  --radius-md: 0.875rem; /* 14px */
+  --radius-lg: 1.125rem; /* 18px */
   --radius-xl: 1.375rem; /* 22px */
   --radius-pill: 999px;
 
-  /* ---- motion easing (§5.1, §10.1) ---- */
-  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* ---- motion easing (§5, §10.1) — default curve is gentler in v2 ---- */
+  --ease-out: cubic-bezier(0.25, 0.7, 0.4, 1);
   --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
-  /* ---- motion duration (§5.2, §10.1) ---- */
+  /* ---- motion duration (§5, §10.1) ---- */
   --dur-instant: 90ms;
   --dur-fast: 140ms;
   --dur-base: 200ms;
@@ -121,6 +143,22 @@
 :root {
   --size-tap-min: 2.75rem; /* 44px absolute floor */
   --size-tap-nav: 3rem; /* 48px in the bottom nav */
+
+  /* ---- elevation (§4.2) — soft, warm-toned shadows only. Every value here
+   * is the literal shadow recipe from DESIGN.md §4.1/§6.1; kept as a token
+   * so no component ever writes its own rgba() shadow. ---- */
+  --shadow-card: 0 1px 2px rgba(36, 31, 24, 0.03), 0 8px 18px rgba(36, 31, 24, 0.045);
+  --shadow-card-hover: 0 2px 4px rgba(36, 31, 24, 0.04), 0 14px 28px rgba(36, 31, 24, 0.07);
+  --shadow-panel: 0 1px 2px rgba(36, 31, 24, 0.03), 0 10px 24px rgba(36, 31, 24, 0.05);
+  --shadow-nav-pill: 0 4px 16px rgba(36, 31, 24, 0.1);
+  --shadow-fab: 0 6px 18px rgba(173, 81, 51, 0.35);
+  --shadow-sheet: 0 -12px 40px rgba(36, 31, 24, 0.14);
+  --shadow-toast: 0 6px 24px rgba(36, 31, 24, 0.16);
+
+  /* ---- gradients (§6.1/§8) — the FAB's radial Clay fill and the Profile
+   * avatar's radial Pine fill, kept here so no component writes a hex. ---- */
+  --gradient-fab: radial-gradient(circle at 32% 28%, #c36a46, var(--color-clay) 72%);
+  --gradient-avatar: radial-gradient(circle at 32% 28%, var(--color-pine-press), var(--color-pine) 75%);
 
   /* ---- chart (§12) — derived from existing status/priority/accent tokens.
    * No new hues: every chart color is one of these already-approved values,

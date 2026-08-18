@@ -69,8 +69,8 @@ export function Sheet({ open, onClose, title, children, returnFocusRef }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="fixed inset-x-0 bottom-0 z-40 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-(--radius-xl) bg-raised pb-safe"
-            style={{ boxShadow: '0 -12px 40px rgba(0,0,0,.55)' }}
+            className="fixed inset-x-0 bottom-0 z-40 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-(--radius-xl) bg-surface pb-safe"
+            style={{ boxShadow: 'var(--shadow-sheet)' }}
             initial={{ y: '100%' }}
             animate={{ y: 0, transition: reducedMotion ? { duration: 0.12 } : SHEET_SPRING }}
             exit={{
@@ -90,10 +90,10 @@ export function Sheet({ open, onClose, title, children, returnFocusRef }) {
               onPointerDown={(event) => dragControls.start(event)}
               className="flex cursor-grab justify-center pt-3 pb-1 active:cursor-grabbing"
             >
-              <span className="h-1 w-9 rounded-(--radius-pill) bg-overlay" aria-hidden="true" />
+              <span className="h-1 w-9 rounded-(--radius-pill) bg-surface-sunken" aria-hidden="true" />
             </div>
             <div className="px-gutter pt-2 pb-2">
-              <h2 id={titleId} className="text-section text-ink">
+              <h2 id={titleId} className="font-serif text-section text-ink">
                 {title}
               </h2>
             </div>

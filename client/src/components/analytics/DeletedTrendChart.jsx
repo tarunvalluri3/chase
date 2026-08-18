@@ -21,7 +21,7 @@ export function DeletedTrendChart({ tasks }) {
               <Tooltip
                 contentStyle={tooltipContentStyle}
                 labelStyle={tooltipLabelStyle}
-                cursor={{ fill: 'var(--color-overlay)' }}
+                cursor={{ fill: 'var(--color-surface-sunken)' }}
                 formatter={(value) => [value, 'Deleted']}
               />
               <Bar dataKey="count" fill="var(--color-deleted)" radius={[4, 4, 0, 0]} maxBarSize={28} />

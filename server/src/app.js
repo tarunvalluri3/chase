@@ -9,7 +9,7 @@ import { withClerkAuth } from './middleware/auth.js';
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+const allowedOrigins = (process.env.CORS_ORIGIN ?? 'https://chase-six-rosy.vercel.app,http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);

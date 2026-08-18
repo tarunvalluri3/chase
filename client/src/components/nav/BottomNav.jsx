@@ -1,38 +1,20 @@
 import { useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, ListChecks, Plus, BarChart3, User } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { SHEET_SPRING } from '../../lib/motion';
 import { Sheet } from '../ui/Sheet';
 import { TaskForm } from '../tasks/TaskForm';
 import { useTasksContext } from '../../lib/tasksStore';
+import { NAV_TABS } from './navTabs';
 
-// DESIGN.md §6.1 — five slots, safe-area padding, `layoutId` pill, raised
-// Create action opening a sheet, amber needs-review dot. Always visible;
-// it disappears only when a sheet or the keyboard is open (handled by the
-// sheet itself sitting above it, and by callers not rendering this inside
-// a keyboard-visible context).
-const TABS = [
-  { key: 'home', label: 'Home', to: '/', icon: Home, isActive: (path) => path === '/' },
-  {
-    key: 'tasks',
-    label: 'Tasks',
-    to: '/tasks/active',
-    icon: ListChecks,
-    isActive: (path) => path.startsWith('/tasks'),
-  },
-  {
-    key: 'insights',
-    label: 'Insights',
-    to: '/insights',
-    icon: BarChart3,
-    isActive: (path) => path.startsWith('/insights'),
-  },
-  { key: 'profile', label: 'Profile', to: '/profile', icon: User, isActive: (path) => path.startsWith('/profile') },
-];
-
-// needsReviewCount comes from AppLayout's real useTaskCounts() (Phase 12) —
-// the badge itself was fully built in Phase 11, stubbed at zero until now.
+// DESIGN.md §6.1 — a pill track holding exactly four icon slots (no
+// spacer, no FAB inside the track); the active item grows into a labeled
+// white capsule, inactive items show icon only. The Create FAB is a fully
+// separate circular element, a sibling of the pill in the same flex row.
+//
+// needsReviewCount comes from AppLayout's real useTaskCounts() — the
+// ochre dot on the Tasks slot.
 export function BottomNav({ needsReviewCount = 0 }) {
   const { pathname } = useLocation();
   const createButtonRef = useRef(null);
@@ -40,18 +22,21 @@ export function BottomNav({ needsReviewCount = 0 }) {
 
   return (
     <>
-      <nav
-        aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-(--border-hairline) pb-safe"
-        style={{
-          backgroundColor: 'rgba(13,13,13,.86)',
-          backdropFilter: 'blur(20px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-        }}
-      >
-        <div className="mx-auto flex h-14 max-w-md items-center justify-around px-2">
-          <NavTab tab={TABS[0]} active={TABS[0].isActive(pathname)} />
-          <NavTab tab={TABS[1]} active={TABS[1].isActive(pathname)} badge={needsReviewCount > 0} />
+      <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-20 pb-safe">
+        <div className="mx-auto flex max-w-md items-center gap-2.5 px-4 pb-3">
+          <div
+            className="flex h-14 flex-1 items-center gap-1 rounded-(--radius-pill) bg-surface-sunken p-[5px]"
+            style={{ boxShadow: 'var(--shadow-nav-pill)' }}
+          >
+            {NAV_TABS.map((tab) => (
+              <NavTab
+                key={tab.key}
+                tab={tab}
+                active={tab.isActive(pathname)}
+                badge={tab.key === 'tasks' && needsReviewCount > 0}
+              />
+            ))}
+          </div>
 
           <button
             ref={createButtonRef}
@@ -60,13 +45,14 @@ export function BottomNav({ needsReviewCount = 0 }) {
             aria-haspopup="dialog"
             aria-expanded={createSheetOpen}
             aria-label="Create task"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-(--radius-md) bg-accent-press text-canvas transition-colors hover:brightness-110"
+            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-(--radius-pill) text-canvas transition-transform active:scale-[0.93]"
+            style={{
+              background: 'var(--gradient-fab)',
+              boxShadow: 'var(--shadow-fab)',
+            }}
           >
-            <Plus size={22} strokeWidth={1.75} aria-hidden="true" />
+            <Plus size={22} strokeWidth={2} aria-hidden="true" />
           </button>
-
-          <NavTab tab={TABS[2]} active={TABS[2].isActive(pathname)} />
-          <NavTab tab={TABS[3]} active={TABS[3].isActive(pathname)} />
         </div>
       </nav>
 
@@ -90,23 +76,20 @@ function NavTab({ tab, active, badge = false }) {
     <Link
       to={tab.to}
       aria-current={active ? 'page' : undefined}
-      className="relative flex min-h-(--size-tap-nav) min-w-(--size-tap-nav) flex-col items-center justify-center gap-0.5"
+      aria-label={tab.label}
+      className="relative flex min-h-(--size-tap-nav) items-center justify-center gap-1.5 overflow-hidden rounded-(--radius-pill)"
+      style={{ flex: active ? 2 : 1 }}
     >
       {active && (
         <motion.span
           layoutId="nav-pill"
-          className="absolute top-0.5 h-8 w-8 rounded-(--radius-pill)"
-          style={{ backgroundColor: 'var(--color-indigo)' }}
+          className="absolute inset-0.5 rounded-(--radius-pill) bg-surface"
+          style={{ boxShadow: 'var(--shadow-card)' }}
           transition={SHEET_SPRING}
         />
       )}
-      <span className="relative">
-        <Icon
-          size={22}
-          strokeWidth={1.75}
-          color={active ? 'var(--color-ink)' : 'var(--color-ink-3)'}
-          aria-hidden="true"
-        />
+      <span className="relative shrink-0">
+        <Icon size={19} strokeWidth={1.8} color={active ? 'var(--color-pine)' : 'var(--color-ink-3)'} aria-hidden="true" />
         {badge && (
           <span
             aria-hidden="true"
@@ -115,12 +98,11 @@ function NavTab({ tab, active, badge = false }) {
           />
         )}
       </span>
-      <span
-        className="relative text-[10px] font-medium"
-        style={{ color: active ? 'var(--color-ink)' : 'var(--color-ink-3)' }}
-      >
-        {tab.label}
-      </span>
+      {active && (
+        <span aria-hidden="true" className="relative text-meta font-semibold whitespace-nowrap" style={{ color: 'var(--color-pine)' }}>
+          {tab.label}
+        </span>
+      )}
     </Link>
   );
 }

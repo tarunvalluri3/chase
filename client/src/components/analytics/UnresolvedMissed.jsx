@@ -14,7 +14,7 @@ export function UnresolvedMissed({ tasks }) {
   return (
     <div className="flex flex-col gap-3 px-gutter">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-section text-ink">Needs review</h2>
+        <h2 className="font-serif text-section text-ink">Needs review</h2>
         <span className="font-mono text-meta text-ink-3">{missed.length}</span>
       </div>
 
@@ -23,14 +23,10 @@ export function UnresolvedMissed({ tasks }) {
           Nothing waiting on you.
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {missed.slice(0, VISIBLE_LIMIT).map((task) => (
-            <li key={task.id}>
-              <Link
-                to={`/tasks/missed/${task.id}`}
-                className="flex items-center justify-between gap-3 rounded-(--radius-md) border bg-surface px-4 py-3"
-                style={{ borderColor: 'color-mix(in srgb, var(--color-review) 45%, var(--border-hairline))' }}
-              >
+        <ul className="flex flex-col rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
+          {missed.slice(0, VISIBLE_LIMIT).map((task, index) => (
+            <li key={task.id} className={index > 0 ? 'border-t border-(--color-rule)' : ''}>
+              <Link to={`/tasks/missed/${task.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
                 <span className="line-clamp-1 text-task text-ink">{task.title}</span>
                 <span className="shrink-0 font-mono text-meta text-ink-3">since {formatTimestamp(task.missed_at)}</span>
               </Link>

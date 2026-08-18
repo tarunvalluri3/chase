@@ -25,8 +25,8 @@ export function ReasonField({ label, value, onChange, autoFocus = false, id }) {
         onChange={(event) => onChange(event.target.value)}
         rows={3}
         autoFocus={autoFocus}
-        className="min-h-(--size-tap-min) w-full rounded-(--radius-md) border bg-raised px-3 py-2 text-base text-ink placeholder:text-ink-3 focus-visible:outline-none"
-        style={{ borderColor: 'var(--border-strong)' }}
+        className="min-h-(--size-tap-min) w-full rounded-(--radius-md) border bg-surface-sunken px-3 py-2 text-base text-ink placeholder:text-ink-3 focus-visible:border-pine focus-visible:bg-surface focus-visible:outline-none transition-colors"
+        style={{ borderColor: 'transparent' }}
       />
       <div className="flex items-start justify-between gap-3">
         <p className="text-meta text-ink-3">

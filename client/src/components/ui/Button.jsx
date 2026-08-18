@@ -5,11 +5,14 @@ import { pressVariants } from '../../lib/motion';
 
 const MotionLink = motion.create(Link);
 
+// DESIGN.md §7 — destructive is a Clay outline that fills Clay-tint on
+// hover, never a solid red fill: red stays reserved and quiet even on its
+// own action.
 const VARIANT_CLASSES = {
   primary: 'bg-accent-solid text-canvas hover:bg-accent-press',
-  secondary: 'bg-raised text-ink border border-(--border-strong) hover:bg-overlay',
-  ghost: 'bg-transparent text-ink hover:bg-overlay',
-  destructive: 'bg-danger text-canvas hover:brightness-95',
+  secondary: 'bg-surface text-ink border border-(--border-strong) hover:bg-surface-sunken',
+  ghost: 'bg-transparent text-ink hover:bg-surface-sunken',
+  destructive: 'bg-transparent text-danger border border-danger hover:bg-clay-tint',
 };
 
 const SIZE_CLASSES = {

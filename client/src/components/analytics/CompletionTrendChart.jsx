@@ -28,7 +28,7 @@ export function CompletionTrendChart({ tasks }) {
               <Tooltip
                 contentStyle={tooltipContentStyle}
                 labelStyle={tooltipLabelStyle}
-                cursor={{ fill: 'var(--color-overlay)' }}
+                cursor={{ fill: 'var(--color-surface-sunken)' }}
                 formatter={(value, key) => [value, LEGEND_LABEL[key] ?? key]}
               />
               <Legend

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Button } from '../ui/Button';
 import { ApiError, tasksApi } from '../../lib/apiClient';
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from '../../lib/datetime';
+import { PRIORITY_CONFIG } from './priorityConfig';
 
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
-const PRIORITY_LABEL = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High' };
 
 function defaultDeadlineValue() {
   const inOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -12,11 +12,13 @@ function defaultDeadlineValue() {
   return toDatetimeLocalValue(inOneDay.toISOString());
 }
 
-// Shared create/edit form (DESIGN.md §7). Native `datetime-local` for the
-// deadline (no date-picker library needed), priority as a three-way
-// segmented control. Client-side validation is a UX nicety only — the
-// server (PATCH/POST /api/tasks) remains the source of truth and its
-// rejection is what actually surfaces field errors on submit.
+// Shared create/edit form (DESIGN.md §7) — fields grouped inside one
+// --color-surface panel, borderless sunken inputs, and a segmented-pill
+// priority selector on a sunken track. Native `datetime-local` for the
+// deadline (no date-picker library needed). Client-side validation is a
+// UX nicety only — the server (PATCH/POST /api/tasks) remains the source
+// of truth and its rejection is what actually surfaces field errors on
+// submit.
 export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
@@ -69,71 +71,78 @@ export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-      <Field label="Title" htmlFor="task-title" error={errors.title}>
-        <input
-          id="task-title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          className={inputClassName}
-          style={fieldBorderStyle(errors.title)}
-          placeholder="e.g. Ship the Q3 pricing memo"
-          autoComplete="off"
-        />
-      </Field>
+      <div className="flex flex-col gap-5 rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-4 shadow-[var(--shadow-panel)]">
+        <Field label="Title" htmlFor="task-title" error={errors.title}>
+          <input
+            id="task-title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            className={inputClassName}
+            style={fieldBorderStyle(errors.title)}
+            placeholder="e.g. Ship the Q3 pricing memo"
+            autoComplete="off"
+          />
+        </Field>
 
-      <Field label="Description" htmlFor="task-description" optional>
-        <textarea
-          id="task-description"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          rows={3}
-          className={`${inputClassName} min-h-0 py-2`}
-          style={fieldBorderStyle(false)}
-          placeholder="Optional detail"
-        />
-      </Field>
+        <Field label="Description" htmlFor="task-description" optional>
+          <textarea
+            id="task-description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            className={`${inputClassName} min-h-0 py-2`}
+            style={fieldBorderStyle(false)}
+            placeholder="Optional detail"
+          />
+        </Field>
 
-      <Field label="Deadline" htmlFor="task-deadline" error={errors.deadline}>
-        <input
-          id="task-deadline"
-          type="datetime-local"
-          value={deadline}
-          onChange={(event) => setDeadline(event.target.value)}
-          className={inputClassName}
-          style={fieldBorderStyle(errors.deadline)}
-        />
-      </Field>
+        <Field label="Deadline" htmlFor="task-deadline" error={errors.deadline}>
+          <input
+            id="task-deadline"
+            type="datetime-local"
+            value={deadline}
+            onChange={(event) => setDeadline(event.target.value)}
+            className={inputClassName}
+            style={fieldBorderStyle(errors.deadline)}
+          />
+        </Field>
 
-      <fieldset>
-        <legend className="mb-2 text-meta text-ink-2">Priority</legend>
-        <div role="radiogroup" aria-label="Priority" className="flex gap-2">
-          {PRIORITIES.map((value) => {
-            const selected = priority === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => setPriority(value)}
-                className="min-h-(--size-tap-min) flex-1 rounded-(--radius-md) border text-base transition-colors"
-                style={{
-                  borderColor: selected ? 'var(--color-accent)' : 'var(--border-strong)',
-                  color: selected ? 'var(--color-ink)' : 'var(--color-ink-2)',
-                  backgroundColor: selected ? 'var(--color-overlay)' : 'transparent',
-                }}
-              >
-                {PRIORITY_LABEL[value]}
-              </button>
-            );
-          })}
-        </div>
-        {errors.priority && (
-          <p role="alert" className="mt-1 text-meta" style={{ color: 'var(--color-danger)' }}>
-            {errors.priority}
-          </p>
-        )}
-      </fieldset>
+        <fieldset>
+          <legend className="mb-2 text-meta text-ink-2">Priority</legend>
+          <div
+            role="radiogroup"
+            aria-label="Priority"
+            className="flex gap-1 rounded-(--radius-md) bg-surface-sunken p-1"
+          >
+            {PRIORITIES.map((value) => {
+              const selected = priority === value;
+              const config = PRIORITY_CONFIG[value];
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setPriority(value)}
+                  className="min-h-(--size-tap-min) flex-1 rounded-(--radius-sm) text-body font-medium transition-colors"
+                  style={{
+                    color: selected ? config.label : 'var(--color-ink-2)',
+                    backgroundColor: selected ? 'var(--color-surface)' : 'transparent',
+                    boxShadow: selected ? 'var(--shadow-card)' : 'none',
+                  }}
+                >
+                  {config.text}
+                </button>
+              );
+            })}
+          </div>
+          {errors.priority && (
+            <p role="alert" className="mt-1 text-meta" style={{ color: 'var(--color-danger)' }}>
+              {errors.priority}
+            </p>
+          )}
+        </fieldset>
+      </div>
 
       {formError && (
         <p role="alert" className="text-meta" style={{ color: 'var(--color-danger)' }}>
@@ -156,13 +165,16 @@ export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
 }
 
 const inputClassName =
-  'min-h-(--size-tap-min) w-full rounded-(--radius-md) border bg-raised px-3 text-base text-ink placeholder:text-ink-3 focus-visible:outline-none';
+  'min-h-(--size-tap-min) w-full rounded-(--radius-md) border bg-surface-sunken px-3 text-base text-ink placeholder:text-ink-3 focus-visible:border-pine focus-visible:bg-surface focus-visible:outline-none transition-colors';
 
 // 16px minimum on every input (DESIGN.md §3.2) is handled via `text-base`
-// above; only the border color needs to respond to validation state, and
-// that's a token reference, never a literal hex.
+// above. Inputs are borderless by default (DESIGN.md §7 TaskForm) — focus
+// or an error state adds a Pine/Clay border on a surface background.
 function fieldBorderStyle(hasError) {
-  return { borderColor: hasError ? 'var(--color-danger)' : 'var(--border-strong)' };
+  return {
+    borderColor: hasError ? 'var(--color-danger)' : 'transparent',
+    backgroundColor: hasError ? 'var(--color-surface)' : undefined,
+  };
 }
 
 function Field({ label, htmlFor, error, optional, children }) {
