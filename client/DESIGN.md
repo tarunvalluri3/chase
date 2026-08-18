@@ -334,7 +334,7 @@ Built in the order the phases need them. Anything not on this list needs a conve
 | `DeleteSheet` | 13 | Reason required; destructive red confirm — the only red button in the app |
 | `Toast` | 13 | Bottom, above the nav, 3.2s, `aria-live="polite"`, one at a time |
 | `StatTile` / `RecentActivity` | 14 | Mono display numerals, tabular, 2-up grid |
-| Chart primitives | 15 | Deferred. Palette and rules specified when Phase 15 is approved. |
+| Chart primitives (`ChartCard`, trend/reason/priority charts, `UnresolvedMissed`) | 15 | See §12. Recharts, fully retokenized — no chart ships a literal hex. |
 
 ### 7.1 States are part of the component
 
@@ -369,6 +369,33 @@ Defense in depth alongside the backend's own enforcement (`CLAUDE.md` §Lifecycl
 **There is no "mark as missed" control anywhere in the UI.** `MISSED` only ever arises automatically.
 
 Missed, Incomplete, and Deleted tasks display their reasons and timestamps. A task resolved `MISSED → COMPLETED` still shows its missed history alongside its completion. An `INCOMPLETE` task shows **both** the auto-generated `missed_reason` and the user's own `incomplete_reason` — they are distinct records and both are surfaced.
+
+### 7.4 Data visualization (Phase 15)
+
+Charts are read-only analysis over history that's already being kept (`CLAUDE.md`'s "nothing gets deleted" guarantee), so this section is about making that history legible, not about inventing a new visual language. Every rule below extends §2's tokens; nothing here introduces a color, weight, or motion timing that doesn't already exist elsewhere in the app.
+
+**Series palette.** The source palette (§2.1) is a deliberately low-chroma, muted set — that's the whole identity, not an oversight — so it does not behave like a standard vivid categorical chart palette, and a generic multi-hue categorical scheme would fight it rather than extend it. Instead:
+
+- **Status trends stay status-colored.** A completions chart is green (`--color-completed`), a not-done chart is Foggy (`--color-notdone`), a deleted chart is Mid Grey (`--color-deleted`) — the same hues already carrying those meanings on every `StatusChip` in the app. A reader who already knows the chip colors reads the chart for free.
+- **Two-path series share one hue, split by treatment, not by a second color.** Completions have two paths — completed on time, or confirmed complete after passing through `MISSED` first — and both are still "completed," so they're encoded as the same green at two opacities (`--color-completed` solid vs. `--color-chart-completed-resolved`, a 55%-mix of the same hue) rather than a second categorical color that would imply a different outcome. Always legended, never color-alone.
+- **Priority stays monochrome in charts too.** §2.5's rule ("priority gets no hue") isn't just a task-card rule — the priority breakdown chart reuses `PriorityRail`'s exact rail colors (Star Dust / Foggy / Mid Grey) instead of a chart-only categorical set. Only three categories, so every bar is direct-labeled and needs no legend.
+- **Ranked reason bars use one flat hue** — the bar's own status color (Foggy for incomplete reasons, Mid Grey for deleted reasons). Bar length already encodes magnitude (these are ranked lists, not a scale needing a light→dark ramp), so a single hue is enough.
+- **Red never appears in a chart.** It stays bound to the destructive action only (§2.4) — deletion volume is shown in receded grey, the same as the resting `DELETED` status everywhere else.
+- **Unresolved `MISSED` is amber, and is never a trend line.** Per `CLAUDE.md`, `MISSED` is a pending checkpoint the user hasn't resolved yet, not a terminal outcome — charting it over time would imply it's a verdict. It's surfaced instead as a live count + oldest-first list (`UnresolvedMissed`), same amber as the `MISSED` chip, explicitly not on the same visual axis as the completed/incomplete/deleted trend charts.
+
+These tokens live in `tokens.css`: `--color-chart-grid` (= `--border-hairline`), `--color-chart-axis-label` (= `--color-ink-3`), `--color-chart-completed-resolved` (a `color-mix()` of `--color-completed`, not a new hex). Every other chart color is an existing status/priority token used as-is.
+
+**Axes & grid.** Gridlines are horizontal only (`--color-chart-grid`) — vertical gridlines add clutter without adding information on a narrow mobile chart. Axis lines and tick marks are otherwise hidden; only the labels remain, recessive against the surface. No dual-axis chart anywhere — a second measure gets its own chart, never a second y-scale.
+
+**Labels & numerals.** Split follows §2.2/§3's existing cool-vs-warm, mono-vs-sans rule: axis ticks, counts, and percentages are **Geist Mono** at `micro`-adjacent size (11px) with `tabular-nums`, since they're numbers the app is keeping a record of. Reason-breakdown category labels (the user's own free-typed text) are **Geist Sans** — they're something the user said, not something the app computed. Tooltips reuse `--color-raised` + `--border-hairline`, matching every other floating surface in the app (sheets, popovers).
+
+**Empty & loading states.** Every chart gets its own compact empty state (a bordered `--color-surface` panel with one line of plain copy, e.g. *"No completions yet. They'll show up here as you go."*) rather than hiding the section — consistent with §7.1's "empty is a real state, not an absence." Loading is the same shimmer sweep (§5.5) as every other skeleton, sized to the chart it's standing in for. Never a spinner.
+
+**Reduced motion.** Chart entry has no built-in animation in this phase (Recharts' default mount transitions are disabled) — the data is simply present on first paint. This sidesteps §5.6 entirely rather than needing a reduced-motion branch: nothing here was worth the one signature-moment budget (§5.4) already spent on task completion, and an un-animated chart is fully legible immediately, which matters more for a "read your own history" view than for a moment of delight.
+
+**Mobile layout.** Charts stack vertically, one per section, full-width (`ResponsiveContainer` at `width: 100%`) — never a cramped multi-chart grid. Each chart's `ResponsiveContainer` sits inside its own `overflow-x-auto` wrapper per §9's "no chart causes the page body to scroll horizontally" rule, even though none of Phase 15's charts (8 weekly buckets, or ≤6 ranked reason bars) actually overflow a 360px viewport in practice — the wrapper is defensive, not currently load-bearing.
+
+**Library.** Recharts, chosen over hand-rolled SVG for this phase — see `STATE.md`'s Phase 15 decisions log for the trade-off. Every chart is retokenized in the same commit it's built in, same rule as §10.4 applies to 21st.dev output: nothing ships with Recharts' own default colors.
 
 ---
 

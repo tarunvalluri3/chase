@@ -34,7 +34,7 @@ export function FilterRow({ selected, counts = {} }) {
             ref={isSelected ? selectedRef : undefined}
             to={`/tasks/${filter.status}`}
             aria-current={isSelected ? 'true' : undefined}
-            className="flex shrink-0 snap-start items-center gap-1.5 rounded-(--radius-pill) border px-3 py-1.5 text-meta transition-colors"
+            className="flex min-h-(--size-tap-min) shrink-0 snap-start items-center gap-1.5 rounded-(--radius-pill) border px-3 py-1.5 text-meta transition-colors"
             style={{
               borderColor: isSelected ? filter.color : 'var(--border-hairline)',
               color: isSelected ? filter.color : 'var(--color-ink-2)',

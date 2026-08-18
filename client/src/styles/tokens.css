@@ -121,4 +121,14 @@
 :root {
   --size-tap-min: 2.75rem; /* 44px absolute floor */
   --size-tap-nav: 3rem; /* 48px in the bottom nav */
+
+  /* ---- chart (§12) — derived from existing status/priority/accent tokens.
+   * No new hues: every chart color is one of these already-approved values,
+   * optionally desaturated via color-mix for secondary-encoding purposes
+   * (e.g. distinguishing resolved-from-missed completions from on-time ones
+   * without inventing a new categorical hue). ---- */
+  --color-chart-grid: var(--border-hairline);
+  --color-chart-axis-label: var(--color-ink-3);
+  --color-chart-ranked-bar: var(--color-accent);
+  --color-chart-completed-resolved: color-mix(in srgb, var(--color-completed) 55%, transparent);
 }

@@ -10,7 +10,6 @@ const absoluteFormatter = new Intl.DateTimeFormat(undefined, {
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
 
 // Relative under 48h ("in 2h", "2d overdue"), absolute beyond — DeadlineDisplay spec (§7).
 export function formatDeadline(isoUtc, { now = new Date() } = {}) {

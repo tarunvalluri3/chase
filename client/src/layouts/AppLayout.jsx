@@ -4,6 +4,7 @@ import { AppBar } from '../components/nav/AppBar';
 import { BottomNav } from '../components/nav/BottomNav';
 import { FilterRow } from '../components/nav/FilterRow';
 import { ToastViewport } from '../components/ui/Toast';
+import { OfflineBar } from '../components/ui/OfflineBar';
 import { routeVariants } from '../lib/motion';
 import { formatTodayContext } from '../lib/datetime';
 import { useTaskCounts } from '../hooks/useTaskCounts';
@@ -57,6 +58,7 @@ export function AppLayout({ children }) {
       </main>
 
       <BottomNav needsReviewCount={counts.missed ?? 0} />
+      <OfflineBar />
       <ToastViewport />
     </div>
   );
@@ -73,7 +75,7 @@ function sectionMeta(pathname, status, isTaskDetail) {
     return { title: 'Tasks', context: STATUS_CONTEXT[status] ?? '' };
   }
   if (pathname.startsWith('/insights')) {
-    return { title: 'Insights', context: 'LOCKED · PHASE 15' };
+    return { title: 'Insights', context: 'PATTERNS' };
   }
   if (pathname.startsWith('/profile')) {
     return { title: 'Profile', context: 'ACCOUNT' };

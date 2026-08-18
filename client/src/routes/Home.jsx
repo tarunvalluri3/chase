@@ -1,38 +1,60 @@
-import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { apiClient } from '../lib/apiClient';
+import { useDashboardTasks } from '../hooks/useDashboardTasks';
+import { useTasksContext } from '../lib/tasksStore';
+import { StatusCounts } from '../components/dashboard/StatusCounts';
+import { DueSoon } from '../components/dashboard/DueSoon';
+import { RecentActivity } from '../components/dashboard/RecentActivity';
+import { EmptyState } from '../components/ui/EmptyState';
+import { ErrorState } from '../components/ui/ErrorState';
+import { DashboardStatSkeleton } from '../components/ui/Skeleton';
+import { Button } from '../components/ui/Button';
 
-// Authenticated placeholder for the Home nav slot (DESIGN.md §6), rendered
-// inside AppLayout (Phase 11) — AppBar/BottomNav are now permanent chrome,
-// so this only needs its own content. The real dashboard — counts, due soon,
-// needs review, recent activity — is Phase 14.
+// Real dashboard (Phase 14, DESIGN.md §7/§3.1/§14) — task-status counts, a
+// due-soon heads-up, and recent activity, all aggregated client-side from
+// one unfiltered GET /api/tasks via useDashboardTasks (no new backend
+// aggregation endpoint, per the phase's explicit scope). Implements all
+// four DESIGN.md §7.1 states: loading (stat-grid skeleton), empty (no tasks
+// at all yet), error (plain explanation + Retry), loaded.
 export default function Home() {
   const { user } = useUser();
-  const [health, setHealth] = useState('checking...');
+  const { tasks, status, reload } = useDashboardTasks();
+  const { openCreateSheet } = useTasksContext();
 
-  useEffect(() => {
-    let cancelled = false;
-    apiClient
-      .get('/health')
-      .then((data) => {
-        if (!cancelled) setHealth(data?.status ?? 'ok');
-      })
-      .catch(() => {
-        if (!cancelled) setHealth('unreachable');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const greetingName = user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? 'there';
+
+  if (status === 'loading' && tasks.length === 0) {
+    return (
+      <div className="flex flex-col gap-8 pt-4">
+        <p className="px-gutter text-body text-ink-2">Welcome back, {greetingName}.</p>
+        <DashboardStatSkeleton />
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return <ErrorState onRetry={reload} />;
+  }
+
+  if (tasks.length === 0) {
+    return (
+      <EmptyState
+        title="Nothing here yet."
+        description="Add your first task to see your dashboard come together."
+        action={
+          <Button size="sm" className="mt-1" onClick={openCreateSheet}>
+            New task
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center gap-2 px-gutter pt-16 text-center">
-      <p className="text-meta text-ink-3">Welcome back</p>
-      <h2 className="text-title text-ink">
-        {user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? 'Chase'}
-      </h2>
-      <p className="text-body text-ink-2">The dashboard lands in Phase 14.</p>
-      <p className="text-meta text-ink-3">API: {health}</p>
+    <div className="flex flex-col gap-8 pt-4 pb-4">
+      <p className="px-gutter text-body text-ink-2">Welcome back, {greetingName}.</p>
+      <StatusCounts tasks={tasks} />
+      <DueSoon tasks={tasks} />
+      <RecentActivity tasks={tasks} />
     </div>
   );
 }
