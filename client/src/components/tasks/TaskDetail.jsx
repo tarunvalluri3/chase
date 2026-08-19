@@ -8,6 +8,7 @@ import { TaskForm } from './TaskForm';
 import { CompleteConfirmSheet } from './CompleteAction';
 import { DeleteSheet } from './DeleteSheet';
 import { ResolveSheet } from './ResolveSheet';
+import { TimeTracker } from './TimeTracker';
 import { useTasksContext } from '../../lib/tasksStore';
 import { useTaskLifecycle } from '../../hooks/useTaskLifecycle';
 
@@ -71,6 +72,8 @@ export function TaskDetail({ task, onTaskUpdated }) {
         {task.incomplete_at && <Row label="Confirmed not done" value={formatTimestamp(task.incomplete_at)} />}
         {task.deleted_at && <Row label="Deleted" value={formatTimestamp(task.deleted_at)} />}
       </dl>
+
+      <TimeTracker taskId={task.id} readOnly={task.status !== 'ACTIVE'} />
 
       {task.missed_reason && <Reason label="Why it needed review" text={task.missed_reason} />}
       {task.incomplete_reason && <Reason label="What got in the way" text={task.incomplete_reason} />}

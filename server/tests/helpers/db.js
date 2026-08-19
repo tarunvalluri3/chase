@@ -17,6 +17,7 @@ export async function cleanupUser(clerkUserId) {
 
   await supabase.from('notifications').delete().eq('user_id', user.id);
   await supabase.from('push_subscriptions').delete().eq('user_id', user.id);
+  await supabase.from('work_sessions').delete().eq('user_id', user.id);
   await supabase.from('tasks').delete().eq('user_id', user.id);
   await supabase.from('users').delete().eq('id', user.id);
 }

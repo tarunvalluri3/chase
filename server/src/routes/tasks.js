@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { requireAuthenticated } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import * as tasksController from '../controllers/tasksController.js';
+import workSessionsRouter from './workSessions.js';
 import {
   createTaskBodySchema,
   editTaskBodySchema,
@@ -15,6 +16,8 @@ import {
 const router = Router();
 
 router.use(requireAuthenticated);
+
+router.use('/:id/sessions', workSessionsRouter);
 
 router.post('/', validate({ body: createTaskBodySchema }), tasksController.create);
 router.get('/', validate({ query: listQuerySchema }), tasksController.list);

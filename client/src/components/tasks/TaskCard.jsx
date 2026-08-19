@@ -11,6 +11,7 @@ import { Button } from '../ui/Button';
 import { CompleteConfirmSheet } from './CompleteAction';
 import { DeleteSheet } from './DeleteSheet';
 import { ResolveSheet } from './ResolveSheet';
+import { TimeTracker } from './TimeTracker';
 import { useTaskLifecycle } from '../../hooks/useTaskLifecycle';
 import { DURATION, EASE_EXIT, EASE_OUT } from '../../lib/motion';
 
@@ -129,6 +130,8 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
             <DeadlineDisplay deadline={task.deadline} />
           </div>
         </Link>
+
+        {task.status === 'ACTIVE' && <TimeTracker taskId={task.id} compact />}
 
         {task.status === 'ACTIVE' && (
           <div className="flex gap-2 pt-1">

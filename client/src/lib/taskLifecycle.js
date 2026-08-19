@@ -10,3 +10,13 @@ export function lifecycleErrorMessage(error) {
   }
   return 'Something went wrong. Try again.';
 }
+
+// Same voice as lifecycleErrorMessage, worded for a work-session action
+// (Start/Pause/Resume/Stop) instead of a task-status transition.
+export function sessionErrorMessage(error) {
+  if (error instanceof ApiError) {
+    if (error.status === 409) return 'This session changed somewhere else. Refresh and try again.';
+    if (error.status === 404) return "This task couldn't be found. Pull to refresh.";
+  }
+  return 'Something went wrong. Try again.';
+}

@@ -84,3 +84,16 @@ export const notificationsApi = {
   markRead: (id) => apiClient.post(`/notifications/${id}/read`),
   markAllRead: () => apiClient.post('/notifications/read-all'),
 };
+
+// Work session (time tracking) API methods (Phase 19) — server/API.md is
+// the source of truth for shapes. `list` returns the full chronological
+// segment history; the frontend derives total/running/paused state from it
+// client-side (see hooks/useWorkSession.js) rather than also calling the
+// separate summary endpoint.
+export const sessionsApi = {
+  start: (taskId) => apiClient.post(`/tasks/${taskId}/sessions/start`),
+  pause: (taskId) => apiClient.post(`/tasks/${taskId}/sessions/pause`),
+  resume: (taskId) => apiClient.post(`/tasks/${taskId}/sessions/resume`),
+  stop: (taskId) => apiClient.post(`/tasks/${taskId}/sessions/stop`),
+  list: (taskId) => apiClient.get(`/tasks/${taskId}/sessions`),
+};

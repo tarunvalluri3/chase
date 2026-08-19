@@ -1,5 +1,6 @@
 import * as tasksRepository from '../repositories/tasksRepository.js';
 import * as notificationService from './notificationService.js';
+import * as workSessionsService from './workSessionsService.js';
 import { NotFoundError, InvalidTransitionError } from '../errors/AppError.js';
 
 export const MISSED_REASON = 'Deadline passed while task was still ACTIVE';
@@ -14,12 +15,23 @@ async function maybeTransitionToMissed(task) {
 
   const now = new Date().toISOString();
 
-  return tasksRepository.update(task.id, task.user_id, {
+  const updated = await tasksRepository.transitionToMissedIfActive(task.id, task.user_id, {
     status: 'MISSED',
     missed_reason: MISSED_REASON,
     missed_at: now,
     updated_at: now,
   });
+
+  if (!updated) {
+    // Status changed out from under us between the read and this write
+    // (e.g. a concurrent Complete/Delete landed first) -- return the
+    // current row rather than the now-stale in-memory `task`.
+    return tasksRepository.findByIdForUser(task.id, task.user_id);
+  }
+
+  await workSessionsService.autoCloseOpenSession(task.id);
+
+  return updated;
 }
 
 async function getOwnedTaskOrThrow(id, userId) {
@@ -138,6 +150,7 @@ export async function completeTask(userId, id) {
     completed_at: now,
     updated_at: now,
   });
+  await workSessionsService.autoCloseOpenSession(id);
   await notificationService.notifyTaskCompleted(userId, updated);
   return updated;
 }
@@ -157,6 +170,7 @@ export async function deleteTask(userId, id, reason) {
     deleted_at: now,
     updated_at: now,
   });
+  await workSessionsService.autoCloseOpenSession(id);
   await notificationService.notifyTaskDeleted(userId, updated);
   return updated;
 }

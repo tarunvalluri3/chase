@@ -61,6 +61,28 @@ export async function update(id, userId, fields) {
   return data;
 }
 
+// Guarded variant for the lazy ACTIVE -> MISSED check: conditions the write
+// on the row still being ACTIVE, so a concurrent Complete/Delete that lands
+// first is never silently overwritten back to MISSED. Returns null (rather
+// than throwing) when the row no longer matched -- the caller re-reads the
+// row's current state in that case.
+export async function transitionToMissedIfActive(id, userId, fields) {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(fields)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .eq('status', 'ACTIVE')
+    .select('*')
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function sweepMissed(userId, { missedReason, now }) {
   const { data, error } = await supabase
     .from('tasks')
