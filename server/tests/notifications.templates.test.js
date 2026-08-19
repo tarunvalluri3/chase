@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildEmail } from '../src/services/notificationTemplates.js';
+import { buildEmail, buildPush } from '../src/services/notificationTemplates.js';
 
 const baseTask = {
   id: 'task-1',
@@ -67,5 +67,31 @@ describe('notificationTemplates.buildEmail', () => {
 
   it('throws on an unknown notification type', () => {
     expect(() => buildEmail('NOT_A_TYPE', { task: baseTask })).toThrow();
+  });
+});
+
+describe('notificationTemplates.buildPush', () => {
+  it('builds a short { title, body, url } shape', () => {
+    const { title, body, url } = buildPush('TASK_CREATED', { task: baseTask });
+
+    expect(title).toContain(baseTask.title);
+    expect(body).toContain('HIGH');
+    expect(url).toContain(process.env.CLIENT_URL);
+  });
+
+  it('interpolates the incomplete reason into TASK_INCOMPLETE', () => {
+    const task = { ...baseTask, incomplete_reason: 'Ran out of time' };
+    const { body } = buildPush('TASK_INCOMPLETE', { task });
+    expect(body).toContain('Ran out of time');
+  });
+
+  it('never implies "never completed" for TASK_MISSED, same as the email copy', () => {
+    const { body } = buildPush('TASK_MISSED', { task: baseTask });
+    expect(body).not.toMatch(/never completed/i);
+    expect(body).toMatch(/confirm/i);
+  });
+
+  it('throws on an unknown notification type', () => {
+    expect(() => buildPush('NOT_A_TYPE', { task: baseTask })).toThrow();
   });
 });

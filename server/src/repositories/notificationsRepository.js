@@ -1,15 +1,18 @@
 import { supabase } from '../db/supabaseClient.js';
 
 // Attempts to claim a notification slot by inserting a PENDING row. The
-// unique constraint on (task_id, type, dedup_key) is what actually prevents
-// a duplicate send: a 23505 violation here means this notification was
-// already claimed or sent (by an earlier attempt, another process, or a
-// prior server run before a restart), so the caller should just skip.
-// Returns the inserted row, or null if the slot was already claimed.
-export async function claim({ userId, taskId, type, dedupKey }) {
+// unique constraint on (task_id, type, dedup_key, channel) is what actually
+// prevents a duplicate send: a 23505 violation here means this notification
+// was already claimed or sent on this channel (by an earlier attempt,
+// another process, or a prior server run before a restart), so the caller
+// should just skip. `channel` defaults to 'EMAIL' -- push claims pass
+// channel: 'PUSH' explicitly, tracked as an independent slot so a push
+// failure can never block or dedupe against the email send for the same
+// event, or vice versa. Returns the inserted row, or null if already claimed.
+export async function claim({ userId, taskId, type, dedupKey, channel = 'EMAIL' }) {
   const { data, error } = await supabase
     .from('notification_log')
-    .insert({ user_id: userId, task_id: taskId, type, dedup_key: dedupKey, status: 'PENDING' })
+    .insert({ user_id: userId, task_id: taskId, type, dedup_key: dedupKey, channel, status: 'PENDING' })
     .select('*')
     .single();
 

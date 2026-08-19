@@ -1,129 +1,208 @@
-# PHASE_18.md — Time Tracking
+# PHASE_18.md — Push Notifications & In-App Feed
 
-> Documentation only. Not implemented. Do not build until the user gives explicit approval ("Approved — build Phase 18"), per `CLAUDE.md`'s governing rule. Depends conceptually on Phase 17 only in that both extend `tasksService`'s lifecycle methods with a side effect — they are otherwise independent and could be built in either order.
+> Documentation only. Not implemented. Do not build until the user gives explicit approval ("Approved — build Phase 18"), per `CLAUDE.md`'s governing rule. Independent of Phase 17 (Email) — reuses its event triggers but not its code paths — and independent of Phase 19 (Time Tracking, renumbered from 18 to make room for this phase).
+
+## 0. Why this phase exists
+
+The user asked for notifications "when the app is not opened, not only using the app." Email (Phase 17) already covers that, but the request is specifically for something that reads as an OS-level notification rather than an inbox item. Two mechanisms were considered:
+
+- **Web Push (Push API + Service Worker)** — chosen. Works even when the Chase tab/PWA is fully closed, as long as the browser/OS is running. No native app, no app-store account, no FCM/APNs — fits Chase's existing web-only stack.
+- **Mobile push (FCM/APNs)** — rejected for now. Only relevant if Chase ever ships as a native/wrapped app, which it doesn't.
+
+**Known platform constraint, load-bearing for scope:** iOS Safari only delivers Web Push to a PWA that the user has actually **installed via "Add to Home Screen"** — a normal Safari tab cannot receive push on iOS. Android Chrome supports push from an ordinary browser tab, no install required. This phase cannot change that; it's a browser/OS limitation, not a design choice. Chase already ships a `manifest.webmanifest` (Phase 16), which is the prerequisite for iOS installability, but nothing in this phase can force a user to install — the UI should ask for the OS permission the same way regardless of platform, and simply won't succeed on non-installed iOS Safari.
+
+Paired with push, this phase also adds a lightweight **in-app notification feed** (a bell + list) — not because it satisfies "not only using the app" on its own, but because every push-worthy event should also leave a durable, visible record inside the app for whenever the user does open it (mirroring `CLAUDE.md`'s "preserve meaningful history" principle already applied to tasks). The feed is populated unconditionally at each trigger point regardless of whether push permission was ever granted.
 
 ## 1. Architecture
 
-Same layered shape as everything else in the backend (`CLAUDE.md`'s Route → Middleware → Controller → Service → Repository → Supabase):
-
 ```
-server/src/routes/workSessions.js         — nested under /api/tasks/:id/sessions
-server/src/controllers/workSessionsController.js
-server/src/services/workSessionsService.js   — start/pause/resume/stop rules, total-time math
-server/src/repositories/workSessionsRepository.js  — Supabase calls only
-server/src/validation/workSessionSchemas.js  — Zod, param validation only (no body fields —
-                                                every timestamp is server-controlled)
+tasksService (same trigger points Phase 17 already added)
+      │
+      ▼
+notificationService          — extended, not replaced: now fans out to three channels
+      │                         (server/src/services/notificationService.js)
+      ├──▶ notificationTemplates   — extended: builds { subject, html, text } (email, unchanged)
+      │       AND { title, body, url } (push + in-app, new, shorter copy than email)
+      │
+      ├──▶ emailService            — unchanged from Phase 17
+      │
+      ├──▶ pushService             — NEW: thin web-push wrapper, sends one payload to one subscription
+      │       (server/src/services/pushService.js)
+      │
+      ├──▶ notificationsFeedRepository — NEW: inserts one row per event into `notifications`
+      │       (server/src/repositories/notificationsFeedRepository.js)     (the in-app feed)
+      │
+      └──▶ notificationsRepository  — unchanged from Phase 17 (email's own send-audit log)
+
+pushSubscriptionsRepository   — NEW: Supabase calls only, against `push_subscriptions`
+  (server/src/repositories/pushSubscriptionsRepository.js)
+
+pushSubscriptionsController/Service — NEW: subscribe/unsubscribe endpoints (§3)
+
+notificationsFeedController/Service — NEW: list/mark-read endpoints for the bell (§3)
+
+client: service worker + subscribe flow + bell UI (§7)
 ```
 
-`tasksService`'s `completeTask`, `deleteTask`, and the internal `maybeTransitionToMissed` gain one new call each into `workSessionsService.autoCloseOpenSession(taskId)` (see §5) — the one place this phase's logic reaches into existing, already-shipped code.
+`notificationService.notifyX` (the same six functions Phase 17 built) gains two more steps per call: send push to every subscription the user has, and insert one `notifications` feed row — both **after** the existing email step, both wrapped the same never-throws way. A push failure or a feed-insert failure still can never fail the underlying task operation, exactly like Phase 17's email guarantee.
 
 ## 2. Database changes
 
-A dedicated **segment-based** `work_sessions` table, not one row per logical "session" with multiple pause/resume timestamp columns crammed into it — a row instead represents one *continuous stretch of active work*. Pausing ends the current segment; resuming (or starting) opens a new one. Total time on a task is simply the sum of `(ended_at - started_at)` across all its segments — no separate accumulator field to keep in sync.
+**New table — push subscriptions** (a user may have several: phone, laptop, etc., each a separate subscription):
 
 ```sql
-create table work_sessions (
+create table push_subscriptions (
   id uuid primary key default gen_random_uuid(),
-  task_id uuid not null references tasks (id),
   user_id uuid not null references users (id),
-  started_at timestamptz not null default now(),
-  ended_at timestamptz,
-  end_reason text check (end_reason in ('PAUSED', 'STOPPED', 'AUTO_STOPPED')),
+  endpoint text not null,
+  p256dh text not null,
+  auth text not null,
+  user_agent text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint work_sessions_ended_reason_consistent
-    check ((ended_at is null and end_reason is null) or (ended_at is not null and end_reason is not null))
+  last_seen_at timestamptz not null default now(),
+  unique (endpoint)
 );
 
-create index work_sessions_task_id_idx on work_sessions (task_id);
-create index work_sessions_user_id_idx on work_sessions (user_id);
-create unique index work_sessions_one_open_per_task
-  on work_sessions (task_id) where ended_at is null;
+create index push_subscriptions_user_id_idx on push_subscriptions (user_id);
 ```
 
-`user_id` is denormalized onto `work_sessions` (not derived only via a join through `tasks`) for the same reason `CLAUDE.md` already scopes every task query directly by `user_id` — every ownership check and every listing query can filter directly on the session row without a join, matching the rest of the codebase's pattern.
+`endpoint` is globally unique per the Push API spec (it's a unique URL assigned by the browser's push service), so `unique (endpoint)` doubles as "re-subscribing the same device just updates its row" (upsert on conflict) rather than accumulating duplicates. `user_agent` is stored only so a future "manage your devices" UI could label entries meaningfully — not required for this phase's own function.
 
-The partial unique index (`... where ended_at is null`) is the actual invalid-state guard, enforced at the database level, not just in `workSessionsService` — "multiple active sessions on one task" becomes a constraint violation, not just an application-level bug waiting to happen under a race.
+**New table — in-app notification feed:**
 
-`Task → Work Session → Work Session → Work Session` from the prompt maps directly: each `work_sessions` row is one child segment; a task's full time-tracking history is `select * from work_sessions where task_id = ? order by started_at`.
+```sql
+create table notifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users (id),
+  task_id uuid not null references tasks (id),
+  type text not null check (type in (
+    'TASK_CREATED', 'TASK_COMPLETED', 'TASK_INCOMPLETE',
+    'TASK_DELETED', 'TASK_UPDATED', 'TASK_MISSED', 'DEADLINE_REMINDER'
+  )),
+  title text not null,
+  body text not null,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index notifications_user_id_created_at_idx on notifications (user_id, created_at desc);
+create index notifications_user_id_unread_idx on notifications (user_id) where read_at is null;
+```
+
+Same seven `type` values as Phase 17's `notification_log`, deliberately — this is the same set of events, just a second, user-facing surface for them. `title`/`body` are stored pre-rendered (not re-derived from `type` + a join at read time) so the feed still reads correctly even if a task is later edited again or its copy-generating logic changes.
+
+**Reused, not duplicated:** Phase 17's `notification_log` keeps doing exactly what it already does (email send-audit + dedup) — it is not widened into a generic multi-channel log. The `notifications` table above is a distinct concern (a user-facing feed, always populated, no dedup/retry semantics needed since it's a single insert per event, not a delivery attempt that can fail and need retrying).
+
+**Push dedup/retry:** rather than a third audit table, push reuses `notification_log` by adding one column:
+
+```sql
+alter table notification_log add column channel text not null default 'EMAIL' check (channel in ('EMAIL', 'PUSH'));
+alter table notification_log drop constraint notification_log_task_id_type_dedup_key_key;
+alter table notification_log add constraint notification_log_task_id_type_dedup_key_channel_key
+  unique (task_id, type, dedup_key, channel);
+```
+
+This keeps the exact dedup/retry mechanism Phase 17 already built (claim-then-send-then-mark against a unique constraint, §6 of `PHASE_17.md`) and just makes it channel-aware — a push send and an email send for the same event are tracked as two independent rows, each individually retryable, neither blocking the other.
 
 ## 3. API endpoints
 
 ```
-POST   /api/tasks/:id/sessions/start
-POST   /api/tasks/:id/sessions/pause
-POST   /api/tasks/:id/sessions/resume
-POST   /api/tasks/:id/sessions/stop
-GET    /api/tasks/:id/sessions           # full segment history, chronological
-GET    /api/tasks/:id/sessions/summary   # { totalSeconds, isRunning, currentSessionStartedAt }
+POST   /api/push/subscribe          # body: { endpoint, keys: { p256dh, auth } } — upsert on endpoint
+DELETE /api/push/subscribe          # body: { endpoint } — remove one device's subscription
+GET    /api/notifications           # in-app feed, paginated, ?unreadOnly=true optional
+POST   /api/notifications/:id/read  # mark one feed row read
+POST   /api/notifications/read-all  # mark every unread row read
+GET    /api/push/vapid-public-key   # returns the public key so the client doesn't need it build-time-baked
+                                     # (kept as a live env-backed value, easier to rotate than a Vite env var
+                                     # that requires a rebuild)
 ```
 
-Nested under the existing task-ownership pattern (`:id` is the task id — every route first resolves the task via the same `getOwnedTaskOrThrow`-style check `tasksService` already uses, so a session on someone else's task 404s exactly like a task on someone else's task does). No request bodies on any of the four action endpoints — matching `CLAUDE.md`'s existing rule that lifecycle timestamps are always server-controlled, never client-supplied.
+All five scoped to the authenticated user via the existing Clerk → internal-user-id pattern, matching every other endpoint. `read-all` and per-id `read` are separate (not a generic PATCH), per `CLAUDE.md`'s "no generic status-update endpoint, each transition is its own dedicated operation" convention already applied to tasks.
 
-`GET /sessions/summary` is a derived read, not a stored value — `totalSeconds` is computed by summing closed segments plus, if a segment is currently open, the elapsed time from `started_at` to "now" at request time.
-
-## 4. Session lifecycle
+## 4. Push send flow
 
 ```
-(no open segment)
-   │
-   ├─ Start   → open segment created                         [requires: task ACTIVE, no open segment]
-   │
-(open segment, RUNNING)
-   │
-   ├─ Pause   → segment closed, end_reason = PAUSED            [requires: an open segment exists]
-   │
-(no open segment, most recent segment's end_reason = PAUSED)
-   │
-   ├─ Resume  → new segment created                            [requires: task ACTIVE, no open segment,
-   │                                                              most recent segment was PAUSED]
-   │
-(open segment, RUNNING)
-   │
-   └─ Stop    → segment closed, end_reason = STOPPED            [requires: an open segment exists]
+pushService.sendPush(subscription, { title, body, url }):
+  1. web-push.sendNotification(subscription, JSON.stringify({ title, body, url }), vapidDetails)
+  2. on success: return { ok: true }
+  3. on failure:
+       - if the error is a 404/410 (subscription expired or the user revoked permission at the OS level,
+         both reported by the push service as a gone/not-found on send) → delete the subscription row,
+         this is the only place push subscriptions are ever removed automatically
+       - any other failure → return { ok: false, error }, never throws
 ```
 
-Start and Resume both "open a new segment" mechanically — they are kept as two distinct endpoints (matching the prompt's explicit Start/Pause/Resume/Stop framing, and `CLAUDE.md`'s established one-dedicated-endpoint-per-transition convention) but differ in their precondition: Start is valid any time there's no open segment (including the very first time, or after a prior Stop — "track multiple work sessions" means a task can be started, stopped, and started again later), while Resume additionally requires that the task's most recent segment ended specifically with `PAUSED` — calling Resume on a task that was never paused (or was last Stopped) is a `409`, same status code family `CLAUDE.md` already uses for invalid task-status transitions.
+`notificationService.notifyX` calls this once per subscription the user has (0, 1, or many) — a user with zero subscriptions (push never granted, or on an unsupported browser) simply gets none sent, no error, no log noise. Same claim-then-send-then-mark dance as email (§6 of `PHASE_17.md`), now keyed by `channel = 'PUSH'`.
 
-A task can accumulate any number of Start→(Pause→Resume)*→Stop cycles over its lifetime; each Start/Resume produces one new `work_sessions` row.
+## 5. Service worker & client subscribe flow
 
-## 5. Interaction with task status
+```
+client/public/sw.js                  — NEW, hand-written (no vite-plugin-pwa; matches the project's
+                                        existing preference for hand-built code over generator-owned
+                                        abstractions, e.g. Tailwind v4's CSS-first config over a
+                                        tailwind.config.js, no ORM, etc.)
+  self.addEventListener('push', ...)     — shows the OS notification from the payload
+  self.addEventListener('notificationclick', ...) — focuses/opens the app at payload.url
 
-- **ACTIVE:** the only status Start/Resume are ever allowed on, matching every other mutating task action in `CLAUDE.md` (Edit, Complete, Delete are all ACTIVE-only already).
-- **COMPLETED / DELETED / (auto) MISSED:** if a session is currently open (`RUNNING`) at the moment a task leaves ACTIVE — via `completeTask`, `deleteTask`, or the lazy/scheduled `ACTIVE→MISSED` transition — that open segment is auto-closed with `end_reason = 'AUTO_STOPPED'` as part of the same operation. This is the one new coupling between `tasksService` and `workSessionsService`: each of those three code paths gains one call to `workSessionsService.autoCloseOpenSession(taskId)` immediately alongside its status write. Rationale: a `RUNNING` session on a task that is no longer `ACTIVE` is exactly the kind of invalid state §"Prevent invalid session states" calls out — leaving it open would mean `GET /sessions/summary` keeps counting elapsed time against a task nobody can be working on anymore.
-  - **Flagged as a decision to confirm, not assumed silently:** this auto-close is a genuine cross-service side effect layered onto already-shipped, already-tested `tasksService` methods. The alternative — leave the session open and treat "task status != ACTIVE" as an implicit stop when computing totals — avoids touching existing code but leaves a permanently-`RUNNING`-looking row in the data, which reads worse for the "preserve meaningful history" analytics goal `CLAUDE.md` states as this project's long-term arc. This document recommends the auto-close approach; either is buildable.
-- **MISSED (the pending-checkpoint window itself):** no new segment can start or resume while a task is `MISSED` (it isn't `ACTIVE`), consistent with `CLAUDE.md`'s existing "a MISSED task cannot be edited" rule. If the task is later resolved back to `COMPLETED` via `resolve-missed`, no new session-related action follows — the auto-close already happened when it first became `MISSED`.
-- **INCOMPLETE / DELETED (terminal):** fully frozen, same as every other field on a terminal task — session rows are never edited or deleted, they remain as historical record even for a soft-deleted task, exactly like `deletion_reason`/`missed_reason` are preserved forever per `CLAUDE.md`'s data model.
+client/src/lib/pushClient.js         — NEW
+  registerServiceWorker()             — navigator.serviceWorker.register('/sw.js')
+  subscribeToPush()                   — Notification.requestPermission(), then
+                                         registration.pushManager.subscribe({ userVisibleOnly: true,
+                                         applicationServerKey: <fetched VAPID public key> }),
+                                         then POST /api/push/subscribe
+  unsubscribeFromPush()               — pushManager.getSubscription() → .unsubscribe() →
+                                         DELETE /api/push/subscribe
+```
 
-## 6. Validation
+**Opt-in UI, flagged as a decision to confirm at approval, not assumed:** the permission prompt needs a deliberate trigger point, not an automatic call on every app load (browsers already discourage/throttle notification prompts fired on page load with no user gesture, and it reads as hostile). Two reasonable places, either buildable:
+- A dismissible one-time prompt/banner (similar in spirit to Phase 16's `OfflineBar`) shown once on `Home` after first sign-in, asking to enable notifications.
+- A toggle inside `Profile` (`/profile` already exists as the account-settings destination per `DESIGN.md`'s nav table) — lower-friction to build, but only reaches a user who happens to visit Profile.
+This document recommends the `Profile` toggle as the primary control (durable, always reachable, no repeated-prompt annoyance) plus a single dismissible `Home` banner the first time only (tracked via `localStorage`, not a DB field, since "have we asked before" is a device-local concern) — but the actual choice should be confirmed with the user before implementation, same posture Phase 18/19's auto-close decision took.
 
-- `:id` (task id) validated as a UUID via the existing `idParamSchema` pattern from `server/src/validation/taskSchemas.js`, reused rather than duplicated.
-- No request-body schemas needed for the four action endpoints — there is no client-writable field.
-- Service-layer checks (not Zod, since they're state-dependent, matching how `tasksService` already splits "shape validation via Zod" from "business-rule validation via the service layer" per the Phase 4 decisions log): task must be owned by the caller, task must be `ACTIVE` for Start/Resume, an open segment must/must-not exist per the table in §4.
+## 6. In-app feed UI
 
-## 7. Security
+- A bell icon in `AppBar`'s existing, currently-unused trailing-action slot (`client/DESIGN.md` §6.2: "at most one trailing action") — shown on every authenticated screen, not just Home, since unread notifications can arrive regardless of which tab is open.
+- An unread-count badge on the bell, visually consistent with `BottomNav`'s existing amber needs-review dot (`client/DESIGN.md` §6.1) rather than inventing a new badge treatment.
+- Tapping it opens a sheet (reusing the existing `Sheet` primitive from Phase 12, not a new route) listing feed rows newest-first, each showing `title`/`body`/relative time (via the existing `lib/datetime.js` formatter) and linking to `/tasks/:status/:id` for its `task_id`. Tapping a row marks it read; a "Mark all read" action calls `read-all`.
+- No polling — the feed refreshes on sheet-open (a plain `GET`) and, optionally, on receiving a push message via the service worker's `push` event forwarding a `postMessage` to any open tab (a nice-to-have, not required for correctness, since opening the sheet already re-fetches).
 
-- Every session route first resolves and ownership-checks the parent task exactly like every existing task route does — a session action on a task id that exists but belongs to another user returns `404`, identically to how a foreign task id already 404s elsewhere in the API (no new leak surface, no new code path that could differ in status/timing/message from the existing pattern).
-- `user_id` on `work_sessions` is always taken from the authenticated session (`getAuth(req)` → internal user id), never from any request input — there is no request input that could carry one, since none of the six endpoints accept a body.
-- `GET /sessions` and `GET /sessions/summary` are similarly scoped — a user can only ever read their own task's sessions.
+## 7. Environment variables
 
-## 8. Testing requirements
+```
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:
+```
 
-- **Lifecycle:** Start → Pause → Resume → Stop happy path, asserting the resulting segment rows and computed total.
-- **Invalid-state rejections (409):** Start while a session is already open; Pause/Stop with no open session; Resume when the most recent segment was `STOPPED` (not `PAUSED`) or when no segment exists yet; any action on a non-`ACTIVE` task.
-- **Ownership:** the same cross-user-access battery the existing task tests already run (`server/tests/`), applied to all six session endpoints — confirms `404`, not `403`, and no field/state leakage.
-- **Auto-close:** an open session on a task that is then Completed / Deleted / auto-transitioned to Missed ends up closed with `end_reason = 'AUTO_STOPPED'`, and no further session action is possible on that task afterward.
-- **Summary math:** multiple closed segments plus one currently-open segment sum correctly in `GET /sessions/summary`; a task with zero sessions returns `{ totalSeconds: 0, isRunning: false, currentSessionStartedAt: null }` rather than an error.
-- Reuses the existing Vitest + Supertest setup (`server/tests/setup.js`'s mocked Clerk auth, `server/tests/helpers/` db cleanup) rather than introducing a new test harness.
+Generated once via `web-push generate-vapid-keys` (a one-time setup step, documented in the phase's own README note, not committed as real values — same "names only" convention `example.env` already follows). `VAPID_SUBJECT` is a contact `mailto:`/URL the push services use to reach the sender if something's wrong, required by the Web Push protocol. No client-side env var is needed for the public key — the client fetches it live from `GET /api/push/vapid-public-key` (§3), so rotating keys never requires a frontend rebuild.
 
-## 9. Acceptance criteria
+Already-existing vars (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLERK_SECRET_KEY`, `RESEND_API_KEY`, etc. from Phases 2/17) are reused as-is.
 
-- [ ] `work_sessions` migration applied, including the partial unique index enforcing at most one open segment per task at the database level.
-- [ ] All six endpoints implemented, ownership-scoped, and returning correct status codes for every valid and invalid transition in §4.
-- [ ] Starting/resuming is rejected on any non-`ACTIVE` task.
-- [ ] The auto-close behavior in §5 is implemented (pending the decision flagged there being confirmed with the user) and covered by tests.
-- [ ] `GET /sessions/summary` returns a correct, derived (not stored) total across multiple segments including one still open.
-- [ ] No schema field or endpoint assumes a single-segment-per-task model — multiple full Start→Stop cycles on the same task are supported and tested.
-- [ ] Full backend test suite (existing tests plus this phase's new ones) passes.
-- [ ] `STATE.md` updated: Phase 18 marked `Done`, with the auto-close decision's actual resolution logged.
+## 8. Error handling
 
+Same posture as Phase 17 throughout — nothing in this phase can turn into a failed task-management response:
+- `pushService.sendPush` never throws past its own boundary, same as `emailService.sendEmail`.
+- `notificationsFeedRepository`'s insert is wrapped the same never-throws way inside `notificationService.notifyX` — a feed-insert failure is logged and swallowed, not propagated.
+- An expired/revoked subscription is pruned automatically on a 404/410 send response (§4) rather than retried forever or left to accumulate as dead weight.
+- `POST /api/push/subscribe` and the feed endpoints follow the existing Zod-validation + ownership-scoping + consistent-error-shape rules from `CLAUDE.md`'s Security section, same as every other endpoint.
+
+## 9. Testing requirements
+
+- **Unit — `pushService.js`:** mocked `web-push`, verifies success/failure/expired-subscription-prunes-row paths, never throws.
+- **Unit — `notificationTemplates.js`:** extended tests for the new `{ title, body, url }` shape per type, alongside the existing email-shape tests.
+- **Unit — `notificationService.js`:** extended to verify a `notifyX` call with zero/one/many subscriptions sends the correct number of push calls, still inserts exactly one feed row regardless of push outcome, and dedupes per `(task_id, type, dedup_key, channel)`.
+- **Integration:** `POST /api/push/subscribe` (create + upsert-on-conflict), `DELETE /api/push/subscribe`, `GET /api/notifications` (ownership-scoped, correct pagination/unread filter), `POST /api/notifications/:id/read` and `/read-all` (ownership-scoped, idempotent). Task-management endpoints (`POST /api/tasks`, complete, delete, etc.) still return correct 2xx responses even when `pushService`/feed-insert are forced to fail, mirroring Phase 17's email-failure-isolation tests.
+- **Frontend (extends the Phase 16 Vitest + Testing Library setup):** bell badge shows correct unread count, sheet lists feed rows, marking read clears the badge, `pushClient.js`'s permission/subscribe flow tested with `Notification`/`serviceWorker`/`pushManager` mocked (no real browser push in CI).
+
+## 10. Acceptance criteria
+
+- [ ] `push_subscriptions` and `notifications` tables created; `notification_log` extended with `channel` and the widened unique constraint.
+- [ ] `web-push` VAPID keys generated and documented (names only in `example.env`, no real values committed).
+- [ ] All five new endpoints implemented, ownership-scoped, correctly validated.
+- [ ] Every existing Phase 17 trigger point (`TASK_CREATED`/`TASK_COMPLETED`/`TASK_INCOMPLETE`/`TASK_DELETED`/`TASK_UPDATED` immediate, `TASK_MISSED`/`DEADLINE_REMINDER` via the scheduler) now also sends push (when subscriptions exist) and always inserts a feed row, without altering Phase 17's existing email behavior or `tasksService`'s return values.
+- [ ] A forced push-send failure or feed-insert failure never causes a task-management endpoint to return a non-2xx response.
+- [ ] An expired/revoked subscription is pruned automatically rather than retried indefinitely.
+- [ ] Service worker registers, permission-prompt placement decision (§5) confirmed with the user before implementation.
+- [ ] Bell + badge + sheet implemented per §6, reusing the existing `Sheet` primitive.
+- [ ] Full backend + frontend test suites (existing + new) pass.
+- [ ] `STATE.md` updated: Phase 18 marked `Done`, with the opt-in-placement decision's actual resolution logged in the decisions log.

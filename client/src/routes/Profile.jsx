@@ -5,7 +5,6 @@ import {
   KeyRound,
   ShieldCheck,
   Smartphone,
-  Bell,
   Globe,
   Download,
   LogOut,
@@ -15,6 +14,7 @@ import {
 import { useDashboardTasks } from '../hooks/useDashboardTasks';
 import { computeCompletedCount, computeOnTimeRate } from '../lib/taskStats';
 import { LedgerStrip, StatTile } from '../components/dashboard/StatTile';
+import { NotificationsSettingsRow } from '../components/notifications/NotificationsSettingsRow';
 
 // DESIGN.md §8 — built out from a one-line placeholder: avatar header,
 // ledger-strip stats, then ledger-row settings sections. Change password,
@@ -76,7 +76,7 @@ export default function Profile() {
 
       {/* ---- Preferences ---- */}
       <SettingsSection title="Preferences">
-        <SettingsRow icon={Bell} label="Notifications" value="On" />
+        <NotificationsSettingsRow />
         <SettingsRow icon={Globe} label="Time zone" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
       </SettingsSection>
 

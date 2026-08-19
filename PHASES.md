@@ -4,7 +4,7 @@ Chase is built strictly one phase at a time, with explicit approval required bef
 
 ---
 
-## Phases 0–18 (in scope, prompts drafted in `prompts/`)
+## Phases 0–19 (in scope, prompts drafted in `prompts/`)
 
 **Phase 0 — Project Foundation**
 Create `client/` & `server/`, `.gitkeep` in `client/`, init Node/Express backend, install deps, env config, basic server structure, middleware foundation, error-handling foundation, health-check endpoint.
@@ -60,24 +60,27 @@ Component tests, API integration tests, auth-flow tests, task-workflow tests, re
 **Phase 17 — Notifications & Email**
 Transactional email via Resend: creation confirmation, updates on completion/incomplete-resolution/deletion/deadline-priority changes, and reminder emails for upcoming/overdue deadlines. Notification/email logic kept separate from controllers/task services; email failures handled independently from task operations; duplicate reminders prevented via a `notification_log` table; no Redis/Kafka/queue infrastructure. Full detail in `PHASE_17.md` and `prompts/phase-17.md`.
 
-**Phase 18 — Time Tracking**
-Start/Pause/Resume/Stop work sessions on a task, backed by a dedicated `work_sessions` table (one row per work segment, not a single accumulated-time field). Defines interaction with ACTIVE/COMPLETED/MISSED/DELETED task states, prevents invalid/multiple-open sessions, enforces ownership, and shapes the data for a future planned-vs-actual analytics phase. Full detail in `PHASE_18.md` and `prompts/phase-18.md`.
+**Phase 18 — Push Notifications & In-App Feed**
+Web Push (Push API + service worker) so task-event notifications reach the user even when Chase isn't open — email (Phase 17) alone only reaches an inbox, not the OS notification tray. Paired with a lightweight in-app notification feed (bell + list) that's always populated regardless of push-permission status, preserving a durable record per `CLAUDE.md`'s history-first philosophy. New `push_subscriptions` and `notifications` tables, `notification_log` extended with a `channel` column so the existing dedup/retry mechanism covers push independently of email. No native app, no FCM/APNs — reuses Phase 17's six trigger points rather than adding new ones. Full detail in `PHASE_18.md` and `prompts/phase-18.md`.
+
+**Phase 19 — Time Tracking**
+Start/Pause/Resume/Stop work sessions on a task, backed by a dedicated `work_sessions` table (one row per work segment, not a single accumulated-time field). Defines interaction with ACTIVE/COMPLETED/MISSED/DELETED task states, prevents invalid/multiple-open sessions, enforces ownership, and shapes the data for a future planned-vs-actual analytics phase. Full detail in `PHASE_19.md` and `prompts/phase-19.md`.
 
 ---
 
 ## Future (not built yet — recorded for context, explicitly out of scope)
 
-19. Projects
-20. Subtasks
-21. Categories & Tags
-22. Planned vs Actual Time
-23. Daily Planning
-24. Daily/Weekly Reviews
-25. Advanced Productivity Analytics
-26. Scheduled/Background Processing (beyond Phase 17's in-process sweep, if ever needed)
-27. Productivity Insights
-28. AI Productivity Intelligence
-29. AI Task Intelligence
-30. Production Hardening & Optimization
+20. Projects
+21. Subtasks
+22. Categories & Tags
+23. Planned vs Actual Time
+24. Daily Planning
+25. Daily/Weekly Reviews
+26. Advanced Productivity Analytics
+27. Scheduled/Background Processing (beyond Phase 17's in-process sweep, if ever needed)
+28. Productivity Insights
+29. AI Productivity Intelligence
+30. AI Task Intelligence
+31. Production Hardening & Optimization
 
-Renumbered from the original list: **Time Tracking** and **Notifications & Reminders** were pulled forward to Phases 18 and 17 respectively (see above) instead of their original slots (20 and 25) — everything else keeps its original relative order, shifted down. None of the items above have prompts yet and none should be started without first drafting and getting approval for a phase prompt, following the same process as phases 0–18.
+Renumbered from the original list: **Time Tracking** and **Notifications & Reminders** were pulled forward to Phases 19 and 17 respectively (see above) instead of their original slots (20 and 25); **Push Notifications & In-App Feed** was inserted as the new Phase 18, pushing Time Tracking from 18 to 19 and shifting the Future list down by one further slot — everything else keeps its original relative order. None of the items above have prompts yet and none should be started without first drafting and getting approval for a phase prompt, following the same process as phases 0–19.

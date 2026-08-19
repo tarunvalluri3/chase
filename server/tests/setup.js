@@ -8,6 +8,9 @@ import { vi } from 'vitest';
 process.env.RESEND_API_KEY ||= 'test-resend-api-key';
 process.env.RESEND_FROM_EMAIL ||= 'notifications@chase.test';
 process.env.CLIENT_URL ||= 'http://localhost:5173';
+process.env.VAPID_PUBLIC_KEY ||= 'test-vapid-public-key';
+process.env.VAPID_PRIVATE_KEY ||= 'test-vapid-private-key';
+process.env.VAPID_SUBJECT ||= 'mailto:test@chase.test';
 
 // Test-only stand-in for @clerk/express so the suite never makes real Clerk
 // network calls. A request is "authenticated" by setting the
@@ -43,4 +46,15 @@ vi.mock('resend', () => ({
       send: vi.fn(async () => ({ data: { id: 'test-email-id' }, error: null })),
     },
   })),
+}));
+
+// web-push is fully mocked so the suite never sends a real push -- every
+// call succeeds by default; individual tests can override sendNotification's
+// resolved/rejected value to exercise the failure/expired-subscription
+// paths.
+vi.mock('web-push', () => ({
+  default: {
+    setVapidDetails: vi.fn(),
+    sendNotification: vi.fn(async () => ({ statusCode: 201 })),
+  },
 }));

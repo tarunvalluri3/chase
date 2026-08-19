@@ -2,17 +2,21 @@ import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import { TasksProvider } from '../lib/tasksStore';
 import { ToastProvider } from '../lib/toastStore';
+import { NotificationsProvider } from '../lib/notificationsStore';
 
 // Shared render helper — wraps a component in the same provider stack
-// App.jsx uses in production (router + TasksProvider + ToastProvider),
-// scoped down to what components under test actually reach for via
-// context, without pulling in ClerkProvider (mocked per-file instead,
-// since @clerk/clerk-react needs a real publishable key to initialize).
+// App.jsx uses in production (router + TasksProvider + ToastProvider +
+// NotificationsProvider), scoped down to what components under test
+// actually reach for via context, without pulling in ClerkProvider (mocked
+// per-file instead, since @clerk/clerk-react needs a real publishable key
+// to initialize).
 export function renderWithProviders(ui, { route = '/', ...options } = {}) {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <ToastProvider>
-        <TasksProvider>{ui}</TasksProvider>
+        <TasksProvider>
+          <NotificationsProvider>{ui}</NotificationsProvider>
+        </TasksProvider>
       </ToastProvider>
     </MemoryRouter>,
     options,

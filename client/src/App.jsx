@@ -7,6 +7,7 @@ import { CLERK_PUBLISHABLE_KEY } from './lib/clerk';
 import { setAuthTokenGetter } from './lib/apiClient';
 import { TasksProvider } from './lib/tasksStore';
 import { ToastProvider } from './lib/toastStore';
+import { NotificationsProvider } from './lib/notificationsStore';
 
 // Bridges Clerk's session token into the plain-fetch API client, which can't
 // call the useAuth() hook itself.
@@ -26,11 +27,13 @@ export default function App() {
       <ApiAuthBridge />
       <ToastProvider>
         <TasksProvider>
-          <MotionConfig reducedMotion="user">
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-          </MotionConfig>
+          <NotificationsProvider>
+            <MotionConfig reducedMotion="user">
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </MotionConfig>
+          </NotificationsProvider>
         </TasksProvider>
       </ToastProvider>
     </ClerkProvider>

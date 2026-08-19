@@ -4,18 +4,20 @@ vi.mock('../src/services/emailService.js', () => ({
   sendEmail: vi.fn(),
 }));
 
+import webpush from 'web-push';
 import { sendEmail } from '../src/services/emailService.js';
 import { supabase } from '../src/db/supabaseClient.js';
 import { asUser, newClerkUserId } from './helpers/client.js';
 import { cleanupUser } from './helpers/db.js';
 import { pastDeadline, taskPayload } from './helpers/fixtures.js';
 
-async function findLog(taskId, type) {
+async function findLog(taskId, type, channel = 'EMAIL') {
   const { data } = await supabase
     .from('notification_log')
     .select('*')
     .eq('task_id', taskId)
     .eq('type', type)
+    .eq('channel', channel)
     .maybeSingle();
   return data;
 }
@@ -132,5 +134,63 @@ describe('notifications: task operations never fail because email fails', () => 
 
     const log = await findLog(created.body.id, 'TASK_MISSED');
     expect(log).toBeNull();
+  });
+});
+
+describe('notifications: task operations never fail because push fails', () => {
+  const userId = newClerkUserId();
+  const user = asUser(userId);
+
+  beforeEach(() => {
+    sendEmail.mockReset();
+    sendEmail.mockResolvedValue({ id: 'ok' });
+    webpush.sendNotification.mockReset();
+  });
+
+  afterAll(() => cleanupUser(userId));
+
+  // Ordered deliberately: this one runs before the user has any
+  // subscriptions at all, since the later tests each add one.
+  it('sends no push and creates no PUSH log row when the user has no subscriptions', async () => {
+    webpush.sendNotification.mockResolvedValue({ statusCode: 201 });
+
+    const res = await user.post('/api/tasks').send(taskPayload());
+
+    expect(res.status).toBe(201);
+    expect(webpush.sendNotification).not.toHaveBeenCalled();
+
+    const log = await findLog(res.body.id, 'TASK_CREATED', 'PUSH');
+    expect(log).toBeNull();
+  });
+
+  it('creating a task still returns 201 and sends push to a subscribed device', async () => {
+    await user
+      .post('/api/push/subscribe')
+      .send({ endpoint: 'https://push.example.test/isolation-1', keys: { p256dh: 'k', auth: 's' } });
+    webpush.sendNotification.mockResolvedValue({ statusCode: 201 });
+
+    const res = await user.post('/api/tasks').send(taskPayload());
+
+    expect(res.status).toBe(201);
+    expect(webpush.sendNotification).toHaveBeenCalledTimes(1);
+
+    const log = await findLog(res.body.id, 'TASK_CREATED', 'PUSH');
+    expect(log?.status).toBe('SENT');
+  });
+
+  it('creating a task still returns 201 when the push provider rejects', async () => {
+    await user.delete('/api/push/subscribe').send({ endpoint: 'https://push.example.test/isolation-1' });
+    await user
+      .post('/api/push/subscribe')
+      .send({ endpoint: 'https://push.example.test/isolation-2', keys: { p256dh: 'k', auth: 's' } });
+    webpush.sendNotification.mockRejectedValue(new Error('Push service unavailable'));
+
+    const res = await user.post('/api/tasks').send(taskPayload());
+
+    expect(res.status).toBe(201);
+    expect(res.body.title).toBe(taskPayload().title);
+
+    const log = await findLog(res.body.id, 'TASK_CREATED', 'PUSH');
+    expect(log?.status).toBe('FAILED');
   });
 });

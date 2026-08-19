@@ -84,3 +84,19 @@ export function buildEmail(type, { task, ...extra }) {
 
   return { subject: title, html, text };
 }
+
+// Pure, same inputs as buildEmail: returns the short { title, body, url }
+// shape used by both push notifications and the in-app feed -- push and the
+// feed share one shorter form of the copy rather than each inventing their
+// own, since neither has room (or need) for email's fuller HTML body.
+export function buildPush(type, { task, ...extra }) {
+  const builder = builders(task, extra)[type];
+  if (!builder) {
+    throw new Error(`Unknown notification type: ${type}`);
+  }
+
+  const { title, lines } = builder();
+  const url = taskUrl(task);
+
+  return { title, body: lines.join(' '), url };
+}

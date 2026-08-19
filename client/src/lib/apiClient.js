@@ -70,3 +70,17 @@ export const tasksApi = {
   resolveMissed: (id, body) => apiClient.post(`/tasks/${id}/resolve-missed`, body),
   remove: (id, reason) => apiClient.delete(`/tasks/${id}`, { reason }),
 };
+
+// Push subscription API methods (Phase 18) — server/API.md is the source of truth for shapes.
+export const pushApi = {
+  getVapidPublicKey: () => apiClient.get('/push/vapid-public-key'),
+  subscribe: (subscription) => apiClient.post('/push/subscribe', subscription),
+  unsubscribe: (endpoint) => apiClient.delete('/push/subscribe', { endpoint }),
+};
+
+// In-app notification feed API methods (Phase 18).
+export const notificationsApi = {
+  list: ({ unreadOnly } = {}) => apiClient.get(`/notifications${unreadOnly ? '?unreadOnly=true' : ''}`),
+  markRead: (id) => apiClient.post(`/notifications/${id}/read`),
+  markAllRead: () => apiClient.post('/notifications/read-all'),
+};

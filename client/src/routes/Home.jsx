@@ -8,6 +8,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { DashboardStatSkeleton } from '../components/ui/Skeleton';
 import { Button } from '../components/ui/Button';
+import { NotificationsBanner } from '../components/notifications/NotificationsBanner';
 
 // Real dashboard (Phase 14, DESIGN.md §7/§3.1/§14) — task-status counts, a
 // due-soon heads-up, and recent activity, all aggregated client-side from
@@ -52,6 +53,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-8 pt-4 pb-4">
       <p className="px-gutter text-body text-ink-2">Welcome back, {greetingName}.</p>
+      <NotificationsBanner />
       <StatusCounts tasks={tasks} />
       <DueSoon tasks={tasks} />
       <RecentActivity tasks={tasks} />

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AppBar } from '../components/nav/AppBar';
@@ -6,9 +7,12 @@ import { Sidebar } from '../components/nav/Sidebar';
 import { FilterRow } from '../components/nav/FilterRow';
 import { ToastViewport } from '../components/ui/Toast';
 import { OfflineBar } from '../components/ui/OfflineBar';
+import { NotificationBell } from '../components/notifications/NotificationBell';
+import { NotificationsSheet } from '../components/notifications/NotificationsSheet';
 import { routeVariants } from '../lib/motion';
 import { formatTodayContext } from '../lib/datetime';
 import { useTaskCounts } from '../hooks/useTaskCounts';
+import { useNotificationsContext } from '../lib/notificationsStore';
 
 const STATUS_CONTEXT = {
   active: 'ACTIVE',
@@ -32,6 +36,16 @@ export function AppLayout({ children }) {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const counts = useTaskCounts();
+  const { refreshUnreadCount } = useNotificationsContext();
+  const bellRef = useRef(null);
+
+  // AppLayout only ever renders for a signed-in user (Root/ProtectedRoute
+  // gate everything above it), so this is the one safe place to trigger the
+  // feed's first unread-count fetch -- see notificationsStore.jsx's note on
+  // why NotificationsProvider itself doesn't fetch on mount.
+  useEffect(() => {
+    refreshUnreadCount();
+  }, [refreshUnreadCount]);
 
   const segments = location.pathname.split('/').filter(Boolean);
   const isTasksRoute = segments[0] === 'tasks';
@@ -51,6 +65,7 @@ export function AppLayout({ children }) {
             title={title}
             context={context}
             onBack={isTaskDetail ? () => navigate(`/tasks/${status}`) : undefined}
+            action={<NotificationBell ref={bellRef} />}
           />
           {isTasksList && <FilterRow selected={status} counts={counts} />}
         </div>
@@ -71,6 +86,7 @@ export function AppLayout({ children }) {
       </div>
       <OfflineBar />
       <ToastViewport />
+      <NotificationsSheet triggerRef={bellRef} />
     </div>
   );
 }

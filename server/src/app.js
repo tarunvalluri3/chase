@@ -4,6 +4,8 @@ import cors from 'cors';
 import healthRouter from './routes/health.js';
 import meRouter from './routes/me.js';
 import tasksRouter from './routes/tasks.js';
+import pushRouter from './routes/push.js';
+import notificationsRouter from './routes/notifications.js';
 import errorHandler from './middleware/errorHandler.js';
 import { withClerkAuth } from './middleware/auth.js';
 
@@ -26,6 +28,8 @@ app.use(withClerkAuth);
 app.use('/api/health', healthRouter);
 app.use('/api/me', meRouter);
 app.use('/api/tasks', tasksRouter);
+app.use('/api/push', pushRouter);
+app.use('/api/notifications', notificationsRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: { message: 'Not found' } });
