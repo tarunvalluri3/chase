@@ -4,7 +4,7 @@ Chase is built strictly one phase at a time, with explicit approval required bef
 
 ---
 
-## Phases 0–16 (in scope, prompts drafted in `prompts/`)
+## Phases 0–18 (in scope, prompts drafted in `prompts/`)
 
 **Phase 0 — Project Foundation**
 Create `client/` & `server/`, `.gitkeep` in `client/`, init Node/Express backend, install deps, env config, basic server structure, middleware foundation, error-handling foundation, health-check endpoint.
@@ -57,23 +57,27 @@ Completion/missed/incomplete/deleted analysis, reason analysis (including why ta
 **Phase 16 — Frontend Testing & Polish**
 Component tests, API integration tests, auth-flow tests, task-workflow tests, responsive behavior, UX refinement, performance/accessibility review.
 
+**Phase 17 — Notifications & Email**
+Transactional email via Resend: creation confirmation, updates on completion/incomplete-resolution/deletion/deadline-priority changes, and reminder emails for upcoming/overdue deadlines. Notification/email logic kept separate from controllers/task services; email failures handled independently from task operations; duplicate reminders prevented via a `notification_log` table; no Redis/Kafka/queue infrastructure. Full detail in `PHASE_17.md` and `prompts/phase-17.md`.
+
+**Phase 18 — Time Tracking**
+Start/Pause/Resume/Stop work sessions on a task, backed by a dedicated `work_sessions` table (one row per work segment, not a single accumulated-time field). Defines interaction with ACTIVE/COMPLETED/MISSED/DELETED task states, prevents invalid/multiple-open sessions, enforces ownership, and shapes the data for a future planned-vs-actual analytics phase. Full detail in `PHASE_18.md` and `prompts/phase-18.md`.
+
 ---
 
 ## Future (not built yet — recorded for context, explicitly out of scope)
 
-17. Projects
-18. Subtasks
-19. Categories & Tags
-20. Time Tracking
-21. Planned vs Actual Time
-22. Daily Planning
-23. Daily/Weekly Reviews
-24. Advanced Productivity Analytics
-25. Notifications & Reminders
-26. Scheduled/Background Processing
+19. Projects
+20. Subtasks
+21. Categories & Tags
+22. Planned vs Actual Time
+23. Daily Planning
+24. Daily/Weekly Reviews
+25. Advanced Productivity Analytics
+26. Scheduled/Background Processing (beyond Phase 17's in-process sweep, if ever needed)
 27. Productivity Insights
 28. AI Productivity Intelligence
 29. AI Task Intelligence
 30. Production Hardening & Optimization
 
-None of these have prompts yet and none should be started without first drafting and getting approval for a phase prompt, following the same process as phases 0–16.
+Renumbered from the original list: **Time Tracking** and **Notifications & Reminders** were pulled forward to Phases 18 and 17 respectively (see above) instead of their original slots (20 and 25) — everything else keeps its original relative order, shifted down. None of the items above have prompts yet and none should be started without first drafting and getting approval for a phase prompt, following the same process as phases 0–18.

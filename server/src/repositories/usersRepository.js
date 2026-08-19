@@ -1,44 +1,59 @@
 import { supabase } from '../db/supabaseClient.js';
 
-export async function findOrCreateByClerkUserId(clerkUserId) {
-  const { data: existing, error: findError } = await supabase
+export async function findByClerkUserId(clerkUserId) {
+  const { data, error } = await supabase
     .from('users')
     .select('*')
     .eq('clerk_user_id', clerkUserId)
     .maybeSingle();
 
-  if (findError) {
-    throw findError;
+  if (error) {
+    throw error;
   }
 
-  if (existing) {
-    return existing;
+  return data;
+}
+
+export async function findById(id) {
+  const { data, error } = await supabase.from('users').select('*').eq('id', id).maybeSingle();
+
+  if (error) {
+    throw error;
   }
 
-  const { data: created, error: insertError } = await supabase
+  return data;
+}
+
+export async function create(clerkUserId, email) {
+  const { data, error } = await supabase
     .from('users')
-    .insert({ clerk_user_id: clerkUserId })
+    .insert({ clerk_user_id: clerkUserId, email: email ?? null })
     .select('*')
     .single();
 
-  if (insertError) {
+  if (error) {
     // Unique violation: another concurrent request created the row first.
-    if (insertError.code === '23505') {
-      const { data: raceWinner, error: refetchError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('clerk_user_id', clerkUserId)
-        .single();
-
-      if (refetchError) {
-        throw refetchError;
-      }
-
-      return raceWinner;
+    if (error.code === '23505') {
+      return findByClerkUserId(clerkUserId);
     }
 
-    throw insertError;
+    throw error;
   }
 
-  return created;
+  return data;
+}
+
+export async function updateEmail(id, email) {
+  const { data, error } = await supabase
+    .from('users')
+    .update({ email, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }

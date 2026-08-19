@@ -76,3 +76,52 @@ export async function sweepMissed(userId, { missedReason, now }) {
 
   return data;
 }
+
+// Cross-user version of sweepMissed, for the internal notification scheduler
+// only (server-side, service-role client, never exposed via a route) --
+// flips every user's overdue ACTIVE tasks to MISSED in one pass.
+export async function sweepAllUsersMissed({ missedReason, now }) {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update({ status: 'MISSED', missed_reason: missedReason, missed_at: now, updated_at: now })
+    .eq('status', 'ACTIVE')
+    .lt('deadline', now)
+    .select('*');
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+// ACTIVE tasks whose deadline falls between now and the given horizon --
+// candidates for a deadline-approaching reminder. Internal/scheduler use
+// only, not user-scoped.
+export async function findActiveDueWithin({ now, until }) {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('status', 'ACTIVE')
+    .gte('deadline', now)
+    .lte('deadline', until);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+// Unscoped lookup for internal/server-side use only (the notification
+// scheduler and retry pass) -- every user-facing read still goes through
+// findByIdForUser, which enforces ownership.
+export async function findByIdInternal(id) {
+  const { data, error } = await supabase.from('tasks').select('*').eq('id', id).maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

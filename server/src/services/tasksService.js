@@ -1,7 +1,8 @@
 import * as tasksRepository from '../repositories/tasksRepository.js';
+import * as notificationService from './notificationService.js';
 import { NotFoundError, InvalidTransitionError } from '../errors/AppError.js';
 
-const MISSED_REASON = 'Deadline passed while task was still ACTIVE';
+export const MISSED_REASON = 'Deadline passed while task was still ACTIVE';
 
 // Shared single-source-of-truth for "what counts as missed": an ACTIVE task
 // whose deadline has already passed. Used by both the lazy read-path check
@@ -32,12 +33,16 @@ async function getOwnedTaskOrThrow(id, userId) {
 }
 
 export async function createTask(userId, { title, description, deadline, priority }) {
-  return tasksRepository.create(userId, {
+  const task = await tasksRepository.create(userId, {
     title,
     description: description ?? null,
     deadline,
     priority,
   });
+
+  await notificationService.notifyTaskCreated(userId, task);
+
+  return task;
 }
 
 export async function listTasks(userId, status) {
@@ -72,19 +77,23 @@ export async function resolveMissedTask(userId, id, resolution, reason) {
   const now = new Date().toISOString();
 
   if (resolution === 'INCOMPLETE') {
-    return tasksRepository.update(id, userId, {
+    const updated = await tasksRepository.update(id, userId, {
       status: 'INCOMPLETE',
       incomplete_reason: reason,
       incomplete_at: now,
       updated_at: now,
     });
+    await notificationService.notifyTaskIncomplete(userId, updated);
+    return updated;
   }
 
-  return tasksRepository.update(id, userId, {
+  const updated = await tasksRepository.update(id, userId, {
     status: 'COMPLETED',
     completed_at: now,
     updated_at: now,
   });
+  await notificationService.notifyTaskCompleted(userId, updated);
+  return updated;
 }
 
 export async function editTask(userId, id, fields) {
@@ -94,10 +103,25 @@ export async function editTask(userId, id, fields) {
     throw new InvalidTransitionError('Only ACTIVE tasks can be edited');
   }
 
-  return tasksRepository.update(id, userId, {
+  const updated = await tasksRepository.update(id, userId, {
     ...fields,
     updated_at: new Date().toISOString(),
   });
+
+  const changedFields = ['deadline', 'priority'].filter((field) => {
+    if (!(field in fields)) {
+      return false;
+    }
+    if (field === 'deadline') {
+      return new Date(fields.deadline).getTime() !== new Date(task.deadline).getTime();
+    }
+    return fields[field] !== task[field];
+  });
+  if (changedFields.length > 0) {
+    await notificationService.notifyTaskUpdated(userId, updated, changedFields);
+  }
+
+  return updated;
 }
 
 export async function completeTask(userId, id) {
@@ -109,11 +133,13 @@ export async function completeTask(userId, id) {
 
   const now = new Date().toISOString();
 
-  return tasksRepository.update(id, userId, {
+  const updated = await tasksRepository.update(id, userId, {
     status: 'COMPLETED',
     completed_at: now,
     updated_at: now,
   });
+  await notificationService.notifyTaskCompleted(userId, updated);
+  return updated;
 }
 
 export async function deleteTask(userId, id, reason) {
@@ -125,10 +151,12 @@ export async function deleteTask(userId, id, reason) {
 
   const now = new Date().toISOString();
 
-  return tasksRepository.update(id, userId, {
+  const updated = await tasksRepository.update(id, userId, {
     status: 'DELETED',
     deletion_reason: reason,
     deleted_at: now,
     updated_at: now,
   });
+  await notificationService.notifyTaskDeleted(userId, updated);
+  return updated;
 }

@@ -1,10 +1,10 @@
 import { getAuth } from '../middleware/auth.js';
-import * as usersRepository from '../repositories/usersRepository.js';
+import * as usersService from '../services/usersService.js';
 import * as tasksService from '../services/tasksService.js';
 
 async function currentInternalUserId(req) {
   const { userId: clerkUserId } = getAuth(req);
-  const user = await usersRepository.findOrCreateByClerkUserId(clerkUserId);
+  const user = await usersService.getOrCreateUser(clerkUserId);
   return user.id;
 }
 
