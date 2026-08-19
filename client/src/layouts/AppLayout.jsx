@@ -7,6 +7,7 @@ import { Sidebar } from '../components/nav/Sidebar';
 import { FilterRow } from '../components/nav/FilterRow';
 import { ToastViewport } from '../components/ui/Toast';
 import { OfflineBar } from '../components/ui/OfflineBar';
+import { CreateTaskSheet } from '../components/tasks/CreateTaskSheet';
 import { NotificationBell } from '../components/notifications/NotificationBell';
 import { NotificationsSheet } from '../components/notifications/NotificationsSheet';
 import { routeVariants } from '../lib/motion';
@@ -86,6 +87,7 @@ export function AppLayout({ children }) {
       </div>
       <OfflineBar />
       <ToastViewport />
+      <CreateTaskSheet />
       <NotificationsSheet triggerRef={bellRef} />
     </div>
   );

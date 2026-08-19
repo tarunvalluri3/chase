@@ -5,7 +5,8 @@ import { tooltipContentStyle, tooltipLabelStyle } from './chartTheme';
 
 // DESIGN.md §12 — ranked horizontal bars over the user's own free-typed
 // reasons (not an enum, per CLAUDE.md's data model — grouped by exact
-// trimmed text in lib/analyticsStats.js, top 5 plus "Other"). Reason labels
+// trimmed text server-side in analyticsService.js, top 5 plus "Other").
+// Reason labels
 // use Sans (user-authored copy, §2.2's "warm" family); the count uses Mono
 // (the app's own tally). Bar length already encodes magnitude, so one flat
 // hue is enough — no ramp needed.

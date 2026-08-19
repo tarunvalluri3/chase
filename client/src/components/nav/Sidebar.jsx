@@ -1,12 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { NAV_TABS } from './navTabs';
+import { Button } from '../ui/Button';
+import { useTasksContext } from '../../lib/tasksStore';
 
 // DESIGN.md §6.3 — desktop-only (>=960px) fixed 220px left sidebar: logo
 // + four vertical nav items, active item gets a Pine-tint background pill.
 // Same four destinations/routes as BottomNav, just a different chrome —
 // no new IA. Hidden below 960px; the bottom nav is authoritative there.
+//
+// "New task" reuses the same openCreateSheet from TasksProvider that
+// BottomNav's FAB and Home's empty-state button already call — this is the
+// only create entry point at >=960px, since BottomNav (and its FAB) is
+// hidden entirely at that width and Home's own button only shows once a
+// user has zero tasks.
 export function Sidebar({ needsReviewCount = 0 }) {
   const { pathname } = useLocation();
+  const { openCreateSheet } = useTasksContext();
 
   return (
     <aside
@@ -17,6 +27,11 @@ export function Sidebar({ needsReviewCount = 0 }) {
         <img src="/brand/chase-mark-on-light.svg" alt="" className="h-6 w-6" />
         <span className="font-serif text-section text-ink">Chase</span>
       </Link>
+
+      <Button variant="primary" size="md" className="mb-4 w-full" onClick={openCreateSheet}>
+        <Plus size={18} strokeWidth={2} aria-hidden="true" />
+        New task
+      </Button>
 
       {NAV_TABS.map((tab) => {
         const Icon = tab.icon;

@@ -1,14 +1,46 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithProviders, buildTask } from '../testUtils';
-import { tasksApi } from '../../lib/apiClient';
+import { tasksApi, analyticsApi } from '../../lib/apiClient';
 import Home from '../../routes/Home';
 import Insights from '../../routes/Insights';
 
 vi.mock('../../lib/apiClient', async () => {
   const actual = await vi.importActual('../../lib/apiClient');
-  return { ...actual, tasksApi: { ...actual.tasksApi, list: vi.fn() } };
+  return {
+    ...actual,
+    tasksApi: { ...actual.tasksApi, list: vi.fn() },
+    analyticsApi: { ...actual.analyticsApi, summary: vi.fn() },
+  };
 });
+
+const EMPTY_SUMMARY = {
+  range: 'all',
+  kpis: {
+    totalTasks: 0,
+    completedTasks: 0,
+    missedUnresolvedTasks: 0,
+    missedEverTasks: 0,
+    deletedTasks: 0,
+    completionRate: 0,
+    missedRate: 0,
+    deletionRate: 0,
+    totalTrackedSeconds: 0,
+  },
+  completionTrend: [],
+  missedTrend: [],
+  incompleteTrend: [],
+  deletedTrend: [],
+  priorityBreakdown: [],
+  deadlinePerformance: { onTime: 0, late: 0, total: 0 },
+  incompleteReasons: [],
+  deletedReasons: [],
+  unresolvedMissed: [],
+  timeTrackedTrend: [],
+  timePerTask: [],
+  timeVsOutcome: [],
+  priorityTimeSpent: [],
+};
 
 vi.mock('@clerk/clerk-react', () => ({
   useUser: () => ({ user: { firstName: 'Rajni', primaryEmailAddress: { emailAddress: 'rajni@example.com' } } }),
@@ -47,23 +79,35 @@ describe('Dashboard view (Home)', () => {
 });
 
 describe('Insights view', () => {
-  beforeEach(() => tasksApi.list.mockReset());
+  beforeEach(() => analyticsApi.summary.mockReset());
 
   it('shows the empty state when there is no history yet', async () => {
-    tasksApi.list.mockResolvedValue([]);
+    analyticsApi.summary.mockResolvedValue(EMPTY_SUMMARY);
     renderWithProviders(<Insights />);
     expect(await screen.findByText('Nothing to show yet.')).toBeInTheDocument();
   });
 
   it('renders the charts and unresolved-missed section once there is history', async () => {
-    tasksApi.list.mockResolvedValue([
-      buildTask({ status: 'COMPLETED', completed_at: new Date().toISOString() }),
-      buildTask({ status: 'MISSED', missed_at: new Date().toISOString() }),
-      buildTask({ status: 'INCOMPLETE', incomplete_reason: 'Ran out of time', incomplete_at: new Date().toISOString() }),
-    ]);
+    analyticsApi.summary.mockResolvedValue({
+      ...EMPTY_SUMMARY,
+      kpis: { ...EMPTY_SUMMARY.kpis, totalTasks: 3, completedTasks: 1, missedUnresolvedTasks: 1, missedEverTasks: 1 },
+      completionTrend: [{ week: '2026-08-10', label: 'Aug 10', onTime: 1, resolved: 0 }],
+      unresolvedMissed: [{ id: 't-1', title: 'Needs a look', missed_at: new Date().toISOString() }],
+      incompleteReasons: [{ reason: 'Ran out of time', count: 1 }],
+    });
     renderWithProviders(<Insights />);
     expect(await screen.findByText('Needs review')).toBeInTheDocument();
     expect(screen.getByText('Completed over time')).toBeInTheDocument();
     expect(screen.getByText("Why tasks didn't get done")).toBeInTheDocument();
+  });
+
+  it('refetches with the selected range when the date-range filter changes', async () => {
+    analyticsApi.summary.mockResolvedValue(EMPTY_SUMMARY);
+    renderWithProviders(<Insights />);
+    await screen.findByText('Nothing to show yet.');
+
+    screen.getByRole('button', { name: '30 days' }).click();
+    await screen.findByText('Nothing to show yet.');
+    expect(analyticsApi.summary).toHaveBeenLastCalledWith('30d');
   });
 });

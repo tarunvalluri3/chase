@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { TaskList } from '../../components/tasks/TaskList';
 import { TaskDetail } from '../../components/tasks/TaskDetail';
 import { BottomNav } from '../../components/nav/BottomNav';
+import { Sidebar } from '../../components/nav/Sidebar';
+import { CreateTaskSheet } from '../../components/tasks/CreateTaskSheet';
 import { renderWithProviders, buildTask } from '../testUtils';
 import { tasksApi } from '../../lib/apiClient';
 
@@ -35,11 +37,41 @@ describe('Create task flow', () => {
   it('opens the create sheet from the bottom nav, submits, and calls tasksApi.create', async () => {
     const user = userEvent.setup();
     tasksApi.create.mockResolvedValue(buildTask({ title: 'New task from nav' }));
-    renderWithProviders(<BottomNav />, { route: '/' });
+    // CreateTaskSheet lives outside BottomNav (rendered once at the
+    // AppLayout level, see AppLayout.jsx) so it isn't hidden by BottomNav's
+    // own `min-[960px]:hidden` wrapper at the desktop breakpoint — composed
+    // together here the same way AppLayout composes them in production.
+    renderWithProviders(
+      <>
+        <BottomNav />
+        <CreateTaskSheet />
+      </>,
+      { route: '/' },
+    );
 
     await user.click(screen.getByRole('button', { name: 'Create task' }));
     const dialog = await screen.findByRole('dialog', { name: 'New task' });
     await user.type(within(dialog).getByLabelText('Title'), 'New task from nav');
+    await user.click(within(dialog).getByRole('button', { name: 'Create task' }));
+
+    await waitFor(() => expect(tasksApi.create).toHaveBeenCalled());
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('opens the same create sheet from the desktop Sidebar (regression: it used to be unreachable at >=960px)', async () => {
+    const user = userEvent.setup();
+    tasksApi.create.mockResolvedValue(buildTask({ title: 'New task from sidebar' }));
+    renderWithProviders(
+      <>
+        <Sidebar />
+        <CreateTaskSheet />
+      </>,
+      { route: '/' },
+    );
+
+    await user.click(screen.getByRole('button', { name: 'New task' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New task' });
+    await user.type(within(dialog).getByLabelText('Title'), 'New task from sidebar');
     await user.click(within(dialog).getByRole('button', { name: 'Create task' }));
 
     await waitFor(() => expect(tasksApi.create).toHaveBeenCalled());

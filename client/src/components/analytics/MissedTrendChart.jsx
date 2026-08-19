@@ -3,13 +3,20 @@ import { ChartCard } from './ChartCard';
 import { ChartEmpty } from './ChartStates';
 import { axisTickStyle, CHART_GRID_COLOR, tooltipContentStyle, tooltipLabelStyle } from './chartTheme';
 
-// DESIGN.md §12 — weekly count of deleted tasks, keyed to deleted_at.
-// `data` is pre-aggregated server-side (Phase 20).
-export function DeletedTrendChart({ data = [] }) {
+// Phase 20, new — weekly count of missed_at occurrences (detection events),
+// independent of whether the task was later resolved as COMPLETED or
+// INCOMPLETE. Deliberately distinct from IncompleteTrendChart: this counts
+// "the deadline passed," never "the work was never done" (CLAUDE.md). Amber
+// (--color-review) per §2.4, matching UnresolvedMissed's own "a passed
+// deadline is a question, not a verdict" color choice.
+export function MissedTrendChart({ data = [] }) {
   const hasData = data.some((week) => week.count > 0);
 
   return (
-    <ChartCard title="Deleted over time" description="Tasks you removed, by the week you removed them.">
+    <ChartCard
+      title="Missed detections over time"
+      description="How often a deadline passed before you confirmed the task, by week — not the same as never finishing it."
+    >
       {hasData ? (
         <div className="w-full overflow-x-auto">
           <ResponsiveContainer width="100%" height={180}>
@@ -21,14 +28,14 @@ export function DeletedTrendChart({ data = [] }) {
                 contentStyle={tooltipContentStyle}
                 labelStyle={tooltipLabelStyle}
                 cursor={{ fill: 'var(--color-surface-sunken)' }}
-                formatter={(value) => [value, 'Deleted']}
+                formatter={(value) => [value, 'Missed']}
               />
-              <Bar dataKey="count" fill="var(--color-deleted)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              <Bar dataKey="count" fill="var(--color-review)" radius={[4, 4, 0, 0]} maxBarSize={28} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       ) : (
-        <ChartEmpty message="Nothing deleted yet." />
+        <ChartEmpty message="No missed deadlines yet." />
       )}
     </ChartCard>
   );

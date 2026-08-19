@@ -97,3 +97,10 @@ export const sessionsApi = {
   stop: (taskId) => apiClient.post(`/tasks/${taskId}/sessions/stop`),
   list: (taskId) => apiClient.get(`/tasks/${taskId}/sessions`),
 };
+
+// Productivity Analytics 2.0 (Phase 20) — one consolidated, server-aggregated
+// payload per date range. See server/src/services/analyticsService.js for
+// the response shape.
+export const analyticsApi = {
+  summary: (range) => apiClient.get(`/analytics/summary?range=${range}`),
+};

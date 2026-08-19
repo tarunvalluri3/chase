@@ -39,9 +39,9 @@ export function computeRecentActivity(tasks, limit = 5) {
 
 // DESIGN.md §8 — Profile's ledger strip (Completed count, on-time rate).
 // "On time" means completed without ever having passed through MISSED
-// first (missed_at unset) — the same distinction computeCompletionTrend
-// already draws in lib/analyticsStats.js, restated here as a single
-// all-time percentage rather than a weekly trend.
+// first (missed_at unset) — the same distinction the completion trend chart
+// draws (server-side, Phase 20's analyticsService.js), restated here as a
+// single all-time percentage rather than a weekly trend.
 export function computeCompletedCount(tasks) {
   return tasks.filter((task) => task.status === 'COMPLETED').length;
 }

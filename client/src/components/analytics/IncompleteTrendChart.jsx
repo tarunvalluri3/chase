@@ -1,14 +1,13 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { computeIncompleteTrend } from '../../lib/analyticsStats';
 import { ChartCard } from './ChartCard';
 import { ChartEmpty } from './ChartStates';
 import { axisTickStyle, CHART_GRID_COLOR, tooltipContentStyle, tooltipLabelStyle } from './chartTheme';
 
 // DESIGN.md §12 — weekly count of tasks confirmed INCOMPLETE (keyed to
 // incomplete_at, the user's own confirmation — never missed_at, since
-// CLAUDE.md treats MISSED as a pending checkpoint, not the outcome).
-export function IncompleteTrendChart({ tasks }) {
-  const data = computeIncompleteTrend(tasks);
+// CLAUDE.md treats MISSED as a pending checkpoint, not the outcome). `data`
+// is pre-aggregated server-side (Phase 20).
+export function IncompleteTrendChart({ data = [] }) {
   const hasData = data.some((week) => week.count > 0);
 
   return (

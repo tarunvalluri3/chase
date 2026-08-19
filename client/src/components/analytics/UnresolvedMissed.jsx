@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { computeUnresolvedMissed } from '../../lib/analyticsStats';
 import { formatTimestamp } from '../../lib/datetime';
 
 const VISIBLE_LIMIT = 5;
@@ -8,9 +7,10 @@ const VISIBLE_LIMIT = 5;
 // so it's surfaced here as a current "needs attention" count + list
 // (oldest-first, i.e. longest unresolved) rather than a historical chart.
 // Amber per §2.4; never red — a passed deadline is a question, not a verdict.
-export function UnresolvedMissed({ tasks }) {
-  const missed = computeUnresolvedMissed(tasks);
-
+// `missed` is pre-computed server-side (Phase 20,
+// analyticsService.computeUnresolvedMissed) — not range-filtered, since
+// this is always a current snapshot, not history.
+export function UnresolvedMissed({ missed = [] }) {
   return (
     <div className="flex flex-col gap-3 px-gutter">
       <div className="flex items-baseline justify-between">

@@ -1,5 +1,4 @@
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { computePriorityBreakdown } from '../../lib/analyticsStats';
 import { PRIORITY_CONFIG, priorityText } from '../tasks/priorityConfig';
 import { ChartCard } from './ChartCard';
 import { ChartEmpty } from './ChartStates';
@@ -9,9 +8,10 @@ import { axisTickStyle, tooltipContentStyle, tooltipLabelStyle } from './chartTh
 // isn't just a task-card rule): reuses PriorityRail's exact rail colors
 // rather than a chart-only categorical hue, so priority never competes with
 // status color anywhere in the app. Only 3 categories, so every bar is
-// direct-labeled — no legend needed.
-export function PriorityBreakdown({ tasks }) {
-  const data = computePriorityBreakdown(tasks).map((entry) => ({
+// direct-labeled — no legend needed. `breakdown` is pre-aggregated
+// server-side (Phase 20, analyticsService.computePriorityBreakdown).
+export function PriorityBreakdown({ breakdown = [] }) {
+  const data = breakdown.map((entry) => ({
     ...entry,
     label: priorityText(entry.priority),
     percent: Math.round(entry.incompleteRate * 100),

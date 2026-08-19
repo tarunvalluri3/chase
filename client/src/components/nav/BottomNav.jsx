@@ -1,10 +1,7 @@
-import { useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { SHEET_SPRING } from '../../lib/motion';
-import { Sheet } from '../ui/Sheet';
-import { TaskForm } from '../tasks/TaskForm';
 import { useTasksContext } from '../../lib/tasksStore';
 import { NAV_TABS } from './navTabs';
 
@@ -15,58 +12,48 @@ import { NAV_TABS } from './navTabs';
 //
 // needsReviewCount comes from AppLayout's real useTaskCounts() — the
 // ochre dot on the Tasks slot.
+//
+// The create Sheet itself lives in CreateTaskSheet, rendered once at the
+// AppLayout level rather than nested here — this whole component is
+// wrapped in `min-[960px]:hidden` by AppLayout, so a Sheet nested inside it
+// would be unreachable at the desktop breakpoint even while "open".
 export function BottomNav({ needsReviewCount = 0 }) {
   const { pathname } = useLocation();
-  const createButtonRef = useRef(null);
-  const { createSheetOpen, openCreateSheet, closeCreateSheet, refreshTasks } = useTasksContext();
+  const { createSheetOpen, openCreateSheet } = useTasksContext();
 
   return (
-    <>
-      <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-20 pb-safe">
-        <div className="mx-auto flex max-w-md items-center gap-2.5 px-4 pb-3">
-          <div
-            className="flex h-14 flex-1 items-center gap-1 rounded-(--radius-pill) bg-surface-sunken p-[5px]"
-            style={{ boxShadow: 'var(--shadow-nav-pill)' }}
-          >
-            {NAV_TABS.map((tab) => (
-              <NavTab
-                key={tab.key}
-                tab={tab}
-                active={tab.isActive(pathname)}
-                badge={tab.key === 'tasks' && needsReviewCount > 0}
-              />
-            ))}
-          </div>
-
-          <button
-            ref={createButtonRef}
-            type="button"
-            onClick={openCreateSheet}
-            aria-haspopup="dialog"
-            aria-expanded={createSheetOpen}
-            aria-label="Create task"
-            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-(--radius-pill) text-canvas transition-transform active:scale-[0.93]"
-            style={{
-              background: 'var(--gradient-fab)',
-              boxShadow: 'var(--shadow-fab)',
-            }}
-          >
-            <Plus size={22} strokeWidth={2} aria-hidden="true" />
-          </button>
+    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-20 pb-safe">
+      <div className="mx-auto flex max-w-md items-center gap-2.5 px-4 pb-3">
+        <div
+          className="flex h-14 flex-1 items-center gap-1 rounded-(--radius-pill) bg-surface-sunken p-[5px]"
+          style={{ boxShadow: 'var(--shadow-nav-pill)' }}
+        >
+          {NAV_TABS.map((tab) => (
+            <NavTab
+              key={tab.key}
+              tab={tab}
+              active={tab.isActive(pathname)}
+              badge={tab.key === 'tasks' && needsReviewCount > 0}
+            />
+          ))}
         </div>
-      </nav>
 
-      <Sheet open={createSheetOpen} onClose={closeCreateSheet} title="New task" returnFocusRef={createButtonRef}>
-        <TaskForm
-          mode="create"
-          onCancel={closeCreateSheet}
-          onSuccess={() => {
-            closeCreateSheet();
-            refreshTasks();
+        <button
+          type="button"
+          onClick={openCreateSheet}
+          aria-haspopup="dialog"
+          aria-expanded={createSheetOpen}
+          aria-label="Create task"
+          className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-(--radius-pill) text-canvas transition-transform active:scale-[0.93]"
+          style={{
+            background: 'var(--gradient-fab)',
+            boxShadow: 'var(--shadow-fab)',
           }}
-        />
-      </Sheet>
-    </>
+        >
+          <Plus size={22} strokeWidth={2} aria-hidden="true" />
+        </button>
+      </div>
+    </nav>
   );
 }
 
