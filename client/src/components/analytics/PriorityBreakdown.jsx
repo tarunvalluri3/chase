@@ -5,8 +5,8 @@ import { ChartEmpty } from './ChartStates';
 import { axisTickStyle, tooltipContentStyle, tooltipLabelStyle } from './chartTheme';
 
 // DESIGN.md §12 — priority stays monochrome in charts too (§2.5's rule
-// isn't just a task-card rule): reuses PriorityRail's exact rail colors
-// rather than a chart-only categorical hue, so priority never competes with
+// isn't just a task-card rule): reuses the same priority colors PriorityLabel's
+// dot uses, rather than a chart-only categorical hue, so priority never competes with
 // status color anywhere in the app. Only 3 categories, so every bar is
 // direct-labeled — no legend needed. `breakdown` is pre-aggregated
 // server-side (Phase 20, analyticsService.computePriorityBreakdown).

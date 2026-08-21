@@ -3,15 +3,16 @@ import { LedgerStrip, StatTile } from './StatTile';
 import { statusLabel } from '../tasks/StatusChip';
 import { computeStatusCounts, STATUS_ORDER } from '../../lib/taskStats';
 
-// DESIGN.md §2.3 — same status colors/labels as StatusChip (MISSED reads
-// "Needs review", INCOMPLETE reads "Not done"), reused here rather than
-// redefined so the two can't drift.
+// One restrained accent, not five competing hues: MISSED ("Needs review")
+// is the only count that calls for attention, so it alone gets a colored
+// bubble; the other four stay neutral ink-3. Labels below each tile (reused
+// from StatusChip so the words can't drift) still carry the full meaning.
 const STATUS_COLOR = {
-  ACTIVE: 'var(--color-active)',
+  ACTIVE: 'var(--color-ink-3)',
   MISSED: 'var(--color-review)',
-  COMPLETED: 'var(--color-completed)',
-  INCOMPLETE: 'var(--color-notdone)',
-  DELETED: 'var(--color-deleted)',
+  COMPLETED: 'var(--color-ink-3)',
+  INCOMPLETE: 'var(--color-ink-3)',
+  DELETED: 'var(--color-ink-3)',
 };
 
 const STATUS_ICON = {

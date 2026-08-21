@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Check } from 'lucide-react';
-import { PriorityRail } from './PriorityRail';
 import { PriorityLabel } from './PriorityLabel';
 import { priorityText } from './priorityConfig';
 import { StatusChip, statusLabel } from './StatusChip';
@@ -16,8 +15,8 @@ import { TimeTracker } from './TimeTracker';
 import { useTaskLifecycle } from '../../hooks/useTaskLifecycle';
 import { DURATION, EASE_EXIT, EASE_OUT } from '../../lib/motion';
 
-// DESIGN.md §7/§7.3/§8 — priority rail + two-line title + meta row +
-// conditional action row. `onSettled(taskId)`/`onRollback()` let the
+// DESIGN.md §7/§7.3/§8 — two-line title + meta row + conditional action
+// row. `onSettled(taskId)`/`onRollback()` let the
 // parent TaskList remove/restore this card from its local array once a
 // lifecycle action actually settles (see useTaskLifecycle).
 export function TaskCard({ task, sectionStatus, onSettled }) {
@@ -119,7 +118,6 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
         </div>
       )}
 
-      <PriorityRail priority={task.priority} className="relative" />
       <span
         aria-hidden="true"
         className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-(--radius-pill) border-2"

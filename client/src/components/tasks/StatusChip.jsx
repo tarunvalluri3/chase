@@ -19,11 +19,8 @@ export function StatusChip({ status, className = '' }) {
   if (!config) return null;
   return (
     <span
-      className={`inline-flex items-center rounded-(--radius-sm) px-2 py-0.5 text-micro whitespace-nowrap ${className}`}
-      style={{
-        color: config.color,
-        backgroundColor: `color-mix(in srgb, ${config.color} 14%, var(--color-surface))`,
-      }}
+      className={`inline-flex items-center text-micro font-semibold whitespace-nowrap ${className}`}
+      style={{ color: config.color }}
     >
       {config.label}
     </span>

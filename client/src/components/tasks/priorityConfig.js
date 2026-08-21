@@ -1,8 +1,11 @@
 // Priority is now colored (DESIGN.md §2.2/§7 — reverses v1's monochrome
 // rule): Pine = low, Dusk blue = medium, Clay red = high. Shared between
-// PriorityRail, PriorityLabel, and TaskForm's segmented control so the
-// three never drift out of sync. Values reference tokens.css custom
-// properties only, never a literal hex.
+// PriorityLabel's dot, PriorityBreakdown's bars, and TaskForm's segmented
+// control so none of them drift out of sync. Values reference tokens.css
+// custom properties only, never a literal hex. `rail` is kept for
+// PriorityBreakdown's chart bars even though TaskCard no longer renders a
+// standalone priority rail (removed as a redundant third repetition of the
+// same color PriorityLabel's dot+text already carries).
 export const PRIORITY_CONFIG = {
   HIGH: {
     rail: 'var(--color-priority-high)',
