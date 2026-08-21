@@ -4,8 +4,6 @@
   "description": "A personal work and productivity tracker that keeps what actually happened, not just what was planned.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F6F1E5",
-  "theme_color": "#F6F1E5",
   "icons": [
     {
       "src": "/favicon.svg",

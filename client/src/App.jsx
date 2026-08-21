@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ClerkProvider, useAuth } from '@clerk/clerk-react';
-import { MotionConfig } from 'framer-motion';
 import { AppRoutes } from './routes';
 import { CLERK_PUBLISHABLE_KEY } from './lib/clerk';
 import { setAuthTokenGetter } from './lib/apiClient';
@@ -28,11 +27,9 @@ export default function App() {
       <ToastProvider>
         <TasksProvider>
           <NotificationsProvider>
-            <MotionConfig reducedMotion="user">
-              <BrowserRouter>
-                <AppRoutes />
-              </BrowserRouter>
-            </MotionConfig>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
           </NotificationsProvider>
         </TasksProvider>
       </ToastProvider>

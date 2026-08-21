@@ -28,10 +28,10 @@ export default function Insights() {
 
   if (status === 'loading' && !data) {
     return (
-      <div className="flex flex-col gap-6 pt-4 pb-4">
-        <ChartSkeleton size="sm" />
-        <ChartSkeleton size="lg" />
-        <ChartSkeleton size="md" />
+      <div>
+        <ChartSkeleton />
+        <ChartSkeleton />
+        <ChartSkeleton />
       </div>
     );
   }
@@ -50,7 +50,7 @@ export default function Insights() {
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col gap-6 pt-4 pb-4">
+      <div>
         <DateRangeFilter range={range} onChange={setRange} />
         <EmptyState
           title="Nothing to show yet."
@@ -61,7 +61,7 @@ export default function Insights() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pt-4 pb-4">
+    <div>
       <DateRangeFilter range={range} onChange={setRange} />
       <KpiRow kpis={data.kpis} />
       <UnresolvedMissed missed={data.unresolvedMissed} />
@@ -76,14 +76,12 @@ export default function Insights() {
         title="Why tasks didn't get done"
         description="Your own reasons, ranked by how often you gave them."
         data={data.incompleteReasons}
-        color="var(--color-notdone)"
         emptyMessage="No confirmed-incomplete tasks yet."
       />
       <ReasonBreakdownChart
         title="Why tasks were deleted"
         description="Your own reasons, ranked by how often you gave them."
         data={data.deletedReasons}
-        color="var(--color-deleted)"
         emptyMessage="Nothing deleted yet."
       />
       <TimeTrackedTrendChart data={data.timeTrackedTrend} />

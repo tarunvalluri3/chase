@@ -23,9 +23,9 @@ export function RecentActivity({ tasks }) {
   if (activity.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 px-gutter">
-      <h2 className="text-section text-ink">Recent activity</h2>
-      <ul className="flex flex-col gap-(--spacing-stack-gap)">
+    <div>
+      <h2>Recent activity</h2>
+      <ul>
         {activity.map(({ task }) => (
           <li key={task.id}>
             <TaskCard task={task} sectionStatus={SECTION_ROUTE[task.status]} />

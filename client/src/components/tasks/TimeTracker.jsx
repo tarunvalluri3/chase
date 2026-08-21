@@ -20,24 +20,19 @@ export function TimeTracker({ taskId, compact = false, readOnly = false }) {
   const hasElapsed = isRunning || isPaused || totalSeconds > 0;
   if (readOnly && !hasElapsed) return null;
 
-  const iconSize = compact ? 18 : 20;
   const buttonSize = compact ? 'sm' : 'md';
 
   return (
-    <div className={`flex items-center gap-2 ${compact ? '' : 'rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-4'}`}>
-      {!compact && <span className="shrink-0 text-micro text-ink-3 uppercase whitespace-nowrap">Time tracked</span>}
+    <div>
+      {!compact && <span>Time tracked</span>}
 
       {hasElapsed && (
-        <span
-          className={`font-tabular ${compact ? 'text-meta' : 'text-task'}`}
-          style={{ color: isRunning ? 'var(--color-active)' : 'var(--color-ink-2)' }}
-          aria-live={isRunning ? 'off' : undefined}
-        >
+        <span aria-live={isRunning ? 'off' : undefined}>
           {formatDuration(totalSeconds)}
         </span>
       )}
 
-      <div className="ml-auto flex gap-2">
+      <div>
         {!readOnly && !isRunning && !isPaused && (
           <Button
             type="button"
@@ -47,7 +42,7 @@ export function TimeTracker({ taskId, compact = false, readOnly = false }) {
             aria-label={compact ? 'Start work session' : undefined}
             onClick={start}
           >
-            <Play size={iconSize} strokeWidth={1.8} aria-hidden="true" />
+            <Play aria-hidden="true" />
             {!compact && 'Start'}
           </Button>
         )}
@@ -60,7 +55,7 @@ export function TimeTracker({ taskId, compact = false, readOnly = false }) {
             aria-label={compact ? 'Resume work session' : undefined}
             onClick={resume}
           >
-            <Play size={iconSize} strokeWidth={1.8} aria-hidden="true" />
+            <Play aria-hidden="true" />
             {!compact && 'Resume'}
           </Button>
         )}
@@ -74,7 +69,7 @@ export function TimeTracker({ taskId, compact = false, readOnly = false }) {
               aria-label={compact ? 'Pause work session' : undefined}
               onClick={pause}
             >
-              <Pause size={iconSize} strokeWidth={1.8} aria-hidden="true" />
+              <Pause aria-hidden="true" />
               {!compact && 'Pause'}
             </Button>
             <Button
@@ -85,7 +80,7 @@ export function TimeTracker({ taskId, compact = false, readOnly = false }) {
               aria-label={compact ? 'Stop work session' : undefined}
               onClick={stop}
             >
-              <Square size={iconSize} strokeWidth={1.8} aria-hidden="true" />
+              <Square aria-hidden="true" />
               {!compact && 'Stop'}
             </Button>
           </>

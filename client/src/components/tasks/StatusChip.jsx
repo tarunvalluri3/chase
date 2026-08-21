@@ -14,15 +14,12 @@ export function statusLabel(status) {
   return STATUS_CONFIG[status]?.label ?? status;
 }
 
+export function statusColor(status) {
+  return STATUS_CONFIG[status]?.color ?? 'var(--border-hairline)';
+}
+
 export function StatusChip({ status, className = '' }) {
   const config = STATUS_CONFIG[status];
   if (!config) return null;
-  return (
-    <span
-      className={`inline-flex items-center text-micro font-semibold whitespace-nowrap ${className}`}
-      style={{ color: config.color }}
-    >
-      {config.label}
-    </span>
-  );
+  return <span>{config.label}</span>;
 }

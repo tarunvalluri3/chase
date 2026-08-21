@@ -15,19 +15,18 @@ export function DeleteSheet({ open, onClose, onConfirm, returnFocusRef, submitti
 
   return (
     <Sheet open={open} onClose={onClose} title="Delete task" returnFocusRef={returnFocusRef}>
-      <div className="flex flex-col gap-5">
-        <p className="text-body text-ink-2">
+      <div>
+        <p>
           This removes the task from your active list for good. The record stays, but this can't be undone here.
         </p>
         <ReasonField label="Why are you deleting this?" value={reason} onChange={setReason} autoFocus />
-        <div className="flex gap-3 pt-1">
-          <Button type="button" variant="ghost" className="flex-1" onClick={onClose} disabled={submitting}>
+        <div>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
           <Button
             type="button"
             variant="destructive"
-            className="flex-1"
             disabled={!isReasonValid(reason) || submitting}
             loading={submitting}
             onClick={() => onConfirm(reason.trim())}

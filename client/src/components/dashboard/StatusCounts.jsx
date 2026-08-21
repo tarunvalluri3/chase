@@ -3,16 +3,15 @@ import { LedgerStrip, StatTile } from './StatTile';
 import { statusLabel } from '../tasks/StatusChip';
 import { computeStatusCounts, STATUS_ORDER } from '../../lib/taskStats';
 
-// One restrained accent, not five competing hues: MISSED ("Needs review")
-// is the only count that calls for attention, so it alone gets a colored
-// bubble; the other four stay neutral ink-3. Labels below each tile (reused
-// from StatusChip so the words can't drift) still carry the full meaning.
-const STATUS_COLOR = {
-  ACTIVE: 'var(--color-ink-3)',
-  MISSED: 'var(--color-review)',
-  COMPLETED: 'var(--color-ink-3)',
-  INCOMPLETE: 'var(--color-ink-3)',
-  DELETED: 'var(--color-ink-3)',
+// Each status gets its own tint (DESIGN.md v3 §2.3 tokens) rather than one
+// restrained accent — five distinct icon-bubble colors so the row reads at
+// a glance, same tint-background/solid-icon pattern the priority pill uses.
+const STATUS_STYLE = {
+  ACTIVE: { bg: 'var(--color-brand-soft)', icon: 'var(--color-brand)' },
+  MISSED: { bg: 'var(--color-ochre-tint)', icon: 'var(--color-ochre)' },
+  COMPLETED: { bg: 'var(--color-moss-tint)', icon: 'var(--color-moss)' },
+  INCOMPLETE: { bg: 'var(--color-sand-tint)', icon: 'var(--color-sand)' },
+  DELETED: { bg: 'var(--color-stone-tint)', icon: 'var(--color-stone)' },
 };
 
 const STATUS_ICON = {
@@ -27,14 +26,15 @@ const STATUS_ICON = {
 export function StatusCounts({ tasks }) {
   const counts = computeStatusCounts(tasks);
   return (
-    <div className="px-gutter">
-      <LedgerStrip className="overflow-x-auto">
+    <div>
+      <LedgerStrip>
         {STATUS_ORDER.map((status) => (
           <StatTile
             key={status}
             label={statusLabel(status)}
             count={counts[status]}
-            color={STATUS_COLOR[status]}
+            color={STATUS_STYLE[status].icon}
+            bg={STATUS_STYLE[status].bg}
             icon={STATUS_ICON[status]}
           />
         ))}

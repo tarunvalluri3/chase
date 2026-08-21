@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { PriorityLabel } from './PriorityLabel';
 import { priorityText } from './priorityConfig';
@@ -13,43 +12,22 @@ import { DeleteSheet } from './DeleteSheet';
 import { ResolveSheet } from './ResolveSheet';
 import { TimeTracker } from './TimeTracker';
 import { useTaskLifecycle } from '../../hooks/useTaskLifecycle';
-import { DURATION, EASE_EXIT, EASE_OUT } from '../../lib/motion';
 
 // DESIGN.md §7/§7.3/§8 — two-line title + meta row + conditional action
-// row. `onSettled(taskId)`/`onRollback()` let the
-// parent TaskList remove/restore this card from its local array once a
-// lifecycle action actually settles (see useTaskLifecycle).
+// row. `onSettled(taskId)` lets the parent TaskList remove this card from
+// its local array once a lifecycle action actually settles (see
+// useTaskLifecycle).
 export function TaskCard({ task, sectionStatus, onSettled }) {
-  const [stage, setStage] = useState('idle'); // idle | press | wash | check | exit | fade
   const [completeOpen, setCompleteOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
   const completeButtonRef = useRef(null);
   const deleteButtonRef = useRef(null);
   const resolveButtonRef = useRef(null);
-  const reducedMotion = useReducedMotion();
 
   const { submitting, completeTask, deleteTask, resolveTask } = useTaskLifecycle(task, {
-    onStart: ({ flourish }) => playFlourish(flourish),
     onSettle: () => onSettled?.(task.id),
-    onRollback: () => setStage('idle'),
   });
-
-  function playFlourish(flourish) {
-    if (reducedMotion) {
-      setStage('fade');
-      return;
-    }
-    if (!flourish) {
-      setStage('fade');
-      return;
-    }
-    if (navigator.vibrate) navigator.vibrate(10);
-    setStage('press');
-    setTimeout(() => setStage('wash'), 90);
-    setTimeout(() => setStage('check'), 200);
-    setTimeout(() => setStage('exit'), 380);
-  }
 
   async function handleCompleteConfirm() {
     setCompleteOpen(false);
@@ -70,72 +48,18 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
     task.deadline,
   )}, ${statusLabel(task.status).toLowerCase()}`;
 
-  const isExiting = stage === 'exit' || stage === 'fade';
-  const isPressed = stage === 'press' || stage === 'wash' || stage === 'check' || stage === 'exit';
-  const showWash = stage === 'wash' || stage === 'check' || stage === 'exit';
-  const showCheck = stage === 'check' || stage === 'exit';
-
   return (
-    <motion.article
-      layout
-      aria-label={accessibleName}
-      className="relative flex gap-3 overflow-hidden rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
-      animate={{ opacity: isExiting ? 0 : 1, scale: isPressed ? 0.97 : 1 }}
-      whileHover={reducedMotion ? undefined : { y: -2 }}
-      transition={{
-        duration: isExiting ? (reducedMotion ? 0.12 : stage === 'exit' ? 0.24 : 0.2) : 0.09,
-        ease: isExiting ? EASE_EXIT : EASE_OUT,
-        y: { duration: DURATION.base, ease: EASE_OUT },
-      }}
-    >
-      {showWash && (
-        <motion.div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            transformOrigin: 'left',
-            background: 'color-mix(in srgb, var(--color-completed) 22%, var(--color-surface))',
-          }}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.2, ease: EASE_OUT }}
-        />
-      )}
-      {showCheck && (
-        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-            <motion.path
-              d="M5 12.5L10 17.5L19 7"
-              stroke="var(--color-completed)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.24, ease: EASE_OUT }}
-            />
-          </svg>
-        </div>
-      )}
-
-      <span
-        aria-hidden="true"
-        className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-(--radius-pill) border-2"
-        style={
-          task.status === 'COMPLETED'
-            ? { borderColor: 'var(--color-completed)', backgroundColor: 'var(--color-completed)' }
-            : { borderColor: 'var(--border-strong)', backgroundColor: 'transparent' }
-        }
-      >
-        {task.status === 'COMPLETED' && <Check size={13} strokeWidth={3} color="var(--color-canvas)" />}
+    <article aria-label={accessibleName}>
+      <span aria-hidden="true">
+        {task.status === 'COMPLETED' && <Check />}
       </span>
-      <div className="relative flex min-w-0 flex-1 flex-col gap-2">
-        <Link to={`/tasks/${sectionStatus}/${task.id}`} className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="line-clamp-2 text-task text-ink">{task.title}</h3>
-            <StatusChip status={task.status} className="shrink-0" />
+      <div>
+        <Link to={`/tasks/${sectionStatus}/${task.id}`}>
+          <div>
+            <h3>{task.title}</h3>
+            <StatusChip status={task.status} />
           </div>
-          <div className="flex items-center justify-between gap-2">
+          <div>
             <PriorityLabel priority={task.priority} />
             <DeadlineDisplay deadline={task.deadline} />
           </div>
@@ -144,7 +68,7 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
         {task.status === 'ACTIVE' && <TimeTracker taskId={task.id} compact />}
 
         {task.status === 'ACTIVE' && (
-          <div className="flex gap-2 pt-1">
+          <div>
             <Button
               ref={completeButtonRef}
               type="button"
@@ -167,7 +91,7 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
         )}
 
         {task.status === 'MISSED' && (
-          <div className="flex gap-2 pt-1">
+          <div>
             <Button ref={resolveButtonRef} type="button" size="sm" onClick={() => setResolveOpen(true)}>
               Resolve
             </Button>
@@ -196,6 +120,6 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
         returnFocusRef={resolveButtonRef}
         submitting={submitting}
       />
-    </motion.article>
+    </article>
   );
 }

@@ -31,12 +31,12 @@ export function ResolveSheet({ open, onClose, onResolve, returnFocusRef, submitt
 
   return (
     <Sheet open={open} onClose={onClose} title="What actually happened?" returnFocusRef={returnFocusRef}>
-      <div className="flex flex-col gap-5">
-        <p className="text-body text-ink-2">
+      <div>
+        <p>
           The deadline passed before this was confirmed. What actually happened?
         </p>
 
-        <div role="radiogroup" aria-label="What actually happened?" className="flex flex-col gap-2">
+        <div role="radiogroup" aria-label="What actually happened?">
           <ChoiceButton
             label="I completed this"
             selected={choice === 'COMPLETED'}
@@ -53,13 +53,12 @@ export function ResolveSheet({ open, onClose, onResolve, returnFocusRef, submitt
           <ReasonField label="What got in the way?" value={reason} onChange={setReason} autoFocus />
         )}
 
-        <div className="flex gap-3 pt-1">
-          <Button type="button" variant="ghost" className="flex-1" onClick={onClose} disabled={submitting}>
+        <div>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
           <Button
             type="button"
-            className="flex-1"
             disabled={!canConfirm || submitting}
             loading={submitting}
             onClick={handleConfirm}
@@ -74,18 +73,7 @@ export function ResolveSheet({ open, onClose, onResolve, returnFocusRef, submitt
 
 function ChoiceButton({ label, selected, onClick }) {
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
-      onClick={onClick}
-      className="min-h-(--size-tap-min) rounded-(--radius-md) border px-4 text-left text-body transition-colors"
-      style={{
-        borderColor: selected ? 'var(--color-pine)' : 'var(--border-strong)',
-        color: selected ? 'var(--color-pine)' : 'var(--color-ink-2)',
-        backgroundColor: selected ? 'var(--color-pine-tint)' : 'transparent',
-      }}
-    >
+    <button type="button" role="radio" aria-checked={selected} onClick={onClick}>
       {label}
     </button>
   );

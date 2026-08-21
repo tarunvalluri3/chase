@@ -12,11 +12,11 @@ export function ProtectedRoute() {
 
   if (!isLoaded) {
     return (
-      <main className="flex min-h-dvh flex-col gap-3 px-gutter pt-10">
-        <Skeleton className="h-8 w-2/3" />
-        <Skeleton className="h-4 w-1/3" />
-        <Skeleton className="mt-6 h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
+      <main>
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
       </main>
     );
   }

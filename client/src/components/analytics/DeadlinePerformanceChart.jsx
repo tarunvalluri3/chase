@@ -1,7 +1,6 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { ChartEmpty } from './ChartStates';
-import { legendTextStyle, tooltipContentStyle, tooltipLabelStyle } from './chartTheme';
 
 // Phase 20, new — compares completed_at directly to deadline for every
 // completed task in range, catching a task finished late while still
@@ -13,27 +12,23 @@ export function DeadlinePerformanceChart({ data }) {
   const { onTime = 0, late = 0, total = 0 } = data ?? {};
 
   const chartData = [
-    { key: 'onTime', label: 'On time', value: onTime, fill: 'var(--color-completed)' },
-    { key: 'late', label: 'Completed late', value: late, fill: 'var(--color-chart-completed-resolved)' },
+    { key: 'onTime', label: 'On time', value: onTime },
+    { key: 'late', label: 'Completed late', value: late },
   ];
 
   return (
     <ChartCard title="Deadline performance" description="Of completed tasks, the share finished at or before their deadline.">
       {total > 0 ? (
-        <div className="w-full overflow-x-auto">
+        <div>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie data={chartData} dataKey="value" nameKey="label" innerRadius={48} outerRadius={72} paddingAngle={2}>
                 {chartData.map((entry) => (
-                  <Cell key={entry.key} fill={entry.fill} />
+                  <Cell key={entry.key} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={tooltipContentStyle}
-                labelStyle={tooltipLabelStyle}
-                formatter={(value, name) => [`${value} of ${total}`, name]}
-              />
-              <Legend wrapperStyle={legendTextStyle} />
+              <Tooltip formatter={(value, name) => [`${value} of ${total}`, name]} />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </div>

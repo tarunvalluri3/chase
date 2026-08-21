@@ -7,13 +7,13 @@ import { Button } from '../ui/Button';
 export function CompleteConfirmSheet({ open, onClose, onConfirm, returnFocusRef, submitting }) {
   return (
     <Sheet open={open} onClose={onClose} title="Complete this task?" returnFocusRef={returnFocusRef}>
-      <div className="flex flex-col gap-5">
-        <p className="text-body text-ink-2">This marks the task complete. There's no way to undo it from here.</p>
-        <div className="flex gap-3 pt-1">
-          <Button type="button" variant="ghost" className="flex-1" onClick={onClose} disabled={submitting}>
+      <div>
+        <p>This marks the task complete. There's no way to undo it from here.</p>
+        <div>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
-          <Button type="button" className="flex-1" loading={submitting} onClick={onConfirm}>
+          <Button type="button" loading={submitting} onClick={onConfirm}>
             Complete
           </Button>
         </div>

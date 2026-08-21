@@ -45,16 +45,13 @@ export function NotificationsBanner() {
   }
 
   return (
-    <div
-      className="mx-gutter flex items-start gap-3 rounded-(--radius-lg) border p-4"
-      style={{ borderColor: 'var(--border-hairline)', backgroundColor: 'var(--color-surface)' }}
-    >
-      <div className="min-w-0 flex-1">
-        <p className="text-body text-ink">Get notified even when Chase is closed</p>
-        <p className="mt-1 text-meta text-ink-3">
+    <div>
+      <div>
+        <p>Get notified even when Chase is closed</p>
+        <p>
           Enable notifications to hear about deadlines and task updates in real time.
         </p>
-        <div className="mt-3 flex gap-2">
+        <div>
           <Button size="sm" onClick={handleEnable} loading={enabling}>
             Enable
           </Button>
@@ -63,13 +60,8 @@ export function NotificationsBanner() {
           </Button>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label="Dismiss"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-(--radius-sm) text-ink-3"
-      >
-        <X size={18} strokeWidth={1.8} aria-hidden="true" />
+      <button type="button" onClick={dismiss} aria-label="Dismiss">
+        <X aria-hidden="true" />
       </button>
     </div>
   );

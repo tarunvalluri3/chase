@@ -12,29 +12,29 @@ export function TimePerTaskTable({ data = [] }) {
   return (
     <ChartCard title="Time spent per task" description="Your most-tracked tasks in this range.">
       {data.length > 0 ? (
-        <div className="w-full overflow-x-auto rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
-          <table className="w-full text-left text-meta">
+        <div>
+          <table>
             <thead>
-              <tr className="border-b border-(--color-rule) text-micro text-ink-3">
-                <th className="px-4 py-2 font-normal">Task</th>
-                <th className="px-4 py-2 font-normal">Status</th>
-                <th className="px-4 py-2 text-right font-normal">Time</th>
+              <tr>
+                <th>Task</th>
+                <th>Status</th>
+                <th>Time</th>
               </tr>
             </thead>
             <tbody>
               {data.map((row) => (
-                <tr key={row.id} className="border-b border-(--color-rule) last:border-b-0">
-                  <td className="max-w-[160px] truncate px-4 py-2 text-ink">
+                <tr key={row.id}>
+                  <td>
                     {row.status ? (
-                      <Link to={`/tasks/${row.status.toLowerCase()}/${row.id}`} className="hover:underline">
+                      <Link to={`/tasks/${row.status.toLowerCase()}/${row.id}`}>
                         {row.title}
                       </Link>
                     ) : (
                       row.title
                     )}
                   </td>
-                  <td className="px-4 py-2">{row.status ? <StatusChip status={row.status} /> : '—'}</td>
-                  <td className="px-4 py-2 text-right font-tabular text-ink-2">{formatDuration(row.seconds)}</td>
+                  <td>{row.status ? <StatusChip status={row.status} /> : '—'}</td>
+                  <td>{formatDuration(row.seconds)}</td>
                 </tr>
               ))}
             </tbody>

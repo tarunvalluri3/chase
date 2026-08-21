@@ -109,7 +109,9 @@ describe('Complete task flow', () => {
   it('completing an ACTIVE card removes it from the list once the server confirms', async () => {
     const user = userEvent.setup();
     const task = buildTask({ status: 'ACTIVE', title: 'Finish the memo' });
-    tasksApi.list.mockResolvedValue([task]);
+    // First call is the initial load; the refetch triggered after Complete
+    // mirrors a real GET ?status=ACTIVE no longer including the task.
+    tasksApi.list.mockResolvedValueOnce([task]).mockResolvedValue([]);
     tasksApi.complete.mockResolvedValue({ ...task, status: 'COMPLETED' });
 
     renderWithProviders(<TaskList status="active" emptyTitle="empty" emptyDescription="none" />);
@@ -132,7 +134,9 @@ describe('Delete task flow', () => {
   it('deleting an ACTIVE card requires a reason and removes it once confirmed', async () => {
     const user = userEvent.setup();
     const task = buildTask({ status: 'ACTIVE', title: 'Stale task' });
-    tasksApi.list.mockResolvedValue([task]);
+    // First call is the initial load; the refetch triggered after Delete
+    // mirrors a real GET ?status=ACTIVE no longer including the task.
+    tasksApi.list.mockResolvedValueOnce([task]).mockResolvedValue([]);
     tasksApi.remove.mockResolvedValue({ ...task, status: 'DELETED' });
 
     renderWithProviders(<TaskList status="active" emptyTitle="empty" emptyDescription="none" />);
@@ -155,7 +159,9 @@ describe('Resolve MISSED task flow', () => {
   it('resolves MISSED -> COMPLETED with no reason required', async () => {
     const user = userEvent.setup();
     const task = buildTask({ status: 'MISSED', title: 'Overdue report' });
-    tasksApi.list.mockResolvedValue([task]);
+    // First call is the initial load; the refetch triggered after resolving
+    // mirrors a real GET ?status=MISSED no longer including the task.
+    tasksApi.list.mockResolvedValueOnce([task]).mockResolvedValue([]);
     tasksApi.resolveMissed.mockResolvedValue({ ...task, status: 'COMPLETED' });
 
     renderWithProviders(<TaskList status="missed" emptyTitle="empty" emptyDescription="none" />);

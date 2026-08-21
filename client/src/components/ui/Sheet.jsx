@@ -1,6 +1,4 @@
 import { useEffect, useId, useRef } from 'react';
-import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'framer-motion';
-import { DURATION, EASE_EXIT, EASE_OUT, SHEET_SPRING } from '../../lib/motion';
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -9,15 +7,9 @@ const FOCUSABLE_SELECTOR =
 // dismiss, scrim, focus trap, keyboard-aware (rides above the keyboard via
 // the viewport meta from Phase 9 + its own max-height/scroll). Built here,
 // reused by Phase 13's ResolveSheet/DeleteSheet.
-//
-// Drag is bound to the handle only (`dragListener={false}` + manual
-// `dragControls.start()` on pointerdown) so it never fights scrolling or
-// typing inside the sheet's own content.
 export function Sheet({ open, onClose, title, children, returnFocusRef }) {
-  const reducedMotion = useReducedMotion();
   const titleId = useId();
   const sheetRef = useRef(null);
-  const dragControls = useDragControls();
 
   useEffect(() => {
     if (!open) return undefined;
@@ -52,55 +44,21 @@ export function Sheet({ open, onClose, title, children, returnFocusRef }) {
   }, [open, onClose, returnFocusRef]);
 
   return (
-    <AnimatePresence>
+    <>
       {open && (
         <>
-          <motion.div
-            key="scrim"
-            className="fixed inset-0 z-30 bg-black/60"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: DURATION.base, ease: EASE_OUT } }}
-            exit={{ opacity: 0, transition: { duration: DURATION.base, ease: EASE_EXIT } }}
-            onClick={onClose}
-          />
-          <motion.div
-            key="sheet"
-            ref={sheetRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="fixed inset-x-0 bottom-0 z-40 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-(--radius-xl) bg-surface pb-safe"
-            style={{ boxShadow: 'var(--shadow-sheet)' }}
-            initial={{ y: '100%' }}
-            animate={{ y: 0, transition: reducedMotion ? { duration: 0.12 } : SHEET_SPRING }}
-            exit={{
-              y: '100%',
-              transition: reducedMotion ? { duration: 0.12 } : { duration: DURATION.base, ease: EASE_EXIT },
-            }}
-            drag={reducedMotion ? false : 'y'}
-            dragListener={false}
-            dragControls={dragControls}
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.6 }}
-            onDragEnd={(_event, info) => {
-              if (info.offset.y > 80 || info.velocity.y > 600) onClose();
-            }}
-          >
-            <div
-              onPointerDown={(event) => dragControls.start(event)}
-              className="flex cursor-grab justify-center pt-3 pb-1 active:cursor-grabbing"
-            >
-              <span className="h-1 w-9 rounded-(--radius-pill) bg-surface-sunken" aria-hidden="true" />
+          <div onClick={onClose} />
+          <div ref={sheetRef} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+            <div>
+              <span aria-hidden="true" />
             </div>
-            <div className="px-gutter pt-2 pb-2">
-              <h2 id={titleId} className="text-section text-ink">
-                {title}
-              </h2>
+            <div>
+              <h2 id={titleId}>{title}</h2>
             </div>
-            <div className="px-gutter pb-8">{children}</div>
-          </motion.div>
+            <div>{children}</div>
+          </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 }

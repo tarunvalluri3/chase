@@ -82,8 +82,8 @@ export function NotificationsSheet({ triggerRef }) {
 
   return (
     <Sheet open={sheetOpen} onClose={closeSheet} title="Notifications" returnFocusRef={triggerRef}>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div>
+        <div>
           {FEED_TABS.map((tab) => {
             const isSelected = tab.key === activeTab;
             return (
@@ -92,35 +92,25 @@ export function NotificationsSheet({ triggerRef }) {
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => setActiveTab(tab.key)}
-                className="flex shrink-0 items-center gap-1.5 rounded-(--radius-pill) border px-3 py-1.5 text-meta transition-colors"
-                style={{
-                  borderColor: isSelected ? 'var(--color-brand)' : 'var(--border-hairline)',
-                  color: isSelected ? 'var(--color-brand)' : 'var(--color-ink-2)',
-                  backgroundColor: isSelected ? 'var(--color-brand-soft)' : 'transparent',
-                }}
               >
                 {tab.label}
-                <span className="font-tabular text-micro" style={{ color: isSelected ? 'var(--color-brand)' : 'var(--color-ink-3)' }}>
-                  {tabCounts[tab.key]}
-                </span>
+                <span>{tabCounts[tab.key]}</span>
               </button>
             );
           })}
         </div>
         {hasUnread && (
-          <Button size="sm" variant="ghost" className="shrink-0" onClick={markAllRead}>
+          <Button size="sm" variant="ghost" onClick={markAllRead}>
             Mark all read
           </Button>
         )}
       </div>
 
-      {status === 'loading' && notifications.length === 0 && (
-        <p className="py-10 text-center text-meta text-ink-3">Loading…</p>
-      )}
+      {status === 'loading' && notifications.length === 0 && <p>Loading…</p>}
 
       {status === 'error' && (
-        <div className="flex flex-col items-center gap-3 py-10 text-center">
-          <p className="text-body text-ink-2">Couldn't load your notifications.</p>
+        <div>
+          <p>Couldn't load your notifications.</p>
           <Button size="sm" variant="secondary" onClick={reload}>
             Retry
           </Button>
@@ -128,40 +118,30 @@ export function NotificationsSheet({ triggerRef }) {
       )}
 
       {status === 'loaded' && notifications.length === 0 && (
-        <p className="py-10 text-center text-body text-ink-3">Nothing yet. Task updates will show up here.</p>
+        <p>Nothing yet. Task updates will show up here.</p>
       )}
 
       {status === 'loaded' && notifications.length > 0 && visibleNotifications.length === 0 && (
-        <p className="py-10 text-center text-body text-ink-3">Nothing in this tab yet.</p>
+        <p>Nothing in this tab yet.</p>
       )}
 
       {visibleNotifications.length > 0 && (
-        <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--color-rule)' }}>
+        <ul>
           {visibleNotifications.map((notification) => (
-            <li key={notification.id} className="border-t first:border-t-0" style={{ borderColor: 'var(--color-rule)' }}>
+            <li key={notification.id}>
               <Link
                 to={`/tasks/${STATUS_ROUTE[notification.type] ?? 'active'}/${notification.task_id}`}
                 onClick={() => {
                   closeSheet();
                   if (!notification.read_at) markRead(notification.id);
                 }}
-                className="flex flex-col gap-0.5 py-3"
               >
-                <span
-                  className="flex items-center gap-2 text-body"
-                  style={{ color: notification.read_at ? 'var(--color-ink-3)' : 'var(--color-ink)' }}
-                >
-                  {!notification.read_at && (
-                    <span
-                      aria-hidden="true"
-                      className="h-1.5 w-1.5 shrink-0 rounded-(--radius-pill)"
-                      style={{ backgroundColor: 'var(--color-review)' }}
-                    />
-                  )}
+                <span>
+                  {!notification.read_at && <span aria-hidden="true" />}
                   {notification.title}
                 </span>
-                <span className="text-meta text-ink-3">{notification.body}</span>
-                <span className="text-meta text-ink-3">{formatTimestamp(notification.created_at)}</span>
+                <span>{notification.body}</span>
+                <span>{formatTimestamp(notification.created_at)}</span>
               </Link>
             </li>
           ))}

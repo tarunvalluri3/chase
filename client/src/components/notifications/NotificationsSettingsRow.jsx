@@ -71,28 +71,19 @@ export function NotificationsSettingsRow() {
   const disabled = state === 'checking' || state === 'unsupported' || state === 'denied' || busy;
 
   const content = (
-    <span className="flex min-h-(--size-tap-min) w-full items-center gap-3 px-4 py-3 text-left">
-      <Bell size={18} strokeWidth={1.8} aria-hidden="true" style={{ color: 'var(--color-ink-3)' }} />
-      <span className="flex-1 text-body text-ink">Notifications</span>
-      <span
-        className="text-meta"
-        style={{ color: disabled && state !== 'checking' ? 'var(--color-ink-disabled)' : 'var(--color-ink-3)' }}
-      >
-        {valueText}
-      </span>
+    <span>
+      <Bell aria-hidden="true" />
+      <span>Notifications</span>
+      <span>{valueText}</span>
     </span>
   );
 
   if (disabled) {
-    return (
-      <span aria-disabled="true" className="block opacity-60">
-        {content}
-      </span>
-    );
+    return <span aria-disabled="true">{content}</span>;
   }
 
   return (
-    <button type="button" onClick={toggle} className="block w-full transition-colors hover:bg-surface-sunken">
+    <button type="button" onClick={toggle}>
       {content}
     </button>
   );

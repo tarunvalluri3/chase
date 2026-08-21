@@ -35,42 +35,17 @@ export function PullToRefresh({ onRefresh, refreshing, children }) {
     startY.current = null;
   }
 
-  const offset = refreshing ? 40 : pull;
-  const settling = pull === 0 && !refreshing;
-
   return (
     <div
       ref={containerRef}
-      className="relative overscroll-contain"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 flex justify-center pt-3"
-        style={{
-          opacity: refreshing ? 1 : Math.min(pull / THRESHOLD, 1),
-          transform: `translateY(${offset - 28}px)`,
-          transition: settling ? 'transform 150ms var(--ease-out), opacity 150ms var(--ease-out)' : 'none',
-        }}
-      >
-        <RefreshCw
-          size={18}
-          strokeWidth={1.75}
-          color="var(--color-ink-3)"
-          className={refreshing ? 'animate-spin' : ''}
-          style={{ transform: refreshing ? undefined : `rotate(${Math.min(pull * 3, 180)}deg)` }}
-        />
+      <div aria-hidden="true">
+        <RefreshCw />
       </div>
-      <div
-        style={{
-          transform: `translateY(${offset}px)`,
-          transition: settling ? 'transform 150ms var(--ease-out)' : 'none',
-        }}
-      >
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   );
 }

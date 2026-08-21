@@ -7,18 +7,18 @@ import { formatDuration } from '../../lib/datetime';
 // at a glance." Reuses existing status-color tokens, no new hues.
 export function KpiRow({ kpis }) {
   const tiles = [
-    { key: 'total', label: 'Total tasks', count: kpis.totalTasks, color: 'var(--color-ink-2)' },
-    { key: 'completion', label: 'Completion rate', count: formatPercent(kpis.completionRate), color: 'var(--color-completed)' },
-    { key: 'missed', label: 'Missed rate', count: formatPercent(kpis.missedRate), color: 'var(--color-review)' },
-    { key: 'deletion', label: 'Deletion rate', count: formatPercent(kpis.deletionRate), color: 'var(--color-deleted)' },
-    { key: 'tracked', label: 'Time tracked', count: formatDuration(kpis.totalTrackedSeconds), color: 'var(--color-ink-2)' },
+    { key: 'total', label: 'Total tasks', count: kpis.totalTasks },
+    { key: 'completion', label: 'Completion rate', count: formatPercent(kpis.completionRate) },
+    { key: 'missed', label: 'Missed rate', count: formatPercent(kpis.missedRate) },
+    { key: 'deletion', label: 'Deletion rate', count: formatPercent(kpis.deletionRate) },
+    { key: 'tracked', label: 'Time tracked', count: formatDuration(kpis.totalTrackedSeconds) },
   ];
 
   return (
-    <div className="px-gutter">
-      <LedgerStrip className="overflow-x-auto">
+    <div>
+      <LedgerStrip>
         {tiles.map((tile) => (
-          <StatTile key={tile.key} label={tile.label} count={tile.count} color={tile.color} />
+          <StatTile key={tile.key} label={tile.label} count={tile.count} />
         ))}
       </LedgerStrip>
     </div>

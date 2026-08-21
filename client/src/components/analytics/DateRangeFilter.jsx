@@ -12,7 +12,7 @@ const OPTIONS = [
 
 export function DateRangeFilter({ range, onChange }) {
   return (
-    <div className="flex gap-2 overflow-x-auto px-gutter" role="group" aria-label="Date range">
+    <div role="group" aria-label="Date range">
       {OPTIONS.map((option) => {
         const isSelected = option.value === range;
         return (
@@ -21,14 +21,6 @@ export function DateRangeFilter({ range, onChange }) {
             type="button"
             aria-pressed={isSelected}
             onClick={() => onChange(option.value)}
-            className="min-h-(--size-tap-min) shrink-0 rounded-(--radius-pill) border px-3 py-1.5 text-meta transition-colors"
-            style={{
-              borderColor: isSelected ? 'var(--color-accent)' : 'var(--border-hairline)',
-              color: isSelected ? 'var(--color-accent)' : 'var(--color-ink-2)',
-              backgroundColor: isSelected
-                ? 'color-mix(in srgb, var(--color-accent) 14%, var(--color-surface))'
-                : 'transparent',
-            }}
           >
             {option.label}
           </button>

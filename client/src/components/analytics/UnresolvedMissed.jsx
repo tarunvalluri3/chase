@@ -12,23 +12,23 @@ const VISIBLE_LIMIT = 5;
 // this is always a current snapshot, not history.
 export function UnresolvedMissed({ missed = [] }) {
   return (
-    <div className="flex flex-col gap-3 px-gutter">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-section text-ink">Needs review</h2>
-        <span className="font-tabular text-meta text-ink-3">{missed.length}</span>
+    <div>
+      <div>
+        <h2>Needs review</h2>
+        <span>{missed.length}</span>
       </div>
 
       {missed.length === 0 ? (
-        <div className="rounded-(--radius-lg) border border-(--border-hairline) bg-surface px-4 py-3 text-meta text-ink-3">
+        <div>
           Nothing waiting on you.
         </div>
       ) : (
-        <ul className="flex flex-col rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
-          {missed.slice(0, VISIBLE_LIMIT).map((task, index) => (
-            <li key={task.id} className={index > 0 ? 'border-t border-(--color-rule)' : ''}>
-              <Link to={`/tasks/missed/${task.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
-                <span className="line-clamp-1 text-task text-ink">{task.title}</span>
-                <span className="shrink-0 font-tabular text-meta text-ink-3">since {formatTimestamp(task.missed_at)}</span>
+        <ul>
+          {missed.slice(0, VISIBLE_LIMIT).map((task) => (
+            <li key={task.id}>
+              <Link to={`/tasks/missed/${task.id}`}>
+                <span>{task.title}</span>
+                <span>since {formatTimestamp(task.missed_at)}</span>
               </Link>
             </li>
           ))}
@@ -36,7 +36,7 @@ export function UnresolvedMissed({ missed = [] }) {
       )}
 
       {missed.length > VISIBLE_LIMIT && (
-        <Link to="/tasks/missed" className="text-meta text-accent">
+        <Link to="/tasks/missed">
           View all {missed.length} →
         </Link>
       )}

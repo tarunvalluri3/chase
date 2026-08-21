@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AppBar } from '../components/nav/AppBar';
 import { BottomNav } from '../components/nav/BottomNav';
 import { Sidebar } from '../components/nav/Sidebar';
@@ -10,7 +9,6 @@ import { OfflineBar } from '../components/ui/OfflineBar';
 import { CreateTaskSheet } from '../components/tasks/CreateTaskSheet';
 import { NotificationBell } from '../components/notifications/NotificationBell';
 import { NotificationsSheet } from '../components/notifications/NotificationsSheet';
-import { routeVariants } from '../lib/motion';
 import { formatTodayContext } from '../lib/datetime';
 import { useTaskCounts } from '../hooks/useTaskCounts';
 import { useNotificationsContext } from '../lib/notificationsStore';
@@ -35,7 +33,6 @@ const STATUS_CONTEXT = {
 export function AppLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const reducedMotion = useReducedMotion();
   const counts = useTaskCounts();
   const { refreshUnreadCount } = useNotificationsContext();
   const bellRef = useRef(null);
@@ -57,11 +54,11 @@ export function AppLayout({ children }) {
   const { title, context } = sectionMeta(location.pathname, status, isTaskDetail);
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div>
       <Sidebar needsReviewCount={counts.missed ?? 0} />
 
-      <div className="flex min-h-dvh flex-col min-[960px]:ml-[220px]">
-        <div className="w-full min-[960px]:mx-auto min-[960px]:max-w-2xl min-[960px]:px-8">
+      <div>
+        <div>
           <AppBar
             title={title}
             context={context}
@@ -71,17 +68,13 @@ export function AppLayout({ children }) {
           {isTasksList && <FilterRow selected={status} counts={counts} />}
         </div>
 
-        <main className="flex-1 pb-24 min-[960px]:pb-10">
-          <div className="w-full min-[960px]:mx-auto min-[960px]:max-w-2xl min-[960px]:px-8">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div key={location.pathname} {...routeVariants(reducedMotion)}>
-                {children ?? <Outlet />}
-              </motion.div>
-            </AnimatePresence>
+        <main>
+          <div>
+            <div key={location.pathname}>{children ?? <Outlet />}</div>
           </div>
         </main>
 
-        <div className="min-[960px]:hidden">
+        <div>
           <BottomNav needsReviewCount={counts.missed ?? 0} />
         </div>
       </div>

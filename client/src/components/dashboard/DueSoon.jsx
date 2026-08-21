@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
+import { Clock, ChevronRight } from 'lucide-react';
 import { computeDueSoon } from '../../lib/taskStats';
 import { DeadlineDisplay } from '../tasks/DeadlineDisplay';
 
 // DESIGN.md §4.1/§9 "highlight anything time-sensitive" — active tasks due
 // within the next 24h. This is summary/scan content, so it renders as
 // ledger rows (thin hairline dividers, no card chrome) rather than the
-// bordered-box treatment task lists use. Amber per §2.3; this is a
-// heads-up, never a verdict, so it never touches the danger/red token.
+// bordered-box treatment task lists use. Each row gets the same leading
+// icon-badge + status-accent-border treatment as an activity row (DESIGN.md
+// v3 §7.6): brand tint since a due-soon item is still ACTIVE, never the
+// danger/red token — this is a heads-up, never a verdict.
 // Renders nothing once there's nothing due soon, rather than an empty
 // section header.
 export function DueSoon({ tasks }) {
@@ -14,14 +17,18 @@ export function DueSoon({ tasks }) {
   if (dueSoon.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 px-gutter">
-      <h2 className="text-section text-ink">Due soon</h2>
-      <ul className="flex flex-col rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
-        {dueSoon.map((task, index) => (
-          <li key={task.id} className={index > 0 ? 'border-t border-(--color-rule)' : ''}>
-            <Link to={`/tasks/active/${task.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
-              <span className="line-clamp-1 text-task text-ink">{task.title}</span>
-              <DeadlineDisplay deadline={task.deadline} className="shrink-0" />
+    <div>
+      <h2>Due soon</h2>
+      <ul>
+        {dueSoon.map((task) => (
+          <li key={task.id}>
+            <Link to={`/tasks/active/${task.id}`}>
+              <span aria-hidden="true">
+                <Clock />
+              </span>
+              <span>{task.title}</span>
+              <DeadlineDisplay deadline={task.deadline} variant="accent" />
+              <ChevronRight aria-hidden="true" />
             </Link>
           </li>
         ))}

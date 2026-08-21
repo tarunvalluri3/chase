@@ -1,7 +1,6 @@
 import { SignIn, useAuth } from '@clerk/clerk-react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthBackdrop } from '../../components/auth/AuthBackdrop';
-import { clerkAppearance } from '../../lib/clerkAppearance';
 
 export default function Login() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -18,7 +17,6 @@ export default function Login() {
         path="/login"
         signUpUrl="/signup"
         fallbackRedirectUrl={location.state?.from ?? '/'}
-        appearance={clerkAppearance}
       />
     </AuthBackdrop>
   );

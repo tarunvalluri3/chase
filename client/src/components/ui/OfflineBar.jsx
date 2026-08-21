@@ -19,24 +19,10 @@ export function OfflineBar() {
   if (dismissed) return null;
 
   return (
-    <div
-      role="status"
-      className="fixed inset-x-0 z-40 flex items-center justify-between gap-3 px-gutter py-2 text-meta"
-      style={{
-        bottom: 'calc(3.5rem + env(safe-area-inset-bottom))',
-        backgroundColor: 'color-mix(in srgb, var(--color-review) 16%, var(--color-surface))',
-        color: 'var(--color-review)',
-        borderTop: '1px solid color-mix(in srgb, var(--color-review) 30%, transparent)',
-      }}
-    >
+    <div role="status">
       <span>You're offline. Changes will fail until you reconnect.</span>
-      <button
-        type="button"
-        onClick={() => setDismissed(true)}
-        aria-label="Dismiss"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-(--radius-sm)"
-      >
-        <X size={18} strokeWidth={1.8} aria-hidden="true" />
+      <button type="button" onClick={() => setDismissed(true)} aria-label="Dismiss">
+        <X aria-hidden="true" />
       </button>
     </div>
   );

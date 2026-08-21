@@ -14,10 +14,10 @@ export default function Root() {
 
   if (!isLoaded) {
     return (
-      <main className="flex min-h-dvh flex-col gap-3 px-gutter pt-24">
-        <Skeleton className="mx-auto h-8 w-2/3" />
-        <Skeleton className="mx-auto h-4 w-1/2" />
-        <Skeleton className="mx-auto mt-8 h-32 w-full max-w-sm" />
+      <main>
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
       </main>
     );
   }

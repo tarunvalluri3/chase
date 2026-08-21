@@ -25,8 +25,8 @@ export default function Home() {
 
   if (status === 'loading' && tasks.length === 0) {
     return (
-      <div className="flex flex-col gap-8 pt-4">
-        <p className="px-gutter text-body text-ink-2">Welcome back, {greetingName}.</p>
+      <div>
+        <p>Welcome back, {greetingName}.</p>
         <DashboardStatSkeleton />
       </div>
     );
@@ -42,7 +42,7 @@ export default function Home() {
         title="Nothing here yet."
         description="Add your first task to see your dashboard come together."
         action={
-          <Button size="sm" className="mt-1" onClick={openCreateSheet}>
+          <Button size="sm" onClick={openCreateSheet}>
             New task
           </Button>
         }
@@ -51,8 +51,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pt-4 pb-4">
-      <p className="px-gutter text-body text-ink-2">Welcome back, {greetingName}.</p>
+    <div>
+      <p>Welcome back, {greetingName}.</p>
       <NotificationsBanner />
       <StatusCounts tasks={tasks} />
       <DueSoon tasks={tasks} />

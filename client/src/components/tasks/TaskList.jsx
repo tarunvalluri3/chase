@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useTaskList } from '../../hooks/useTaskList';
 import { useTasksContext } from '../../lib/tasksStore';
 import { sortTasks } from '../../lib/taskStats';
@@ -9,7 +8,6 @@ import { ErrorState } from '../ui/ErrorState';
 import { TaskCardSkeletonList } from '../ui/Skeleton';
 import { Button } from '../ui/Button';
 import { TaskCard } from './TaskCard';
-import { listContainerVariants, listItemVariants } from '../../lib/motion';
 
 // One list view (Active/Missed/Completed/Incomplete/Deleted), fetching
 // GET /api/tasks?status=... via useTaskList. Implements all four
@@ -19,7 +17,6 @@ import { listContainerVariants, listItemVariants } from '../../lib/motion';
 export function TaskList({ status, emptyTitle, emptyDescription, showCreateAction = false }) {
   const { tasks: rawTasks, status: loadStatus, reload, removeLocal } = useTaskList(status);
   const { openCreateSheet, sortBy, viewMode } = useTasksContext();
-  const reducedMotion = useReducedMotion();
   const [refreshing, setRefreshing] = useState(false);
   const tasks = useMemo(() => sortTasks(rawTasks, sortBy), [rawTasks, sortBy]);
 
@@ -45,7 +42,7 @@ export function TaskList({ status, emptyTitle, emptyDescription, showCreateActio
           description={emptyDescription}
           action={
             showCreateAction ? (
-              <Button size="sm" className="mt-1" onClick={openCreateSheet}>
+              <Button size="sm" onClick={openCreateSheet}>
                 New task
               </Button>
             ) : undefined
@@ -57,31 +54,13 @@ export function TaskList({ status, emptyTitle, emptyDescription, showCreateActio
 
   return (
     <PullToRefresh onRefresh={handlePullRefresh} refreshing={refreshing}>
-      <motion.ul
-        variants={listContainerVariants(reducedMotion)}
-        initial="initial"
-        animate="animate"
-        className={
-          viewMode === 'grid'
-            ? 'grid grid-cols-2 gap-(--spacing-stack-gap) px-gutter pt-4 pb-4 min-[960px]:grid-cols-3'
-            : 'flex flex-col gap-(--spacing-stack-gap) px-gutter pt-4 pb-4'
-        }
-      >
-        <AnimatePresence initial={false}>
-          {tasks.map((task, index) => (
-            <motion.li
-              key={task.id}
-              layout
-              variants={listItemVariants(reducedMotion, index)}
-              initial="initial"
-              animate="animate"
-              exit={{ opacity: 0, transition: { duration: 0.12 } }}
-            >
-              <TaskCard task={task} sectionStatus={status} onSettled={removeLocal} />
-            </motion.li>
-          ))}
-        </AnimatePresence>
-      </motion.ul>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>
+            <TaskCard task={task} sectionStatus={status} onSettled={removeLocal} />
+          </li>
+        ))}
+      </ul>
     </PullToRefresh>
   );
 }

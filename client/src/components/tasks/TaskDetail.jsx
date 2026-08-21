@@ -54,32 +54,32 @@ export function TaskDetail({ task, onTaskUpdated }) {
   }
 
   return (
-    <div className="flex flex-col gap-6 px-gutter pt-2 pb-10">
-      <div className="flex items-start justify-between gap-3">
-        <h2 className="text-title text-ink">{task.title}</h2>
-        <StatusChip status={task.status} className="shrink-0" />
+    <div>
+      <div>
+        <h2>{task.title}</h2>
+        <StatusChip status={task.status} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-4">
+      <div>
         <PriorityLabel priority={task.priority} />
-        <span className="font-tabular text-meta text-ink-3">Due {formatTimestamp(task.deadline)}</span>
+        <span>Due {formatTimestamp(task.deadline)}</span>
         {task.reminder_enabled && (
-          <span className="flex items-center gap-1 text-meta text-ink-3">
-            <Bell size={16} strokeWidth={1.8} aria-hidden="true" />
+          <span>
+            <Bell aria-hidden="true" />
             Reminder on
           </span>
         )}
         {task.repeat_rule && task.repeat_rule !== 'NONE' && (
-          <span className="flex items-center gap-1 text-meta text-ink-3">
-            <Repeat size={16} strokeWidth={1.8} aria-hidden="true" />
+          <span>
+            <Repeat aria-hidden="true" />
             {repeatText(task.repeat_rule)}
           </span>
         )}
       </div>
 
-      {task.description && <p className="whitespace-pre-wrap text-body text-ink-2">{task.description}</p>}
+      {task.description && <p>{task.description}</p>}
 
-      <dl className="flex flex-col gap-3 rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-4 text-meta text-ink-3">
+      <dl>
         <Row label="Created" value={formatTimestamp(task.created_at)} />
         {task.completed_at && <Row label="Completed" value={formatTimestamp(task.completed_at)} />}
         {task.missed_at && <Row label="Flagged needs review" value={formatTimestamp(task.missed_at)} />}
@@ -94,11 +94,11 @@ export function TaskDetail({ task, onTaskUpdated }) {
       {task.deletion_reason && <Reason label="Why it was deleted" text={task.deletion_reason} />}
 
       {task.status === 'ACTIVE' && (
-        <div className="flex gap-3">
-          <Button ref={completeButtonRef} className="flex-1" onClick={() => setCompleteOpen(true)}>
+        <div>
+          <Button ref={completeButtonRef} onClick={() => setCompleteOpen(true)}>
             Complete
           </Button>
-          <Button ref={editButtonRef} variant="secondary" className="flex-1" onClick={() => setEditOpen(true)}>
+          <Button ref={editButtonRef} variant="secondary" onClick={() => setEditOpen(true)}>
             Edit
           </Button>
           <Button ref={deleteButtonRef} variant="ghost" onClick={() => setDeleteOpen(true)}>
@@ -158,18 +158,18 @@ export function TaskDetail({ task, onTaskUpdated }) {
 
 function Row({ label, value }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div>
       <dt>{label}</dt>
-      <dd className="font-tabular">{value}</dd>
+      <dd>{value}</dd>
     </div>
   );
 }
 
 function Reason({ label, text }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-micro text-ink-3 uppercase">{label}</p>
-      <p className="whitespace-pre-wrap text-body text-ink-2">{text}</p>
+    <div>
+      <p>{label}</p>
+      <p>{text}</p>
     </div>
   );
 }

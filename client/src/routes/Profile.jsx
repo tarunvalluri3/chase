@@ -40,25 +40,15 @@ export default function Profile() {
   const onTimeRate = computeOnTimeRate(tasks);
 
   return (
-    <div className="flex flex-col gap-8 px-gutter pt-2 pb-10">
+    <div>
       {/* ---- header ---- */}
-      <div className="flex items-center gap-4">
-        <div
-          aria-hidden="true"
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-(--radius-pill) text-section text-white"
-          style={{ background: 'var(--color-brand)' }}
-        >
-          {initials}
+      <div>
+        <div aria-hidden="true">{initials}</div>
+        <div>
+          <p>{name}</p>
+          <p>{email}</p>
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-task text-ink">{name}</p>
-          <p className="truncate text-meta text-ink-3">{email}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => openUserProfile()}
-          className="shrink-0 rounded-(--radius-md) border border-(--border-hairline) px-3 py-2 text-meta font-semibold text-accent transition-colors hover:bg-surface-hover"
-        >
+        <button type="button" onClick={() => openUserProfile()}>
           Edit profile
         </button>
       </div>
@@ -114,15 +104,11 @@ function getInitials(user) {
 // not individually elevated like a task card).
 function SettingsSection({ title, children }) {
   return (
-    <div className="flex flex-col gap-2">
-      <h2 className="px-1 text-meta font-semibold text-ink-3 uppercase tracking-wide">{title}</h2>
-      <ul className="flex flex-col rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
+    <div>
+      <h2>{title}</h2>
+      <ul>
         {Array.isArray(children)
-          ? children.map((child, index) => (
-              <li key={index} className={index > 0 ? 'border-t border-(--color-rule)' : ''}>
-                {child}
-              </li>
-            ))
+          ? children.map((child, index) => <li key={index}>{child}</li>)
           : children}
       </ul>
     </div>
@@ -130,32 +116,21 @@ function SettingsSection({ title, children }) {
 }
 
 function SettingsRow({ icon: Icon, label, value, onClick, disabled = false, danger = false }) {
-  const color = danger ? 'var(--color-danger)' : 'var(--color-ink)';
   const content = (
-    <span className="flex min-h-(--size-tap-min) w-full items-center gap-3 px-4 py-3 text-left">
-      <Icon size={18} strokeWidth={1.8} aria-hidden="true" style={{ color: danger ? 'var(--color-danger)' : 'var(--color-ink-3)' }} />
-      <span className="flex-1 text-body" style={{ color }}>
-        {label}
-      </span>
-      {value && (
-        <span className="text-meta" style={{ color: disabled ? 'var(--color-ink-disabled)' : 'var(--color-ink-3)' }}>
-          {value}
-        </span>
-      )}
-      {onClick && !disabled && <ChevronRight size={16} strokeWidth={1.8} className="shrink-0" style={{ color: 'var(--color-ink-3)' }} aria-hidden="true" />}
+    <span>
+      <Icon aria-hidden="true" />
+      <span>{label}</span>
+      {value && <span>{value}</span>}
+      {onClick && !disabled && <ChevronRight aria-hidden="true" />}
     </span>
   );
 
   if (!onClick || disabled) {
-    return (
-      <span aria-disabled={disabled || undefined} className={disabled ? 'block opacity-60' : 'block'}>
-        {content}
-      </span>
-    );
+    return <span aria-disabled={disabled || undefined}>{content}</span>;
   }
 
   return (
-    <button type="button" onClick={onClick} className="block w-full transition-colors hover:bg-surface-sunken">
+    <button type="button" onClick={onClick}>
       {content}
     </button>
   );

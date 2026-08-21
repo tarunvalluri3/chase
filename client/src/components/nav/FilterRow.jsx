@@ -10,11 +10,11 @@ import { useTasksContext } from '../../lib/tasksStore';
 // already-fetched section list, and the view toggle only switches
 // TaskList's layout className.
 const FILTERS = [
-  { status: 'active', label: 'Active', color: 'var(--color-active)' },
-  { status: 'missed', label: 'Needs review', color: 'var(--color-review)' },
-  { status: 'completed', label: 'Completed', color: 'var(--color-completed)' },
-  { status: 'incomplete', label: 'Not done', color: 'var(--color-notdone)' },
-  { status: 'deleted', label: 'Deleted', color: 'var(--color-deleted)' },
+  { status: 'active', label: 'Active' },
+  { status: 'missed', label: 'Needs review' },
+  { status: 'completed', label: 'Completed' },
+  { status: 'incomplete', label: 'Not done' },
+  { status: 'deleted', label: 'Deleted' },
 ];
 
 const SORT_OPTIONS = [
@@ -33,12 +33,8 @@ export function FilterRow({ selected, counts = {} }) {
   }, [selected]);
 
   return (
-    <div className="flex flex-col gap-2 pb-3">
-      <div
-        ref={containerRef}
-        className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-gutter"
-        style={{ scrollbarWidth: 'none' }}
-      >
+    <div>
+      <div ref={containerRef}>
         {FILTERS.map((filter) => {
           const isSelected = filter.status === selected;
           return (
@@ -47,32 +43,18 @@ export function FilterRow({ selected, counts = {} }) {
               ref={isSelected ? selectedRef : undefined}
               to={`/tasks/${filter.status}`}
               aria-current={isSelected ? 'true' : undefined}
-              className="flex min-h-(--size-tap-min) shrink-0 snap-start items-center gap-1.5 rounded-(--radius-pill) border px-3 py-1.5 text-meta transition-colors"
-              style={{
-                borderColor: isSelected ? filter.color : 'var(--border-hairline)',
-                color: isSelected ? filter.color : 'var(--color-ink-2)',
-                backgroundColor: isSelected
-                  ? `color-mix(in srgb, ${filter.color} 14%, var(--color-surface))`
-                  : 'transparent',
-              }}
             >
               {filter.label}
-              <span className="font-tabular text-micro" style={{ color: isSelected ? filter.color : 'var(--color-ink-3)' }}>
-                {counts[filter.status] ?? 0}
-              </span>
+              <span>{counts[filter.status] ?? 0}</span>
             </Link>
           );
         })}
       </div>
 
-      <div className="flex items-center justify-between gap-2 px-gutter">
-        <label className="flex items-center gap-1.5 text-meta text-ink-2">
+      <div>
+        <label>
           Sort by
-          <select
-            value={sortBy}
-            onChange={(event) => setSortBy(event.target.value)}
-            className="rounded-(--radius-sm) border border-(--border-hairline) bg-surface px-2 py-1 text-meta text-ink"
-          >
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -81,7 +63,7 @@ export function FilterRow({ selected, counts = {} }) {
           </select>
         </label>
 
-        <div className="flex items-center gap-1 rounded-(--radius-md) border border-(--border-hairline) p-0.5">
+        <div>
           <ViewModeButton mode="list" current={viewMode} onSelect={setViewMode} icon={List} label="List view" />
           <ViewModeButton mode="grid" current={viewMode} onSelect={setViewMode} icon={LayoutGrid} label="Grid view" />
         </div>
@@ -93,18 +75,8 @@ export function FilterRow({ selected, counts = {} }) {
 function ViewModeButton({ mode, current, onSelect, icon: Icon, label }) {
   const active = mode === current;
   return (
-    <button
-      type="button"
-      aria-pressed={active}
-      aria-label={label}
-      onClick={() => onSelect(mode)}
-      className="flex h-9 w-9 items-center justify-center rounded-(--radius-sm) transition-colors"
-      style={{
-        color: active ? 'var(--color-brand)' : 'var(--color-ink-3)',
-        backgroundColor: active ? 'var(--color-brand-soft)' : 'transparent',
-      }}
-    >
-      <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
+    <button type="button" aria-pressed={active} aria-label={label} onClick={() => onSelect(mode)}>
+      <Icon aria-hidden="true" />
     </button>
   );
 }
