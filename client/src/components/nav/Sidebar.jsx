@@ -29,7 +29,7 @@ export function Sidebar({ needsReviewCount = 0 }) {
       </Link>
 
       <Button variant="primary" size="md" className="mb-4 w-full" onClick={openCreateSheet}>
-        <Plus size={18} strokeWidth={2} aria-hidden="true" />
+        <Plus size={20} strokeWidth={2} aria-hidden="true" />
         New task
       </Button>
 
@@ -48,7 +48,7 @@ export function Sidebar({ needsReviewCount = 0 }) {
             }}
           >
             <span className="relative">
-              <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+              <Icon size={24} strokeWidth={1.8} aria-hidden="true" />
               {tab.key === 'tasks' && needsReviewCount > 0 && (
                 <span
                   aria-hidden="true"
@@ -57,7 +57,7 @@ export function Sidebar({ needsReviewCount = 0 }) {
                 />
               )}
             </span>
-            <span className="font-medium">{tab.label}</span>
+            <span className="text-meta font-semibold">{tab.label}</span>
           </Link>
         );
       })}

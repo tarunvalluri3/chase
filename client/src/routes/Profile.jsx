@@ -115,7 +115,7 @@ function getInitials(user) {
 function SettingsSection({ title, children }) {
   return (
     <div className="flex flex-col gap-2">
-      <h2 className="px-1 text-micro text-ink-3 uppercase">{title}</h2>
+      <h2 className="px-1 text-meta font-semibold text-ink-3 uppercase tracking-wide">{title}</h2>
       <ul className="flex flex-col rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
         {Array.isArray(children)
           ? children.map((child, index) => (

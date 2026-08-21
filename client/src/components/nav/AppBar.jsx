@@ -13,14 +13,14 @@ export function AppBar({ title, context, action, onBack }) {
             type="button"
             onClick={onBack}
             aria-label="Back"
-            className="-ml-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-(--radius-sm) text-ink-2 hover:text-ink"
+            className="-ml-2.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-(--radius-sm) text-ink-2 hover:text-ink"
           >
-            <ChevronLeft size={22} strokeWidth={1.75} aria-hidden="true" />
+            <ChevronLeft size={24} strokeWidth={1.8} aria-hidden="true" />
           </button>
         )}
         <div className="min-w-0">
           <h1 className="text-title text-ink">{title}</h1>
-          {context && <p className="mt-1 text-micro text-ink-3">{context}</p>}
+          {context && <p className="mt-1 text-meta font-semibold text-ink-3">{context}</p>}
         </div>
       </div>
       {action && <div className="shrink-0 pt-1">{action}</div>}

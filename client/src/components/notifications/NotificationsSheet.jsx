@@ -161,7 +161,7 @@ export function NotificationsSheet({ triggerRef }) {
                   {notification.title}
                 </span>
                 <span className="text-meta text-ink-3">{notification.body}</span>
-                <span className="text-micro text-ink-3">{formatTimestamp(notification.created_at)}</span>
+                <span className="text-meta text-ink-3">{formatTimestamp(notification.created_at)}</span>
               </Link>
             </li>
           ))}

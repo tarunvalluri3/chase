@@ -98,13 +98,13 @@ function ViewModeButton({ mode, current, onSelect, icon: Icon, label }) {
       aria-pressed={active}
       aria-label={label}
       onClick={() => onSelect(mode)}
-      className="flex h-8 w-8 items-center justify-center rounded-(--radius-sm) transition-colors"
+      className="flex h-9 w-9 items-center justify-center rounded-(--radius-sm) transition-colors"
       style={{
         color: active ? 'var(--color-brand)' : 'var(--color-ink-3)',
         backgroundColor: active ? 'var(--color-brand-soft)' : 'transparent',
       }}
     >
-      <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
+      <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
     </button>
   );
 }

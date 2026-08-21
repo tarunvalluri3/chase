@@ -65,13 +65,13 @@ export function TaskDetail({ task, onTaskUpdated }) {
         <span className="font-tabular text-meta text-ink-3">Due {formatTimestamp(task.deadline)}</span>
         {task.reminder_enabled && (
           <span className="flex items-center gap-1 text-meta text-ink-3">
-            <Bell size={14} strokeWidth={1.8} aria-hidden="true" />
+            <Bell size={16} strokeWidth={1.8} aria-hidden="true" />
             Reminder on
           </span>
         )}
         {task.repeat_rule && task.repeat_rule !== 'NONE' && (
           <span className="flex items-center gap-1 text-meta text-ink-3">
-            <Repeat size={14} strokeWidth={1.8} aria-hidden="true" />
+            <Repeat size={16} strokeWidth={1.8} aria-hidden="true" />
             {repeatText(task.repeat_rule)}
           </span>
         )}

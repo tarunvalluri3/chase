@@ -78,7 +78,7 @@ function NavTab({ tab, active, badge = false }) {
         />
       )}
       <span className="relative shrink-0">
-        <Icon size={19} strokeWidth={1.8} color={active ? 'var(--color-brand)' : 'var(--color-ink-3)'} aria-hidden="true" />
+        <Icon size={24} strokeWidth={1.8} color={active ? 'var(--color-brand)' : 'var(--color-ink-3)'} aria-hidden="true" />
         {badge && (
           <span
             aria-hidden="true"
@@ -89,7 +89,7 @@ function NavTab({ tab, active, badge = false }) {
       </span>
       <span
         aria-hidden="true"
-        className="relative text-micro font-semibold whitespace-nowrap"
+        className="relative text-meta font-semibold whitespace-nowrap"
         style={{ color: active ? 'var(--color-brand)' : 'var(--color-ink-3)' }}
       >
         {tab.label}

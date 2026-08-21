@@ -34,9 +34,9 @@ export function OfflineBar() {
         type="button"
         onClick={() => setDismissed(true)}
         aria-label="Dismiss"
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-(--radius-sm)"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-(--radius-sm)"
       >
-        <X size={16} strokeWidth={1.75} aria-hidden="true" />
+        <X size={18} strokeWidth={1.8} aria-hidden="true" />
       </button>
     </div>
   );

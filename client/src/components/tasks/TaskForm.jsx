@@ -206,7 +206,7 @@ export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
         className="flex items-start gap-2 rounded-(--radius-md) px-3 py-2.5 text-meta text-ink-2"
         style={{ backgroundColor: 'var(--color-brand-soft)' }}
       >
-        <Info size={16} strokeWidth={1.8} className="mt-0.5 shrink-0" color="var(--color-brand)" aria-hidden="true" />
+        <Info size={18} strokeWidth={1.8} className="mt-0.5 shrink-0" color="var(--color-brand)" aria-hidden="true" />
         <span>Be specific and clear to stay focused and get things done!</span>
       </div>
 
