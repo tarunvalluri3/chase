@@ -28,7 +28,7 @@ export const clerkAppearance = {
     cardBox: 'w-full shadow-none bg-transparent',
     card: 'w-full gap-6 rounded-(--radius-xl) border border-(--border-hairline) bg-surface p-6 shadow-none',
     header: 'gap-1.5',
-    headerTitle: 'font-serif text-title text-ink',
+    headerTitle: 'text-title text-ink',
     headerSubtitle: 'text-body text-ink-2',
     logoBox: 'hidden',
     socialButtonsBlockButton:
@@ -45,7 +45,7 @@ export const clerkAppearance = {
     formFieldErrorText: 'text-meta text-danger',
     formFieldSuccessText: 'text-meta text-completed',
     formButtonPrimary:
-      'h-(--size-tap-min) rounded-(--radius-md) bg-accent-solid text-canvas text-body font-medium normal-case shadow-none hover:bg-accent-press transition-colors',
+      'h-(--size-tap-min) rounded-(--radius-md) bg-accent-solid text-white text-body font-medium normal-case shadow-none hover:bg-accent-press transition-colors',
     footerActionText: 'text-body text-ink-2',
     footerActionLink: 'text-body text-accent hover:text-accent-solid font-medium',
     identityPreview: 'rounded-(--radius-md) border border-(--border-strong) bg-surface-sunken',

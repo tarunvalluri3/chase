@@ -1,6 +1,6 @@
 // Shared Framer Motion variants + reduced-motion helpers — DESIGN.md §5.
-
-// DESIGN.md §5 — default ease is gentler in v2 (was [0.22, 0.61, 0.36, 1]).
+// v3: subtle, purposeful motion only — micro ~150ms, standard ~200ms,
+// sheets/modals ~250-300ms, ease-out.
 export const EASE_OUT = [0.25, 0.7, 0.4, 1];
 export const EASE_ENTER = [0.16, 1, 0.3, 1];
 export const EASE_EXIT = [0.4, 0, 1, 1];
@@ -9,10 +9,10 @@ export const SHEET_SPRING = { type: 'spring', stiffness: 420, damping: 38, mass:
 
 export const DURATION = {
   instant: 0.09,
-  fast: 0.14,
+  fast: 0.15,
   base: 0.2,
-  slow: 0.28,
-  sheet: 0.32,
+  slow: 0.26,
+  sheet: 0.28,
 };
 
 // Route cross-fade + 8px Y — never a horizontal slide (§5.5).

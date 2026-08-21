@@ -45,15 +45,22 @@ export default function Profile() {
       <div className="flex items-center gap-4">
         <div
           aria-hidden="true"
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-(--radius-pill) font-serif text-section text-canvas"
-          style={{ background: 'var(--gradient-avatar)' }}
+          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-(--radius-pill) text-section text-white"
+          style={{ background: 'var(--color-brand)' }}
         >
           {initials}
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-task text-ink">{name}</p>
           <p className="truncate text-meta text-ink-3">{email}</p>
         </div>
+        <button
+          type="button"
+          onClick={() => openUserProfile()}
+          className="shrink-0 rounded-(--radius-md) border border-(--border-hairline) px-3 py-2 text-meta font-semibold text-accent transition-colors hover:bg-surface-hover"
+        >
+          Edit profile
+        </button>
       </div>
 
       {/* ---- ledger strip ---- */}
@@ -62,7 +69,7 @@ export default function Profile() {
         <StatTile
           label="On-time rate"
           count={onTimeRate === null ? '—' : `${onTimeRate}%`}
-          color="var(--color-pine)"
+          color="var(--color-brand)"
         />
       </LedgerStrip>
 

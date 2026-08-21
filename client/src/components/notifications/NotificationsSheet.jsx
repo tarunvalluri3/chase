@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sheet } from '../ui/Sheet';
 import { Button } from '../ui/Button';
@@ -20,11 +21,42 @@ const STATUS_ROUTE = {
   DEADLINE_REMINDER: 'active',
 };
 
+// Every backend-emitted type is either a task lifecycle event or a
+// deadline reminder -- there's no SYSTEM-originated type today, but the
+// tab is real (not decorative) and will simply stay empty until one exists.
+function feedCategory(type) {
+  if (type === 'DEADLINE_REMINDER') return 'reminders';
+  if (type?.startsWith('TASK_')) return 'tasks';
+  return 'system';
+}
+
+const FEED_TABS = [
+  { key: 'all', label: 'All' },
+  { key: 'tasks', label: 'Tasks' },
+  { key: 'reminders', label: 'Reminders' },
+  { key: 'system', label: 'System' },
+];
+
 // Mounted once in AppLayout (like ToastViewport), driven entirely by
 // NotificationsContext so any screen's bell opens the same sheet.
 export function NotificationsSheet({ triggerRef }) {
   const { sheetOpen, closeSheet, refreshUnreadCount } = useNotificationsContext();
   const { status, notifications, reload } = useNotificationsFeed(sheetOpen);
+  const [activeTab, setActiveTab] = useState('all');
+
+  const tabCounts = useMemo(() => {
+    const counts = { all: notifications.length, tasks: 0, reminders: 0, system: 0 };
+    for (const notification of notifications) counts[feedCategory(notification.type)] += 1;
+    return counts;
+  }, [notifications]);
+
+  const visibleNotifications = useMemo(
+    () =>
+      activeTab === 'all'
+        ? notifications
+        : notifications.filter((notification) => feedCategory(notification.type) === activeTab),
+    [notifications, activeTab],
+  );
 
   async function markRead(id) {
     try {
@@ -50,13 +82,37 @@ export function NotificationsSheet({ triggerRef }) {
 
   return (
     <Sheet open={sheetOpen} onClose={closeSheet} title="Notifications" returnFocusRef={triggerRef}>
-      {hasUnread && (
-        <div className="mb-2 flex justify-end">
-          <Button size="sm" variant="ghost" onClick={markAllRead}>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {FEED_TABS.map((tab) => {
+            const isSelected = tab.key === activeTab;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => setActiveTab(tab.key)}
+                className="flex shrink-0 items-center gap-1.5 rounded-(--radius-pill) border px-3 py-1.5 text-meta transition-colors"
+                style={{
+                  borderColor: isSelected ? 'var(--color-brand)' : 'var(--border-hairline)',
+                  color: isSelected ? 'var(--color-brand)' : 'var(--color-ink-2)',
+                  backgroundColor: isSelected ? 'var(--color-brand-soft)' : 'transparent',
+                }}
+              >
+                {tab.label}
+                <span className="font-tabular text-micro" style={{ color: isSelected ? 'var(--color-brand)' : 'var(--color-ink-3)' }}>
+                  {tabCounts[tab.key]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {hasUnread && (
+          <Button size="sm" variant="ghost" className="shrink-0" onClick={markAllRead}>
             Mark all read
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {status === 'loading' && notifications.length === 0 && (
         <p className="py-10 text-center text-meta text-ink-3">Loading…</p>
@@ -75,9 +131,13 @@ export function NotificationsSheet({ triggerRef }) {
         <p className="py-10 text-center text-body text-ink-3">Nothing yet. Task updates will show up here.</p>
       )}
 
-      {notifications.length > 0 && (
+      {status === 'loaded' && notifications.length > 0 && visibleNotifications.length === 0 && (
+        <p className="py-10 text-center text-body text-ink-3">Nothing in this tab yet.</p>
+      )}
+
+      {visibleNotifications.length > 0 && (
         <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--color-rule)' }}>
-          {notifications.map((notification) => (
+          {visibleNotifications.map((notification) => (
             <li key={notification.id} className="border-t first:border-t-0" style={{ borderColor: 'var(--color-rule)' }}>
               <Link
                 to={`/tasks/${STATUS_ROUTE[notification.type] ?? 'active'}/${notification.task_id}`}

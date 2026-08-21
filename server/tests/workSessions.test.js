@@ -256,12 +256,15 @@ describe('work sessions: summary math', () => {
     const created = await user.post('/api/tasks').send(taskPayload());
     const taskId = created.body.id;
 
+    // getSummary floors totalMs to whole seconds (Math.floor(totalMs / 1000)),
+    // so the elapsed time across both segments must clear a full second of
+    // real wall-clock time, not just sum to a few hundred ms.
     await user.post(`/api/tasks/${taskId}/sessions/start`);
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 600));
     await user.post(`/api/tasks/${taskId}/sessions/pause`);
 
     await user.post(`/api/tasks/${taskId}/sessions/resume`);
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
     const summary = await user.get(`/api/tasks/${taskId}/sessions/summary`);
     expect(summary.status).toBe(200);

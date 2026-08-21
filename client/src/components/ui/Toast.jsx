@@ -30,7 +30,7 @@ export function ToastViewport() {
                 ? { opacity: 0, transition: { duration: 0.12 } }
                 : { opacity: 0, y: 12, transition: { duration: DURATION.base, ease: EASE_EXIT } }
             }
-            className="pointer-events-auto max-w-[min(24rem,calc(100vw-2rem))] rounded-(--radius-md) bg-surface px-4 py-3 text-body text-ink"
+            className="pointer-events-auto max-w-[min(24rem,calc(100vw-2rem))] rounded-(--radius-md) border border-(--border-hairline) bg-surface px-4 py-3 text-body text-ink"
             style={{ boxShadow: 'var(--shadow-toast)' }}
           >
             {toast.message}

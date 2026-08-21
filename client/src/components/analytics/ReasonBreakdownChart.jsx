@@ -41,7 +41,7 @@ export function ReasonBreakdownChart({ title, description, data, color, emptyMes
                   dataKey="count"
                   position="right"
                   fill="var(--color-ink-2)"
-                  fontFamily="var(--font-mono)"
+                  fontFamily="var(--font-sans)"
                   fontSize={11}
                 />
               </Bar>

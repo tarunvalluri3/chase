@@ -47,7 +47,7 @@ export function PriorityBreakdown({ breakdown = [] }) {
                   position="right"
                   formatter={(value) => `${value}%`}
                   fill="var(--color-ink-2)"
-                  fontFamily="var(--font-mono)"
+                  fontFamily="var(--font-sans)"
                   fontSize={11}
                 />
               </Bar>

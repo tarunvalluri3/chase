@@ -93,7 +93,7 @@ export function Sheet({ open, onClose, title, children, returnFocusRef }) {
               <span className="h-1 w-9 rounded-(--radius-pill) bg-surface-sunken" aria-hidden="true" />
             </div>
             <div className="px-gutter pt-2 pb-2">
-              <h2 id={titleId} className="font-serif text-section text-ink">
+              <h2 id={titleId} className="text-section text-ink">
                 {title}
               </h2>
             </div>

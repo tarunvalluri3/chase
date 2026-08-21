@@ -33,7 +33,7 @@ export function StatusComparisonChart({ kpis }) {
                 {data.map((entry) => (
                   <Cell key={entry.key} fill={entry.fill} />
                 ))}
-                <LabelList dataKey="count" position="right" fill="var(--color-ink-2)" fontFamily="var(--font-mono)" fontSize={11} />
+                <LabelList dataKey="count" position="right" fill="var(--color-ink-2)" fontFamily="var(--font-sans)" fontSize={11} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

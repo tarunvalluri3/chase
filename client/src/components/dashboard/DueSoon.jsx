@@ -15,7 +15,7 @@ export function DueSoon({ tasks }) {
 
   return (
     <div className="flex flex-col gap-3 px-gutter">
-      <h2 className="font-serif text-section text-ink">Due soon</h2>
+      <h2 className="text-section text-ink">Due soon</h2>
       <ul className="flex flex-col rounded-(--radius-lg) border border-(--border-hairline) bg-surface">
         {dueSoon.map((task, index) => (
           <li key={task.id} className={index > 0 ? 'border-t border-(--color-rule)' : ''}>

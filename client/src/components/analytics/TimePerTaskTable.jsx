@@ -34,7 +34,7 @@ export function TimePerTaskTable({ data = [] }) {
                     )}
                   </td>
                   <td className="px-4 py-2">{row.status ? <StatusChip status={row.status} /> : '—'}</td>
-                  <td className="px-4 py-2 text-right font-mono text-ink-2">{formatDuration(row.seconds)}</td>
+                  <td className="px-4 py-2 text-right font-tabular text-ink-2">{formatDuration(row.seconds)}</td>
                 </tr>
               ))}
             </tbody>

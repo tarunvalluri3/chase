@@ -11,6 +11,8 @@ import { ResolveSheet } from './ResolveSheet';
 import { TimeTracker } from './TimeTracker';
 import { useTasksContext } from '../../lib/tasksStore';
 import { useTaskLifecycle } from '../../hooks/useTaskLifecycle';
+import { repeatText } from './repeatConfig';
+import { Bell, Repeat } from 'lucide-react';
 
 // Full task info (DESIGN.md §7.3) — a MISSED task also shows its
 // auto-generated missed_reason, and an INCOMPLETE task shows both
@@ -58,9 +60,21 @@ export function TaskDetail({ task, onTaskUpdated }) {
         <StatusChip status={task.status} className="shrink-0" />
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <PriorityLabel priority={task.priority} />
-        <span className="font-mono text-meta text-ink-3">Due {formatTimestamp(task.deadline)}</span>
+        <span className="font-tabular text-meta text-ink-3">Due {formatTimestamp(task.deadline)}</span>
+        {task.reminder_enabled && (
+          <span className="flex items-center gap-1 text-meta text-ink-3">
+            <Bell size={14} strokeWidth={1.8} aria-hidden="true" />
+            Reminder on
+          </span>
+        )}
+        {task.repeat_rule && task.repeat_rule !== 'NONE' && (
+          <span className="flex items-center gap-1 text-meta text-ink-3">
+            <Repeat size={14} strokeWidth={1.8} aria-hidden="true" />
+            {repeatText(task.repeat_rule)}
+          </span>
+        )}
       </div>
 
       {task.description && <p className="whitespace-pre-wrap text-body text-ink-2">{task.description}</p>}
@@ -146,7 +160,7 @@ function Row({ label, value }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <dt>{label}</dt>
-      <dd className="font-mono">{value}</dd>
+      <dd className="font-tabular">{value}</dd>
     </div>
   );
 }

@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { Info } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ApiError, tasksApi } from '../../lib/apiClient';
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from '../../lib/datetime';
 import { PRIORITY_CONFIG } from './priorityConfig';
+import { REPEAT_CONFIG } from './repeatConfig';
 
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
+const REPEAT_RULES = ['NONE', 'DAILY', 'WEEKLY', 'MONTHLY'];
 
 function defaultDeadlineValue() {
   const inOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -24,6 +27,8 @@ export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
   const [description, setDescription] = useState(task?.description ?? '');
   const [deadline, setDeadline] = useState(task ? toDatetimeLocalValue(task.deadline) : defaultDeadlineValue());
   const [priority, setPriority] = useState(task?.priority ?? 'MEDIUM');
+  const [reminderEnabled, setReminderEnabled] = useState(task?.reminder_enabled ?? false);
+  const [repeatRule, setRepeatRule] = useState(task?.repeat_rule ?? 'NONE');
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -47,6 +52,8 @@ export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
       description: description.trim() ? description.trim() : null,
       deadline: fromDatetimeLocalValue(deadline),
       priority,
+      reminder_enabled: reminderEnabled,
+      repeat_rule: repeatRule,
     };
 
     setSubmitting(true);
@@ -142,6 +149,65 @@ export function TaskForm({ mode = 'create', task, onSuccess, onCancel }) {
             </p>
           )}
         </fieldset>
+
+        <div className="flex items-center justify-between gap-3">
+          <span id="reminder-label" className="text-body text-ink">
+            Reminder
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={reminderEnabled}
+            aria-labelledby="reminder-label"
+            onClick={() => setReminderEnabled((prev) => !prev)}
+            className="relative h-7 w-12 shrink-0 rounded-(--radius-pill) transition-colors"
+            style={{ backgroundColor: reminderEnabled ? 'var(--color-brand)' : 'var(--border-strong)' }}
+          >
+            <span
+              aria-hidden="true"
+              className="absolute top-0.5 h-6 w-6 rounded-(--radius-pill) bg-white transition-[left]"
+              style={{ left: reminderEnabled ? '1.375rem' : '0.125rem' }}
+            />
+          </button>
+        </div>
+
+        <fieldset>
+          <legend className="mb-2 text-meta text-ink-2">Repeat</legend>
+          <div
+            role="radiogroup"
+            aria-label="Repeat"
+            className="flex flex-wrap gap-1 rounded-(--radius-md) bg-surface-sunken p-1"
+          >
+            {REPEAT_RULES.map((value) => {
+              const selected = repeatRule === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setRepeatRule(value)}
+                  className="min-h-(--size-tap-min) flex-1 rounded-(--radius-sm) px-2 text-meta font-medium whitespace-nowrap transition-colors"
+                  style={{
+                    color: selected ? 'var(--color-ink)' : 'var(--color-ink-2)',
+                    backgroundColor: selected ? 'var(--color-surface)' : 'transparent',
+                    boxShadow: selected ? 'var(--shadow-card)' : 'none',
+                  }}
+                >
+                  {REPEAT_CONFIG[value].text}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      </div>
+
+      <div
+        className="flex items-start gap-2 rounded-(--radius-md) px-3 py-2.5 text-meta text-ink-2"
+        style={{ backgroundColor: 'var(--color-brand-soft)' }}
+      >
+        <Info size={16} strokeWidth={1.8} className="mt-0.5 shrink-0" color="var(--color-brand)" aria-hidden="true" />
+        <span>Be specific and clear to stay focused and get things done!</span>
       </div>
 
       {formError && (

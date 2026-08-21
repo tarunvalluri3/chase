@@ -61,7 +61,7 @@ export default function Landing() {
       {/* ---- top bar ---- */}
       <div className="flex items-center justify-between px-gutter pt-6">
         <Link to="/" className="flex items-center gap-2" aria-label="Chase">
-          <img src="/brand/chase-mark-on-light.svg" alt="" className="h-7 w-7" />
+          <img src="/brand/chase-mark-on-dark.svg" alt="" className="h-7 w-7" />
           <span className="text-task text-ink">Chase</span>
         </Link>
         <Link
@@ -102,7 +102,7 @@ export default function Landing() {
 
       {/* ---- ledger proof ---- */}
       <section className="border-t border-(--border-hairline) px-gutter py-14">
-        <h2 className="max-w-xs font-serif text-section text-ink">Every task keeps its own record.</h2>
+        <h2 className="max-w-xs text-section text-ink">Every task keeps its own record.</h2>
         <div className="mt-6 flex flex-col">
           {LEDGER_ROWS.map((row, i) => (
             <div
@@ -130,7 +130,7 @@ export default function Landing() {
 
       {/* ---- promises ---- */}
       <section className="border-t border-(--border-hairline) px-gutter py-14">
-        <h2 className="max-w-xs font-serif text-section text-ink">
+        <h2 className="max-w-xs text-section text-ink">
           Built for the moment work slips, not just the moment it's done.
         </h2>
         <div className="mt-6 flex flex-col">
@@ -148,7 +148,7 @@ export default function Landing() {
 
       {/* ---- final CTA ---- */}
       <section className="border-t border-(--border-hairline) px-gutter py-16 text-center">
-        <h2 className="mx-auto max-w-xs font-serif text-section text-ink">
+        <h2 className="mx-auto max-w-xs text-section text-ink">
           Start keeping the record.
         </h2>
         <div className="mx-auto mt-6 max-w-xs">
@@ -158,7 +158,7 @@ export default function Landing() {
         </div>
 
         <div className="mt-16 flex flex-col items-center gap-2">
-          <img src="/brand/chase-mark-on-light.svg" alt="" className="h-6 w-6 opacity-60" />
+          <img src="/brand/chase-mark-on-dark.svg" alt="" className="h-6 w-6 opacity-60" />
           <p className="text-meta text-ink-3">Built to remember, not to judge.</p>
         </div>
       </section>

@@ -1,9 +1,21 @@
 import { supabase } from '../db/supabaseClient.js';
 
-export async function create(userId, { title, description, deadline, priority }) {
+export async function create(
+  userId,
+  { title, description, deadline, priority, reminder_enabled, repeat_rule, repeat_group_id },
+) {
   const { data, error } = await supabase
     .from('tasks')
-    .insert({ user_id: userId, title, description, deadline, priority })
+    .insert({
+      user_id: userId,
+      title,
+      description,
+      deadline,
+      priority,
+      reminder_enabled,
+      repeat_rule,
+      repeat_group_id,
+    })
     .select('*')
     .single();
 
@@ -125,6 +137,7 @@ export async function findActiveDueWithin({ now, until }) {
     .from('tasks')
     .select('*')
     .eq('status', 'ACTIVE')
+    .eq('reminder_enabled', true)
     .gte('deadline', now)
     .lte('deadline', until);
 

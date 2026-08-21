@@ -1,286 +1,265 @@
-# DESIGN.md — Chase Design System v2 ("The Ledger")
+# DESIGN.md — Chase Design System v3 ("Dark Navy")
 
-> **Status:** Approved 2026-08-19, supersedes v1 (approved 2026-08-17). This is the authoritative design reference for all frontend work.
->
-> **Relationship to other docs:** `CLAUDE.md` governs architecture, lifecycle rules, and the approval workflow and always wins on those. This file governs everything visual and interactive. Where a phase prompt describes *what* to build, this file describes *how it should look and behave*.
->
-> **Scope:** mobile-primary, with a real (not token-only) desktop presentation — see §6.3. Design for 360–430px wide as the main target; desktop gets a fixed sidebar layout at ≥960px.
->
-> **Why v2 exists:** v1 (dark, Geist, Steel Teal) was rejected by the user as "very immature" and "not production-ready." v2 was designed against user-supplied reference screenshots (a light, minimal smart-home app UI; a mobile-UI spacing-system reference) and iterated twice more on direct feedback ("fonts too heavy," "looks generic," "change the colors," then a specific nav-bar/card-style correction against a third reference screenshot). The approved visual proposal was published and approved as a Claude Artifact before this document was written — this file records what was approved, not a fresh design pass.
+**This supersedes v2 ("The Ledger") entirely — a deliberate, user-confirmed full redesign, not an incremental tweak.** No light/dark toggle exists or was added anywhere in this app: v3 is a single hard-coded dark theme, the same way v2 was a single hard-coded light theme. Where a code comment still says `DESIGN.md §x` from v2, treat this file's matching section number as the current authority — the section shapes are kept aligned to v2's on purpose so those cross-references don't go stale.
 
 ---
 
-## 0. The thesis (unchanged from v1)
+## 0. The thesis
 
-Chase is not a todo app. It keeps the whole record — what got done, what slipped, what was dropped and why — so the patterns can be read later.
-
-**The interface's job is to make recording the truth feel light rather than accusatory.** Every decision below serves that. When something here is ambiguous, resolve it against that sentence.
-
-The visual expression of that thesis in v2 is literal: real ledger rules (thin hairlines) mark summary/scan rows (stat strips, settings lists), and real cards mark individual task records — the app should read as *a kept record*, not a SaaS admin dashboard.
+Modern, minimal, premium dark-mode productivity app. The UI should feel focused, calm, precise, premium, modern, clean, productive. Avoid generic SaaS gradients/glow, excessive color, heavy shadow, over-rounded everything, and visual clutter. Navy dominates; ocean blue is the one brand accent; every other color (success/warning/danger/info) communicates meaning only, never decoration.
 
 ---
 
 ## 1. Principles
 
-| Principle | What it means in practice |
-|---|---|
-| **Never accuse** | `MISSED` means the deadline passed without a confirmation — nothing more. No red, no failure language, no shame iconography on that path. |
-| **Calm, not corporate** | Muted, tonal color — never the stock blue/red/green/amber combo every generated dashboard defaults to. Type stays light (400–500 weight; 600 only on buttons/priority labels/active nav). Warm paper neutrals, not stark white-on-grey. |
-| **Thumb-first** | Every action lives in the bottom third: bottom navigation, bottom sheets, or the card itself. |
-| **Color that means something** | Priority now carries real color (v1 was intentionally monochrome; the user explicitly asked for this): Pine = low, Dusk blue = medium, Clay red = high. Status colors stay semantic and rare elsewhere. |
-| **Motion confirms, never entertains** | ~200ms, transform/opacity only, gentle easing — see §5. |
-| **Never color alone** | Every status carries a word; every priority carries a label. Legible in greyscale. |
+- **Navy first.** The app background, surfaces, and most chrome are dark navy. Color is reserved for meaning: brand actions, status, priority.
+- **One brand color.** `#1683F7` ocean blue is the only accent — links, focus rings, the primary button, the FAB, selected nav state. It never doubles as a status color.
+- **Priority is colored, status is colored — never conflated.** Priority uses Low=green/Medium=blue/High=red on the task-card rail. Status uses its own five-way palette (Active=brand blue, Completed=green, Needs review=amber, Not done=muted slate, Deleted=dimmer slate). Both stay legible in grayscale (word + color together, never color alone).
+- **No gradients on functional chrome.** The FAB and buttons are flat fills. A soft radial glow is still fine as an ambient page backdrop (Landing, auth screens) — that's atmosphere, not a component skin.
+- **Minimal shadow.** Hierarchy comes from surface contrast (canvas → surface → elevated surface), not heavy drop shadows.
 
 ---
 
 ## 2. Color
 
-**Theme: light, single theme.** This explicitly reverses v1's "dark only" decision — the user's reference material was uniformly light, and this was confirmed with them directly before building. No dark theme in v2 scope.
-
-### 2.1 Tokens
-
-| Token | Value | Applied to |
-|---|---|---|
-| `--color-canvas` | `#F6F1E5` | App background — warm parchment |
-| `--color-surface` | `#FFFDF7` | Cards, sheets, inputs, nav active capsule |
-| `--color-surface-sunken` | `#EFE8D8` | Pressed states, nav track, sunken inputs, chrome |
-| `--color-rule` | `rgba(36,31,24,.09)` | Ledger hairlines between rows (stat strips, settings, due-soon lists) |
-| `--border-hairline` | `rgba(36,31,24,.10)` | Card borders |
-| `--border-strong` | `rgba(36,31,24,.18)` | Input borders (focus/error only — see §7), dividers |
-| `--color-ink` | `#241F18` | Titles, primary text — warm near-black, never pure black |
-| `--color-ink-2` | `#6B6255` | Body copy, descriptions, reasons |
-| `--color-ink-3` | `#99907E` | Timestamps, inactive nav, helper text |
-| `--color-ink-disabled` | `#B7AF9C` | Disabled labels only |
-
-### 2.2 Brand / priority
+### 2.1 Tokens (`client/src/styles/tokens.css`)
 
 | Token | Value | Role |
 |---|---|---|
-| `--color-pine` | `#24473E` | Brand accent · `ACTIVE` status · **Low priority** · primary buttons, links, focus ring, active nav capsule text |
-| `--color-pine-press` | `#1A342D` | Primary button pressed/hover |
-| `--color-pine-tint` | `#E4EBE6` | 14% tint background for Pine-colored chips/pills |
-| `--color-dusk` | `#4F6E85` | **Medium priority.** No other job — this is the one place blue appears. |
-| `--color-dusk-tint` | `#E7EDF1` | Medium priority chip/pill background |
-| `--color-clay` | `#AD5133` | **High priority** + the only destructive-action color (delete button, delete-account row). Never used for a resting status. |
-| `--color-clay-tint` | `#F5E7DF` | High priority / danger chip/pill background |
+| `--color-canvas` | `#06111B` | App background |
+| `--color-surface` | `#0B1A27` | Cards, sheets, inputs |
+| `--color-surface-sunken` | `#102235` | Elevated surface (nav bars, panels) |
+| `--color-surface-hover` | `#142A40` | Hover/pressed surface |
+| `--color-ink` | `#F2F6FA` | Primary text |
+| `--color-ink-2` | `#A7B5C2` | Secondary text |
+| `--color-ink-3` | `#6F8190` | Muted text, inactive nav, timestamps |
+| `--color-ink-disabled` | `#4A5A68` | Disabled labels only |
+| `--border-hairline` | `#1B344A` | Default border |
+| `--border-strong` | `#254761` | Strong/focused border |
+| `--color-brand` | `#1683F7` | Primary ocean blue |
+| `--color-brand-hover` | `#0874E5` | Primary hover/press |
+| `--color-brand-soft` | `#0D2C4A` | Brand tint background |
 
-### 2.3 Status (unchanged roles from v1, new values)
+### 2.2 Brand / priority
 
-| Status | Color | Chip label | Tint |
+`--color-pine`/`--color-pine-press`/`--color-pine-tint` are kept as stable alias names (repointed to brand/brand-hover/brand-soft) so the ~15 files that already reference "pine" by name — `BottomNav`, `Sidebar`, `ResolveSheet`, `clerkAppearance.js`'s badge, the auth backdrop glow — resolve to the new brand blue with zero code changes. Treat "pine" and "brand" as the same token family going forward.
+
+Priority: **Low → green, Medium → blue, High → red.** Low priority deliberately aliases `--color-moss` (success green), **not** brand blue — brand identity and "this is a low-priority task" are unrelated concepts in v3 (v2's pine served both roles; that coupling is gone).
+
+| Priority | Rail/label color | Tint |
+|---|---|---|
+| Low | `--color-moss` `#52D273` | `#103522` |
+| Medium | `--color-dusk` `#3B9CFF` | `#0B2943` |
+| High | `--color-clay` `#FF6262` | `#3A171C` |
+
+### 2.3 Status
+
+| Status | Chip label | Color | Tint |
 |---|---|---|---|
-| `ACTIVE` | `--color-pine` `#24473E` | Active | `--color-pine-tint` |
-| `COMPLETED` | `--color-moss` `#62793F` | Completed | `--color-moss-tint` `#EBEEE0` |
-| `MISSED` | `--color-ochre` `#A87A2E` | **Needs review** | `--color-ochre-tint` `#F3EADA` |
-| `INCOMPLETE` | `--color-sand` `#8E7A4F` | Not done | `--color-sand-tint` `#F0EAD9` |
-| `DELETED` | `--color-stone` `#8B8474` | Deleted | `--color-stone-tint` `#ECE9DE` |
-| *danger (action only)* | `--color-clay` `#AD5133` | — | `--color-clay-tint` |
+| ACTIVE | Active | `--color-brand` `#1683F7` | — |
+| COMPLETED | Completed | `--color-moss` `#52D273` | `#103522` |
+| MISSED | Needs review | `--color-ochre` `#F2B84B` | `#382A12` |
+| INCOMPLETE | Not done | `--color-sand` `#8FA1B3` | `#14212C` |
+| DELETED | Deleted | `--color-stone` `#6B7A89` | `#101A22` |
 
-**The most important rule carries over unchanged from v1: red (`--color-clay`) is bound to the destructive action and to HIGH priority — never to the resting `DELETED` or `MISSED` state.** `MISSED` stays ochre, `DELETED` stays stone grey.
+The brief only defines four semantic colors (success/warning/danger/info); the app has five statuses. `INCOMPLETE`/`DELETED` deliberately get their own **muted neutral** tones rather than reusing warning or danger — a confirmed-not-done task or a deleted one shouldn't visually imply the same severity as an active warning or a destructive action. `MISSED` reads "Needs review" and `INCOMPLETE` reads "Not done" — unchanged wording from v2, only colors moved (see CLAUDE.md's MISSED-is-a-checkpoint rule, still binding).
+
+Chip background is a 16% `color-mix()` of the status color over `--color-surface`, computed live in `StatusChip.jsx` — not a separate `-tint` token — so it always tracks the surface color correctly.
 
 ### 2.4 Contrast
 
-Every ink/status/priority color above is a dark, muted tone against the `#F6F1E5` canvas or `#FFFDF7` surface — re-verify AA (4.5:1 body / 3:1 large-UI) against both grounds before shipping each token; re-check whenever a value changes. `--color-ink-disabled` and any tint background are decorative/disabled-only, never body text.
+Every text/background pairing above (primary text `#F2F6FA` on canvas `#06111B`, secondary `#A7B5C2` on surface `#0B1A27`, etc.) clears WCAG AA at body-text sizes. Status/priority colors on their own tint backgrounds clear AA for large/bold text (chip and badge use).
 
 ---
 
 ## 3. Typography
 
-**Three faces, one job each.** Self-hosted via `@fontsource` packages (not a CDN `<link>`, consistent with v1's self-hosting principle — see §10.1).
+**Inter is the only typeface** (self-hosted via `@fontsource-variable/inter`, no CDN). No serif anywhere — v2's Literata is gone, and so is the separate JetBrains Mono face; numerals that need fixed-width alignment use Inter's own tabular figures via the `.font-tabular` utility (`font-variant-numeric: tabular-nums`) instead of a second font file.
 
-- **Literata** (serif) — headings and numerals only: `display`, `title`, `section` scale roles. Weight 500 only, never 600+. This is the one deliberately warm, literary touch in the system — used sparingly.
-- **Manrope** (sans) — everything else: body, task titles, buttons, labels, nav. Weights 400/500/600. **600 is reserved for buttons, priority labels/pills, and the active nav item — nothing else goes bold.**
-- **JetBrains Mono** — anything the app is keeping a record of: deadlines, timestamps, counts, durations, micro-labels. Weights 400/500.
+### 3.1 Scale (`--text-*` tokens, same names as v2, values remapped)
 
-```
-Sans fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
-Serif fallback: Georgia, "Times New Roman", serif
-Mono fallback: ui-monospace, "SF Mono", Menlo, Consolas, monospace
-```
+| Token | Size / line-height | Weight | Tracking | Role |
+|---|---|---|---|---|
+| `--text-display` | 40px / 44px | 600 | 0 | Large KPI |
+| `--text-title` | 32px / 38px | 600 | 0 | Screen title |
+| `--text-section` | 20px / 28px | 600 | 0 | Page-section header ("Due soon", sheet titles) |
+| `--text-task` | 17px / 24px | 600 | 0 | Card/task title |
+| `--text-body` | 16px / 24px | 400 | 0 | Body copy |
+| `--text-meta` | 14px / 20px | 400 | 0 | Secondary text, form labels |
+| `--text-micro` | 12px / 16px | 600 | 0.06em | Labels/badges/uppercase section labels |
 
-### 3.1 Scale
+`--text-section` is Chase's own page-header role (sentence case, not the brief's uppercase "Section label" concept) — it covers "Due soon"/"Recent activity"/sheet titles, which read as plain headers in the reference screenshots, not tracked eyebrow labels. `--text-micro` covers both small badges (StatusChip, PriorityLabel) and uppercase section eyebrows (Profile's "ACCOUNT"/"PREFERENCES") — one token, two visually-compatible uses, same as v2.
 
-| Role | Size / line-height | Weight | Tracking | Face | Used for |
-|---|---|---|---|---|---|
-| `display` | 38/44 | 500 | -0.015em | Literata | Dashboard/profile stat numerals |
-| `title` | 27/34 | 500 | -0.01em | Literata | Screen titles |
-| `section` | 19/26 | 500 | -0.008em | Literata | Section headings, sheet titles |
-| `task` | 16/23 | 600 | -0.006em | Manrope | Task titles |
-| `body` | 15.5/25 | 400 | 0 | Manrope | Descriptions, reasons, helper text |
-| `meta` | 12.5/18 | 400 | 0 | Mono | Deadlines, timestamps, counts |
-| `micro` | 10.5/14 | 500 | 0.09em, uppercase | Mono | Status chips, priority labels, eyebrows |
+### 3.2 Type rules
 
-### 3.2 Type rules (unchanged from v1 — still correct)
+- 16px minimum on every input (`text-base` in `TaskForm.jsx`'s `inputClassName`) — prevents iOS auto-zoom.
+- `rem`, never `px`.
+- Task titles clamp to 2 lines (`line-clamp-2`); reasons (missed/incomplete/deletion) are never truncated in the detail view.
+- Numerals that need alignment (stat counts, chart axis labels, filter/tab counts, timestamps, durations) get `.font-tabular`.
 
-- 16px minimum on every input (prevents iOS auto-zoom).
-- `font-variant-numeric: tabular-nums` globally on mono.
-- Task titles clamp to two lines; full title in detail view.
-- Reasons never truncated in detail view; clamp to three lines in a list.
-- Sizes in `rem`, not `px`.
-- 10.5px is the floor, uppercase mono labels only.
+### 3.3 Voice — unchanged from v2
 
-### 3.3 Voice — unchanged from v1
-
-Carries over verbatim: never say "Failed"/"You missed this"/etc.; the missed prompt, resolve-option copy, reason-field copy, button/toast copy, and error copy from v1 §3.3 all still apply. No copy changes in this redesign.
+Non-accusatory, past-tense confirmations ("Completed" / "Deleted" / "Saved"), never a raw API error message surfaced to the user, MISSED framed as a checkpoint never a verdict.
 
 ---
 
 ## 4. Space, shape, elevation
 
-| Token | Value | Used for |
+### 4.1 Space
+
+The 8px scale itself is unchanged from v2 (4/8/12/16/20/24/32/40/48/64px — `--spacing-1` through `--spacing-10`) — only two usage conventions moved: `--spacing-gutter` (screen horizontal padding) is now 24px (was 16px), and `--spacing-stack-gap` (inter-card gap) is now 12px (was 9px). Card padding is 20px (`p-5`, `--spacing-5`) — bumped from v2's `p-4`/16px on `TaskCard` and form panels.
+
+### 4.2 Radius
+
+| Token | Value | Use |
 |---|---|---|
-| `space-1 … space-10` | 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 | All gaps and padding |
-| `gutter` | 16px | Screen edge inset |
-| `card-gap` | 9–10px | Between task cards in a list |
-| `radius-sm` | 10px | Chips, inputs, small controls |
-| `radius-md` | 14px | Buttons, form inputs, segmented-control track |
-| `radius-lg` | 18px | Task cards, form panels, stat/profile panels |
-| `radius-pill` | 999px | Nav pill, filter chips, avatars, segmented options |
-| `tap-min` | 44×44px | Absolute floor. 48×48 in the bottom nav. |
+| `--radius-sm` | 8px | Chips, small controls |
+| `--radius-md` | 12px | Buttons, form inputs, segmented tracks |
+| `--radius-lg` | 16px | Task cards, form panels, stat panels |
+| `--radius-xl` | 20px | Sheet top corners |
+| `--radius-xxl` | 24px | Reserved for hero-scale surfaces |
+| `--radius-pill` | 999px | Nav pills, filter chips, avatars, switches |
 
-### 4.1 Two list treatments — this is the key structural decision in v2
+### 4.3 List treatment
 
-- **Real elevated cards** — `--color-surface` background, `radius-lg`, 1px `--border-hairline`, soft warm shadow (`0 1px 2px rgba(36,31,24,.03), 0 8px 18px rgba(36,31,24,.045)`), 4px priority-colored left rail, `card-gap` between them — used for **every task list** (Home's Recent Activity, all five Tasks sections). This is what "cards of tasks" refers to.
-- **Ledger rules** — thin `--color-rule` hairlines between rows, no card chrome — used for **summary/scan content**: the Home/Profile stat strip, Due Soon, and every Profile settings row. These are read as a list, not individually acted on the way a task card is.
+Unlike v2's two-tier "elevated cards vs. ledger rows" split, v3 uses **one consistent card treatment** everywhere a list of individually-actioned records appears (task lists, Recent activity, Due soon) — dark surface, 1px hairline border, 16px radius, minimal shadow, 4px priority rail. Summary/settings rows (Profile's account/preferences sections) still use hairline-divided rows with no per-row card chrome, since that's scan content, not individually-actioned records — same distinction v2 drew, just no longer branded as "ledger rows" specifically.
 
-Do not mix the two within one section. A hover/press state exists only on real cards (translateY(-2px) lift on hover, scale(.985) on press) — ledger rows are static.
+### 4.4 Elevation
 
-### 4.2 Elevation
-
-Flat + hairline is still the default. Real shadow (soft, warm-toned, never a hard corporate drop shadow) appears on: task cards, the bottom nav pill, the FAB, bottom sheets, toasts, and form panels. Nothing else casts a shadow.
+Shadows are flat, low-alpha black (`rgba(0,0,0,...)`), not the warm-brown-tinted recipes v2 used on its light background — `--shadow-card`, `--shadow-panel`, `--shadow-sheet`, `--shadow-toast` in `tokens.css`. The one exception is `--shadow-fab`, tinted brand blue (`rgba(22,131,247,.35)`) to match the FAB's own fill color.
 
 ---
 
 ## 5. Motion
 
-Unchanged mechanism from v1 (transform/opacity only, `MotionConfig reducedMotion="user"`, the one signature completion moment at §5.4 of v1 — not repeated here, still in force), with one adjustment:
-
-- **Easing is gentler.** Default transitions use `cubic-bezier(.25,.7,.4,1)` (was `.22,.61,.36,1`) and durations lean slightly longer where it reads calmer (card hover/press ~180–220ms). Nothing becomes slow or laggy — this is a tone adjustment, not a new motion language.
-- All v1 duration/easing tokens (`--dur-instant` 90ms, `--dur-fast` 140ms, `--dur-base` 200ms, `--dur-slow` 280ms, `--dur-sheet` 320ms, the completion-moment choreography) carry forward unchanged in mechanism; only the default ease curve shifts as above.
+Subtle and purposeful only. Micro-interaction ~150ms, standard transition ~200ms, sheets/modals ~250–300ms, `ease-out` default (`client/src/lib/motion.js`'s `DURATION`/`EASE_*` constants). `BottomNav`'s active-tab indicator changed from v2's `layoutId` capsule-morph (a growing pill that hid inactive labels) to a simple opacity-fade static background chip behind an always-visible icon+label — less motion, not more, per the brief's "no gratuitous animation" rule.
 
 ---
 
 ## 6. Navigation
 
-### 6.1 Bottom nav — new spec, replaces v1 §6.1 entirely
+### 6.1 Bottom nav — replaces v2 §6.1
 
-Built to match the user's reference screenshot exactly:
+A dark, rounded, bordered bar (`bg-surface-sunken`, `--radius-xl`) holding **four always-visible icon+label slots** — no growing/morphing capsule, no hidden inactive labels. The active item gets brand-blue icon/label color plus a subtle static `--color-brand-soft` background chip sized to content. The Create FAB is a fully separate 56×56px circle, flat `--color-brand` fill (no gradient), a sibling of the bar in the same row.
 
-- **Pill track**: `--color-surface-sunken` background, 999px radius, ~56px tall, ~5px internal padding, soft shadow, sits centered-left in a flex row.
-- **Four items inside the track**: Home, Tasks, Insights, Profile. **No spacer, no FAB inside the track.**
-- **Active item** renders as a smaller white (`--color-surface`) capsule containing icon + visible text label, with a subtle shadow; it grows (`flex: 2` vs `flex: 1` for inactive) — animate with a Framer `layout` transition.
-- **Inactive items** show icon only, no label, `--color-ink-3`, centered in their flex slot.
-- **FAB is a fully separate element**, a sibling of the pill track in the same flex row, with a visible gap (~10px) between them — never overlapping or merged into the pill. 52px circle, radial-gradient Clay fill (`radial-gradient(circle at 32% 28%, #C36A46, var(--color-clay) 72%)`), white plus glyph, soft clay-tinted shadow, `scale(.93)` on press.
-- Icons: Lucide, 19–20px, 1.8px stroke (carried from v1).
-- Safe-area padding under the whole nav-wrap, same as v1.
+### 6.2 AppBar — unchanged structure from v2
 
-### 6.2 AppBar — unchanged structure from v1 §6.2
+Screen title (`title` scale) + a context line beneath it (e.g. the weekday/date on Home, the current status filter on Tasks). At most one trailing action (the notification bell). No back chevron on tab roots.
 
-Title (Literata `title` scale) + mono uppercase context line. At most one trailing action. No back chevron on tab roots (task detail keeps its chevron, per v1).
+### 6.3 Desktop (≥960px)
 
-### 6.3 Desktop (new — v1 had no desktop treatment)
+Unchanged mechanism from v2: a fixed 220px left `Sidebar` replaces the bottom nav entirely at this breakpoint. Same four destinations, active item gets a `--color-brand-soft` background pill — this was already the "always-visible label + static colored background" pattern the bottom nav was brought in line with, so no structural change was needed here, only token repoints.
 
-At `≥960px`: a fixed 220px left sidebar (logo + four nav items, vertical, active item gets a `--color-pine-tint` background pill) replaces the bottom nav; content renders in a centered column with `max-width` matching the mobile design intent scaled up, generous padding. No new desktop-only features or IA — same four destinations, same components, just more room and a sidebar instead of a bottom bar. Below 960px, the mobile bottom-nav layout is authoritative.
+### 6.4 Routes — unchanged from v2
 
-### 6.4 Routes — unchanged from v1 §6
+Five statuses behind one Tasks tab, six real routes (`/tasks/:status`, `/tasks/:status/:id`). No navigation/IA changes in v3.
 
-Same five-status-behind-one-Tasks-tab model, same six real routes (`/`, `/tasks/active|missed|completed|incomplete|deleted`), same sheet-based Create. No IA changes in this redesign.
+### 6.5 Tasks-list toolbar — new in v3
+
+Beneath the status filter pills, a sort control (Due soon / Priority / Newest) and a list/grid view toggle — both purely client-side (re-sorts/re-lays-out the already-fetched section list; no new API parameter, no persisted server state). State lives in `TasksProvider` (`sortBy`/`viewMode`), read by both `FilterRow` (the controls) and `TaskList` (the effect). `viewMode` persists to `localStorage` as a convenience; `sortBy` resets each session.
 
 ---
 
 ## 7. Components
 
-| Component | Spec |
-|---|---|
-| `Button` | primary (Pine fill) / secondary (bordered) / ghost / destructive (Clay outline, fills Clay-tint on hover — **not** a solid red fill; red stays reserved and quiet even on its own action) · sm/md/lg · 44px min height |
-| `TaskCard` | Real card per §4.1 — priority rail, title, meta row, status/priority chip, conditional action row (same lifecycle-affordance rules as v1 §7.3, unchanged) |
-| `StatusChip` | Five variants per §2.3, 14% tint background, mono micro label |
-| `PriorityLabel` / priority pill | **Now colored** (this reverses v1 §2.5's "monochrome only" rule, explicitly approved): a dot + label in Pine/Dusk/Clay per priority, 14% tint pill background |
-| `FilterRow` | Pills, unfilled outline by default, solid Pine when selected — otherwise unchanged from v1 |
-| `TaskForm` | Fields grouped inside one `--color-surface` panel (`radius-lg`, hairline border, soft shadow) — **not** loose fields on the canvas. Inputs are borderless, `--color-surface-sunken` background, focus adds a Pine border + surface background. Priority is a segmented pill control on a sunken track (selected option gets a white pill + soft shadow, colored text per priority) — replaces v1's three-bordered-box layout. |
-| `Sheet` / `Toast` / `Skeleton` / `EmptyState` / `ErrorState` | Same mechanics as v1 §7, retokenized to v2 colors only — no behavior change |
-| `StatTile` → **ledger strip** | Replaces v1's bordered 2-up KPI-tile grid. A flex row of cells separated by thin vertical rule dividers, Literata numerals, mono micro labels underneath, no card chrome. Used on Home and Profile. |
-| `RecentActivity` / task lists | Real `TaskCard`s per §4.1, not rows |
-| `DueSoon` | Ledger rows per §4.1 (summary content, not individually-actioned cards) |
-| Profile settings rows | Ledger rows, icon + label left, value/chevron right, grouped under mono uppercase section labels (Account / Preferences / Your data / Session) |
-| Chart primitives | Unchanged from v1 §7.4/§12 in mechanism — retokenize the color references only (status/priority tokens moved, series-palette *logic* did not) |
+### 7.1 Cards
 
-### 7.1–7.3 States, empty copy, lifecycle affordances
+Dark navy surface, 1px hairline border, 16px radius, minimal shadow (surface-contrast carries hierarchy, not shadow depth). `TaskCard` additionally carries a 4px priority-colored left rail and a decorative leading checkbox circle (unfilled for ACTIVE, filled + check for COMPLETED) — purely a visual status indicator, not a second tap target; the existing Complete/Delete text buttons remain the only way to actually trigger a lifecycle action, so there's no risk of a duplicate/conflicting completion path.
 
-Unchanged from v1 §7.1–§7.3 verbatim — four states per list/detail view, the same empty-state copy table, the same per-status action-rendering rules. This redesign does not touch behavior or copy.
+### 7.2 Inputs
+
+Dark surface, subtle border, brand-blue border on focus, muted placeholders. 44px tap-target floor everywhere; primary CTA buttons are ~52px tall.
+
+### 7.3 Buttons
+
+- **Primary** — `#1683F7` fill, white text, 12px radius, ~52px height for CTA-scale usage (44px for `size="md"`, 36px for `size="sm"`). No gradient.
+- **Secondary** — transparent/dark surface, subtle border, secondary text color.
+- **Ghost** — transparent, no border.
+- **Destructive** — a red outline that fills a red tint on hover, never a solid red fill; red stays reserved and quiet even on its own action (unchanged rule from v2).
+
+### 7.4 FAB
+
+56×56px circle, flat `#1683F7`, white icon, brand-tinted glow shadow. No gradient (v2's radial clay gradient is gone).
+
+### 7.5 Badges / chips
+
+`StatusChip` (5 status variants) and `PriorityLabel` (3 priority variants) both use a `color-mix()`-derived tint background over `--color-surface` at the component's own base color, computed live rather than from a separate `-tint` token — this is unchanged mechanics from v2, just new underlying colors.
+
+### 7.6 Stat tiles — restructured in v3
+
+`StatTile`/`LedgerStrip` (`components/dashboard/StatTile.jsx`) moved from v2's thin-rule-divided ledger strip (a big serif numeral + small colored label, no icon) to a **card with an optional colored icon bubble** per cell — a lucide icon in a `color-mix()`-tinted circle, above a bold numeral, above a muted label, no divider rules between cells. Used by Home's 5-cell status row (`StatusCounts`, with icons) and Profile's 2-cell stat row (`KpiRow`/Profile, without icons — a plain numeral suffices there). `computeStatusCounts`/`STATUS_ORDER` (`lib/taskStats.js`) are unchanged; this was a render-layer restructure only.
+
+### 7.7 Sheets / toast / skeleton / empty / error states
+
+Same mechanics as v2 (`Sheet.jsx`'s drag-to-dismiss + focus trap, `Toast.jsx`'s single-at-a-time `aria-live` viewport, `Skeleton.jsx`'s shimmer sweep), retokenized for dark surfaces. The shimmer sweep now cycles `--color-surface` → `--color-surface-hover` (was `--color-surface` → `--color-surface-sunken` in v2, since `-sunken` is now the *elevated* surface role, not a dimmer one).
+
+### 7.8 Task creation form — Reminder/Repeat added in v3
+
+`TaskForm.jsx` gained two new real (backend-wired, not decorative) fields beyond v2's Title/Description/Deadline/Priority:
+
+- **Reminder** — a switch (`role="switch"`), `reminder_enabled` on the task. Opts the task into the *existing* global deadline-reminder sweep (`DEADLINE_REMINDER_HOURS_BEFORE`, unchanged from Phase 17) rather than introducing a second, per-task custom offset — the toggle is a filter on top of infrastructure that already existed, not a new notification mechanism.
+- **Repeat** — a 4-option segmented control (Does not repeat / Daily / Weekly / Monthly, `repeat_rule`), styled identically to the existing Priority segmented control. Completing a repeating task spawns a brand-new `ACTIVE` task (never mutates the completed one) with its deadline advanced from the **original** deadline by one interval — see `server/src/services/recurrenceService.js`. This never introduces a new task-lifecycle transition; it's a side effect appended after `completeTask`/`resolveMissedTask`'s existing `COMPLETED` write, the same pattern `notificationService` already uses.
+
+A static blue "Tip" callout (`--color-brand-soft` background, no data binding) closes out the form, matching the reference screenshot.
 
 ---
 
-## 8. Profile — new, built out from a placeholder
+## 8. Profile
 
-v1 shipped Profile as a one-line placeholder with only sign-out. v2 builds it in full, using the **ledger-strip + settings-rows** pattern from §7:
-
-- **Header**: avatar (Literata initials on a Pine gradient circle), name, email.
-- **Ledger strip**: Completed count, on-time rate — same component as Home's stat strip.
-- **Account** section: Name & email, Change password, Two-factor authentication, Active sessions.
-- **Preferences** section: Notifications, Time zone.
-- **Your data** section: Export your history.
-- **Session** section: Sign out, Delete account (the one row using `--color-clay` — the danger-row treatment).
-
-**Implementation note — no new backend, per the explicit "no backend or behavior changes" instruction:** Change password, Two-factor authentication, and Active sessions are **not new custom flows**. Clerk's `<UserProfile />` component already provides all three (password change, TOTP/2FA management, active-session listing) against the existing Clerk account with zero backend work. These rows open that existing Clerk-managed surface (as a modal via `openUserProfile()` from `useClerk()`, or route to a `/profile/account` catch-all rendering `<UserProfile />`) rather than being built from scratch. Notifications and Time zone are static/display-only in this pass (no preferences backend exists) — show current values, no persistence, same "acceptable placeholder, not a lie" standard v1 used for stubbed counts. Export your history and Delete account are UI affordances only in this pass with no wired behavior (no export/account-deletion endpoint exists yet) — they render but should visibly indicate "not yet available" (e.g. a disabled/soon state) rather than silently doing nothing, so as not to imply a working feature that isn't. Confirm scope for these two specifically before wiring any real behavior in a later phase.
+Unchanged structure from v2 (avatar header, a 2-cell stat row, grouped settings sections with uppercase mono-adjacent section labels and hairline-divided rows) — v3 adds an explicit "Edit profile" button next to the avatar (calls the same `openUserProfile()` Clerk handler the "Name & email" row already used) and flattens the avatar's v2 radial-gradient fill to a flat `--color-brand` circle, matching the FAB's no-gradient rule.
 
 ---
 
-## 9. Home — rebuilt from placeholder-grade to real
+## 9. Home
 
-Structure (unchanged data/logic from Phase 14 — `useDashboardTasks`, `lib/taskStats.js` — only presentation changes):
-
-1. AppBar: "Home" + today's date context line.
-2. Ledger strip: Active / Completed / Needs review / Deleted counts.
-3. Due Soon: ledger rows, ochre amber timing, never red.
-4. Recent Activity: real `TaskCard`s (this is the one place v1 used a plain row; v2 upgrades it to match the Tasks list).
-
-Loading/empty/error states unchanged in structure from Phase 14, retokenized.
+Unchanged structure from v2 (greeting, notifications banner, status counts, Due soon, Recent activity) — only `StatusCounts`' stat-tile rendering changed (§7.6 above); `DueSoon`/`RecentActivity` are pure token restyles.
 
 ---
 
 ## 10. Accessibility & mobile checklist
 
-Unchanged from v1 §8–§9 verbatim: contrast, 44/48px tap targets, never-color-alone, focus ring (now Pine-colored, 2px, canvas-offset), sheet semantics, live regions, card semantics, text scaling to 200%, reduced motion, viewport/safe-area/`100dvh`/tap-feel/offline/installable/UTC-time rules. Re-verify contrast numbers against the new palette (§2.4) before closing whichever phase touches each surface — the checklist items themselves don't change, only the color values being checked.
+Unchanged from v2 and re-verified against the new palette: `:focus-visible` uses `var(--color-accent)` (now brand blue) at 2px with a 2px offset; every status/priority pairing carries both a color and a word so grayscale legibility holds; 44px tap-target floor (48px in the bottom nav) unchanged; safe-area insets, `100dvh`, `overscroll-behavior-y: contain`, and reduced-motion handling are all unchanged mechanisms, just running against new token values.
 
 ---
 
 ## 11. Implementation
 
-### 11.1 Fonts — self-hosted via npm, not a CDN link
+### 11.1 Fonts
 
-```
-npm install @fontsource/literata @fontsource-variable/manrope @fontsource/jetbrains-mono
-```
-
-Import the specific weights needed (Literata 500; Manrope 400/500/600; JetBrains Mono 400/500) in `main.jsx` or `globals.css`, consistent with v1's self-hosting principle — no `fonts.googleapis.com` runtime dependency.
+Self-hosted via `@fontsource-variable/inter`, imported once in `client/src/styles/globals.css`. No CDN link. v2's three-package font stack (`@fontsource/literata`, `@fontsource-variable/manrope`, `@fontsource/jetbrains-mono`) was removed from `client/package.json` entirely.
 
 ### 11.2 Tokens are still the only source of color
 
-Same rule as v1 §10.1 — no component writes a hex, everything through `tokens.css` `@theme`. Replace v1's token values with §2/§3/§4 of this document; **priority tokens change from monochrome to the Pine/Dusk/Clay values in §2.2** — every consumer of the old `--color-priority-*` tokens (`PriorityRail`, `PriorityLabel`, `priorityConfig.js`, `TaskForm`'s segmented control) must be updated together since the rename isn't 1:1 (three greyscale values become three hued ones with tint pairs).
+No component may write a literal hex value — confirmed via `grep -rnE "#[0-9a-fA-F]{3,8}" src` returning zero matches outside `tokens.css` itself. Every color is a `var(--color-*)` reference.
 
 ### 11.3 Where things live
 
-Unchanged from v1 §10.2 — no new directories needed; `components/dashboard/` gains the ledger-strip pattern, `routes/Profile.jsx` gets built out in place.
+`client/src/styles/tokens.css` (all tokens), `client/src/styles/globals.css` (font import, base reset, `.font-tabular`/`.shimmer` utilities), `client/src/lib/motion.js` (shared Framer Motion timing).
 
-### 11.4 Impeccable
+### 11.4 No theme toggle
 
-Unchanged from v1 §10.3 — run the detector before closing out this redesign work, treat findings as blocking.
+Confirmed via a full-repo search: no light/dark switching mechanism exists anywhere in the client. v3 is a single, hard-coded dark theme, same as v2 was a single hard-coded light theme — this was not introduced as part of the redesign and is out of scope unless separately requested.
 
 ---
 
-## 12. Approved decisions (v2)
-
-Supersedes v1 §11 in full.
+## 12. Approved decisions (v3, supersedes v2 §12)
 
 | Decision | Outcome |
 |---|---|
-| Theme | **Light only**, reversing v1's dark-only decision. Confirmed directly with the user before implementation. |
-| Typefaces | **Literata** (serif, headings/numerals, 500 only) + **Manrope** (UI, 400/500/600) + **JetBrains Mono** (data), all self-hosted via `@fontsource`. Replaces Geist entirely. |
-| Priority color | **Reverses v1's "monochrome only" rule.** Priority is now colored: Pine low / Dusk blue medium / Clay red high, per explicit user request. |
-| Palette | Muted/tonal "Ledger" palette (§2) replaces v1's Charcoal/Steel-Teal/Indigo system entirely. |
-| List treatment | Two-tier: real elevated cards for task lists, ledger-rule rows for summary/scan content (§4.1) — new in v2. |
-| Bottom nav | Pill track (4 icon slots, one labeled active capsule) + fully separate FAB circle — replaces v1's five-slot single-bar design. |
-| Desktop | Real sidebar layout at ≥960px — new in v2, v1 had no desktop treatment. |
-| Red | Still bound to destructive action only, **plus** now also HIGH priority — never a resting status. Extends, doesn't reverse, v1's rule. |
-| MISSED copy | Unchanged — chip reads "Needs review," section stays "Missed." |
-| Navigation IA | Unchanged — five statuses behind one Tasks tab, six real routes. |
+| Theme | Dark only (reverses v2's light-only decision) |
+| Typeface | Inter only, self-hosted; replaces Literata + Manrope + JetBrains Mono entirely |
+| Numeral alignment | `.font-tabular` (Inter's own tabular figures) replaces the separate JetBrains Mono face |
+| Palette | Dark navy / ocean-blue system replaces v2's warm-parchment "Ledger" palette |
+| Brand vs. Low priority | Decoupled — Low priority is green (success), brand is blue; v2's pine served both roles, v3's does not |
+| INCOMPLETE / DELETED color | Two distinct muted neutrals (not a reuse of warning/danger) — the app has 5 statuses but the brief only defines 4 semantic colors |
+| FAB / avatar | Flat fills, no gradients — reverses v2's radial-gradient FAB and avatar |
+| List treatment | One consistent elevated-card treatment for actioned lists; hairline rows remain for scan/settings content — simplifies v2's two-tier split without changing its underlying logic |
+| Bottom nav | Always-visible icon+label per tab, static colored background on the active item — replaces v2's label-hides-until-active capsule-morph |
+| Desktop sidebar | Unchanged from v2 — already matched the "always-visible label" pattern the bottom nav was brought in line with |
+| Stat tiles | Icon-bubble cards replace v2's divider-rule ledger strip |
+| TaskCard checkbox | Added as a decorative status indicator only, not a second tap target — Complete/Delete buttons remain the sole lifecycle-action affordance |
+| Sort + grid/list view | New, real, client-side-only Tasks-list controls (no backend change) |
+| Reminder (per-task) | New, real, backend-wired — an opt-in filter on the existing global deadline-reminder sweep, not a new per-task offset mechanism |
+| Repeat (recurring tasks) | New, real, backend-wired — spawns a new task on completion, anchored to the original deadline; never mutates the state machine or the completed task itself |
+| Notifications feed tabs | New, real, client-side-only All/Tasks/Reminders/System filter over the existing feed data |
+| Theme toggle | Not added — still a single hard-coded theme, confirmed via full-repo search before concluding so |

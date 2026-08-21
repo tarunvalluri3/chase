@@ -72,9 +72,11 @@ describe('notificationScheduler.runNotificationSweep', () => {
     expect(await countLogs(created.body.id, 'TASK_MISSED')).toBe(0);
   });
 
-  it('sends one DEADLINE_REMINDER for a task due within the configured window, deduped across repeated sweeps', async () => {
+  it('sends one DEADLINE_REMINDER for a reminder-enabled task due within the configured window, deduped across repeated sweeps', async () => {
     const soon = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h from now
-    const created = await user.post('/api/tasks').send(taskPayload({ deadline: soon }));
+    const created = await user
+      .post('/api/tasks')
+      .send(taskPayload({ deadline: soon, reminder_enabled: true }));
     sendEmail.mockClear();
 
     await runNotificationSweep();
@@ -85,11 +87,36 @@ describe('notificationScheduler.runNotificationSweep', () => {
 
   it('does not send a reminder for a task due far beyond the reminder window', async () => {
     const farOut = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
-    const created = await user.post('/api/tasks').send(taskPayload({ deadline: farOut }));
+    const created = await user
+      .post('/api/tasks')
+      .send(taskPayload({ deadline: farOut, reminder_enabled: true }));
     sendEmail.mockClear();
 
     await runNotificationSweep();
 
     expect(await countLogs(created.body.id, 'DEADLINE_REMINDER')).toBe(0);
+  });
+
+  it('does not send a reminder for a task due within the window that has not opted in', async () => {
+    const soon = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h from now
+    const created = await user
+      .post('/api/tasks')
+      .send(taskPayload({ deadline: soon, reminder_enabled: false }));
+    sendEmail.mockClear();
+
+    await runNotificationSweep();
+
+    expect(await countLogs(created.body.id, 'DEADLINE_REMINDER')).toBe(0);
+  });
+
+  it('reminder_enabled defaults to false and round-trips correctly, and can be toggled via PATCH', async () => {
+    const created = await user.post('/api/tasks').send(taskPayload());
+    expect(created.body.reminder_enabled).toBe(false);
+
+    const patched = await user
+      .patch(`/api/tasks/${created.body.id}`)
+      .send({ reminder_enabled: true });
+    expect(patched.status).toBe(200);
+    expect(patched.body.reminder_enabled).toBe(true);
   });
 });

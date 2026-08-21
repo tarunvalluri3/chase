@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useTaskList } from '../../hooks/useTaskList';
 import { useTasksContext } from '../../lib/tasksStore';
+import { sortTasks } from '../../lib/taskStats';
 import { PullToRefresh } from '../ui/PullToRefresh';
 import { EmptyState } from '../ui/EmptyState';
 import { ErrorState } from '../ui/ErrorState';
@@ -12,12 +13,15 @@ import { listContainerVariants, listItemVariants } from '../../lib/motion';
 
 // One list view (Active/Missed/Completed/Incomplete/Deleted), fetching
 // GET /api/tasks?status=... via useTaskList. Implements all four
-// DESIGN.md §7.1 states plus pull-to-refresh (§9).
+// DESIGN.md §7.1 states plus pull-to-refresh (§9). Sort order and
+// list/grid layout come from the shared TasksProvider state that
+// FilterRow's sort/view controls also read and write.
 export function TaskList({ status, emptyTitle, emptyDescription, showCreateAction = false }) {
-  const { tasks, status: loadStatus, reload, removeLocal } = useTaskList(status);
-  const { openCreateSheet } = useTasksContext();
+  const { tasks: rawTasks, status: loadStatus, reload, removeLocal } = useTaskList(status);
+  const { openCreateSheet, sortBy, viewMode } = useTasksContext();
   const reducedMotion = useReducedMotion();
   const [refreshing, setRefreshing] = useState(false);
+  const tasks = useMemo(() => sortTasks(rawTasks, sortBy), [rawTasks, sortBy]);
 
   async function handlePullRefresh() {
     setRefreshing(true);
@@ -57,7 +61,11 @@ export function TaskList({ status, emptyTitle, emptyDescription, showCreateActio
         variants={listContainerVariants(reducedMotion)}
         initial="initial"
         animate="animate"
-        className="flex flex-col gap-(--spacing-stack-gap) px-gutter pt-4 pb-4"
+        className={
+          viewMode === 'grid'
+            ? 'grid grid-cols-2 gap-(--spacing-stack-gap) px-gutter pt-4 pb-4 min-[960px]:grid-cols-3'
+            : 'flex flex-col gap-(--spacing-stack-gap) px-gutter pt-4 pb-4'
+        }
       >
         <AnimatePresence initial={false}>
           {tasks.map((task, index) => (

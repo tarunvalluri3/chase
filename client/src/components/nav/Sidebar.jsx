@@ -24,8 +24,8 @@ export function Sidebar({ needsReviewCount = 0 }) {
       aria-label="Primary"
     >
       <Link to="/" className="mb-6 flex items-center gap-2 px-2 pt-2" aria-label="Chase home">
-        <img src="/brand/chase-mark-on-light.svg" alt="" className="h-6 w-6" />
-        <span className="font-serif text-section text-ink">Chase</span>
+        <img src="/brand/chase-mark-on-dark.svg" alt="" className="h-6 w-6" />
+        <span className="text-section text-ink">Chase</span>
       </Link>
 
       <Button variant="primary" size="md" className="mb-4 w-full" onClick={openCreateSheet}>

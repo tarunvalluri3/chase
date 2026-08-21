@@ -24,7 +24,7 @@ export function RecentActivity({ tasks }) {
 
   return (
     <div className="flex flex-col gap-3 px-gutter">
-      <h2 className="font-serif text-section text-ink">Recent activity</h2>
+      <h2 className="text-section text-ink">Recent activity</h2>
       <ul className="flex flex-col gap-(--spacing-stack-gap)">
         {activity.map(({ task }) => (
           <li key={task.id}>

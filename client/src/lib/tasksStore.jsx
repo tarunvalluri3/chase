@@ -9,13 +9,35 @@ import { createContext, useCallback, useContext, useState } from 'react';
 // the same Create sheet that lives in the bottom nav.
 const TasksContext = createContext(null);
 
+const VIEW_MODE_STORAGE_KEY = 'chase.tasks.viewMode';
+
+function readStoredViewMode() {
+  try {
+    const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    return stored === 'grid' ? 'grid' : 'list';
+  } catch {
+    return 'list';
+  }
+}
+
 export function TasksProvider({ children }) {
   const [version, setVersion] = useState(0);
   const [createSheetOpen, setCreateSheetOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('deadline');
+  const [viewMode, setViewModeState] = useState(readStoredViewMode);
 
   const refreshTasks = useCallback(() => setVersion((v) => v + 1), []);
   const openCreateSheet = useCallback(() => setCreateSheetOpen(true), []);
   const closeCreateSheet = useCallback(() => setCreateSheetOpen(false), []);
+  const setViewMode = useCallback((mode) => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+    } catch {
+      // Best-effort persistence only — a private/blocked storage context
+      // just means the choice doesn't survive a reload.
+    }
+  }, []);
 
   const value = {
     version,
@@ -23,6 +45,10 @@ export function TasksProvider({ children }) {
     createSheetOpen,
     openCreateSheet,
     closeCreateSheet,
+    sortBy,
+    setSortBy,
+    viewMode,
+    setViewMode,
   };
 
   return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;

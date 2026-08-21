@@ -14,8 +14,8 @@ export function UnresolvedMissed({ missed = [] }) {
   return (
     <div className="flex flex-col gap-3 px-gutter">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-serif text-section text-ink">Needs review</h2>
-        <span className="font-mono text-meta text-ink-3">{missed.length}</span>
+        <h2 className="text-section text-ink">Needs review</h2>
+        <span className="font-tabular text-meta text-ink-3">{missed.length}</span>
       </div>
 
       {missed.length === 0 ? (
@@ -28,7 +28,7 @@ export function UnresolvedMissed({ missed = [] }) {
             <li key={task.id} className={index > 0 ? 'border-t border-(--color-rule)' : ''}>
               <Link to={`/tasks/missed/${task.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
                 <span className="line-clamp-1 text-task text-ink">{task.title}</span>
-                <span className="shrink-0 font-mono text-meta text-ink-3">since {formatTimestamp(task.missed_at)}</span>
+                <span className="shrink-0 font-tabular text-meta text-ink-3">since {formatTimestamp(task.missed_at)}</span>
               </Link>
             </li>
           ))}

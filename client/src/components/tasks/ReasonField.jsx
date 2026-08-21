@@ -33,7 +33,7 @@ export function ReasonField({ label, value, onChange, autoFocus = false, id }) {
           This is kept as history — it's what makes the patterns readable later.
         </p>
         {showCount && (
-          <span className="shrink-0 font-mono text-meta text-ink-3">{value.length}</span>
+          <span className="shrink-0 font-tabular text-meta text-ink-3">{value.length}</span>
         )}
       </div>
     </div>

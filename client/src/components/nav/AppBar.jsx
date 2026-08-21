@@ -19,7 +19,7 @@ export function AppBar({ title, context, action, onBack }) {
           </button>
         )}
         <div className="min-w-0">
-          <h1 className="font-serif text-title text-ink">{title}</h1>
+          <h1 className="text-title text-ink">{title}</h1>
           {context && <p className="mt-1 text-micro text-ink-3">{context}</p>}
         </div>
       </div>

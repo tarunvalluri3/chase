@@ -5,20 +5,20 @@ import { pressVariants } from '../../lib/motion';
 
 const MotionLink = motion.create(Link);
 
-// DESIGN.md §7 — destructive is a Clay outline that fills Clay-tint on
+// DESIGN.md v3 §7 — destructive is a Clay outline that fills Clay-tint on
 // hover, never a solid red fill: red stays reserved and quiet even on its
 // own action.
 const VARIANT_CLASSES = {
-  primary: 'bg-accent-solid text-canvas hover:bg-accent-press',
-  secondary: 'bg-surface text-ink border border-(--border-strong) hover:bg-surface-sunken',
-  ghost: 'bg-transparent text-ink hover:bg-surface-sunken',
+  primary: 'bg-accent-solid text-white hover:bg-accent-press',
+  secondary: 'bg-surface text-ink border border-(--border-strong) hover:bg-surface-hover',
+  ghost: 'bg-transparent text-ink hover:bg-surface-hover',
   destructive: 'bg-transparent text-danger border border-danger hover:bg-clay-tint',
 };
 
 const SIZE_CLASSES = {
   sm: 'h-9 px-3 text-meta',
   md: 'h-11 px-4 text-body',
-  lg: 'h-12 px-5 text-task',
+  lg: 'h-[3.25rem] px-6 text-task', // ~52px, per the primary-CTA height spec
 };
 
 export const Button = forwardRef(function Button(
@@ -39,7 +39,7 @@ export const Button = forwardRef(function Button(
   const isDisabled = disabled || loading;
 
   const sharedClassName = [
-    'inline-flex min-h-(--size-tap-min) items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors',
+    'inline-flex min-h-(--size-tap-min) items-center justify-center gap-2 whitespace-nowrap rounded-(--radius-md) font-medium transition-colors',
     'disabled:cursor-not-allowed disabled:opacity-50',
     VARIANT_CLASSES[variant],
     SIZE_CLASSES[size],

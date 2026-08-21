@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 const prioritySchema = z.enum(['LOW', 'MEDIUM', 'HIGH']);
 const statusSchema = z.enum(['ACTIVE', 'COMPLETED', 'MISSED', 'INCOMPLETE', 'DELETED']);
+const repeatRuleSchema = z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY']);
 
 export const idParamSchema = z.object({
   id: z.string().uuid({ message: 'id must be a valid UUID' }),
@@ -20,6 +21,8 @@ export const createTaskBodySchema = z
       required_error: 'deadline is required',
     }),
     priority: prioritySchema,
+    reminder_enabled: z.boolean().optional(),
+    repeat_rule: repeatRuleSchema.optional(),
   })
   .strict();
 
@@ -31,6 +34,8 @@ export const editTaskBodySchema = z
       .date({ invalid_type_error: 'deadline must be a valid date' })
       .optional(),
     priority: prioritySchema.optional(),
+    reminder_enabled: z.boolean().optional(),
+    repeat_rule: repeatRuleSchema.optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {

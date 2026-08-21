@@ -17,7 +17,7 @@ export function AuthBackdrop({ children }) {
         aria-label="Chase home"
         className="mb-8 inline-flex items-center gap-2 rounded-(--radius-sm)"
       >
-        <img src="/brand/chase-mark-on-light.svg" alt="" className="h-8 w-8" />
+        <img src="/brand/chase-mark-on-dark.svg" alt="" className="h-8 w-8" />
       </Link>
 
       <div className="w-full max-w-sm">{children}</div>

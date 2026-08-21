@@ -8,7 +8,7 @@ export function DeadlineDisplay({ deadline, className = '' }) {
   return (
     <time
       dateTime={deadline}
-      className={`font-mono text-meta ${className}`}
+      className={`font-tabular text-meta ${className}`}
       style={{ color: isOverdue ? 'var(--color-review)' : 'var(--color-ink-3)' }}
     >
       {formatDeadline(deadline)}

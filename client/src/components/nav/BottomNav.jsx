@@ -1,14 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { SHEET_SPRING } from '../../lib/motion';
+import { DURATION } from '../../lib/motion';
 import { useTasksContext } from '../../lib/tasksStore';
 import { NAV_TABS } from './navTabs';
 
-// DESIGN.md §6.1 — a pill track holding exactly four icon slots (no
-// spacer, no FAB inside the track); the active item grows into a labeled
-// white capsule, inactive items show icon only. The Create FAB is a fully
-// separate circular element, a sibling of the pill in the same flex row.
+// DESIGN.md v3 §6 — a dark navy bar holding exactly four always-visible
+// icon+label slots; the active item gets ocean-blue icon/label color plus a
+// subtle static blue background chip (no growing/morphing capsule). The
+// Create FAB is a fully separate 56x56 circular element, flat brand-blue
+// fill, a sibling of the bar in the same flex row.
 //
 // needsReviewCount comes from AppLayout's real useTaskCounts() — the
 // ochre dot on the Tasks slot.
@@ -25,7 +26,7 @@ export function BottomNav({ needsReviewCount = 0 }) {
     <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-20 pb-safe">
       <div className="mx-auto flex max-w-md items-center gap-2.5 px-4 pb-3">
         <div
-          className="flex h-14 flex-1 items-center gap-1 rounded-(--radius-pill) bg-surface-sunken p-[5px]"
+          className="flex h-16 flex-1 items-center gap-1 rounded-(--radius-xl) border border-(--border-hairline) bg-surface-sunken px-1.5"
           style={{ boxShadow: 'var(--shadow-nav-pill)' }}
         >
           {NAV_TABS.map((tab) => (
@@ -44,13 +45,13 @@ export function BottomNav({ needsReviewCount = 0 }) {
           aria-haspopup="dialog"
           aria-expanded={createSheetOpen}
           aria-label="Create task"
-          className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-(--radius-pill) text-canvas transition-transform active:scale-[0.93]"
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-(--radius-pill) text-white transition-transform active:scale-[0.93]"
           style={{
-            background: 'var(--gradient-fab)',
+            background: 'var(--color-brand)',
             boxShadow: 'var(--shadow-fab)',
           }}
         >
-          <Plus size={22} strokeWidth={2} aria-hidden="true" />
+          <Plus size={24} strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
     </nav>
@@ -64,19 +65,20 @@ function NavTab({ tab, active, badge = false }) {
       to={tab.to}
       aria-current={active ? 'page' : undefined}
       aria-label={tab.label}
-      className="relative flex min-h-(--size-tap-nav) items-center justify-center gap-1.5 overflow-hidden rounded-(--radius-pill)"
-      style={{ flex: active ? 2 : 1 }}
+      className="relative flex min-h-(--size-tap-nav) flex-1 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-(--radius-md)"
     >
       {active && (
         <motion.span
-          layoutId="nav-pill"
-          className="absolute inset-0.5 rounded-(--radius-pill) bg-surface"
-          style={{ boxShadow: 'var(--shadow-card)' }}
-          transition={SHEET_SPRING}
+          aria-hidden="true"
+          className="absolute inset-0.5 rounded-(--radius-md)"
+          style={{ backgroundColor: 'var(--color-brand-soft)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: DURATION.fast }}
         />
       )}
       <span className="relative shrink-0">
-        <Icon size={19} strokeWidth={1.8} color={active ? 'var(--color-pine)' : 'var(--color-ink-3)'} aria-hidden="true" />
+        <Icon size={19} strokeWidth={1.8} color={active ? 'var(--color-brand)' : 'var(--color-ink-3)'} aria-hidden="true" />
         {badge && (
           <span
             aria-hidden="true"
@@ -85,11 +87,13 @@ function NavTab({ tab, active, badge = false }) {
           />
         )}
       </span>
-      {active && (
-        <span aria-hidden="true" className="relative text-meta font-semibold whitespace-nowrap" style={{ color: 'var(--color-pine)' }}>
-          {tab.label}
-        </span>
-      )}
+      <span
+        aria-hidden="true"
+        className="relative text-micro font-semibold whitespace-nowrap"
+        style={{ color: active ? 'var(--color-brand)' : 'var(--color-ink-3)' }}
+      >
+        {tab.label}
+      </span>
     </Link>
   );
 }

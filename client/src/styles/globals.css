@@ -1,13 +1,9 @@
 @import 'tailwindcss';
 
-/* ---- fonts (§3, §11.1) — self-hosted via @fontsource, no CDN link.
- * Literata 500 only (headings/numerals), Manrope Variable (body/UI, the
- * variable axis covers 400/500/600 in one file), JetBrains Mono 400/500
- * (data/timestamps). ---- */
-@import '@fontsource/literata/500.css';
-@import '@fontsource-variable/manrope/wght.css';
-@import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
+/* ---- fonts (§3) — self-hosted via @fontsource, no CDN link.
+ * Inter Variable is the only typeface (v3 "dark navy" system) — covers the
+ * full 400-600 weight range needed by the type scale in one file. ---- */
+@import '@fontsource-variable/inter/wght.css';
 
 @import './tokens.css';
 
@@ -58,12 +54,6 @@
     color: inherit;
   }
 
-  /* ---- mono numerals never jitter (§3.2) ---- */
-  .font-mono,
-  [class*='font-mono'] {
-    font-variant-numeric: tabular-nums;
-  }
-
   /* ---- mobile hygiene (§9) ---- */
   body,
   button,
@@ -95,6 +85,13 @@
     overscroll-behavior-y: contain;
   }
 
+  /* ---- tabular numerals — no separate mono face in v3; applied wherever
+   * numerals need fixed-width alignment (stat counts, chart axis labels,
+   * filter counts, timestamps). ---- */
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* ---- safe areas (§9) ---- */
   .pt-safe {
     padding-top: env(safe-area-inset-top);
@@ -114,7 +111,7 @@
     background-image: linear-gradient(
       100deg,
       var(--color-surface) 40%,
-      var(--color-surface-sunken) 50%,
+      var(--color-surface-hover) 50%,
       var(--color-surface) 60%
     );
     background-size: 250% 100%;

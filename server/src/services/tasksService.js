@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import * as tasksRepository from '../repositories/tasksRepository.js';
 import * as notificationService from './notificationService.js';
 import * as workSessionsService from './workSessionsService.js';
+import * as recurrenceService from './recurrenceService.js';
 import { NotFoundError, InvalidTransitionError } from '../errors/AppError.js';
 
 export const MISSED_REASON = 'Deadline passed while task was still ACTIVE';
@@ -44,12 +46,18 @@ async function getOwnedTaskOrThrow(id, userId) {
   return task;
 }
 
-export async function createTask(userId, { title, description, deadline, priority }) {
+export async function createTask(
+  userId,
+  { title, description, deadline, priority, reminder_enabled, repeat_rule },
+) {
   const task = await tasksRepository.create(userId, {
     title,
     description: description ?? null,
     deadline,
     priority,
+    reminder_enabled: reminder_enabled ?? false,
+    repeat_rule: repeat_rule ?? 'NONE',
+    repeat_group_id: repeat_rule && repeat_rule !== 'NONE' ? randomUUID() : null,
   });
 
   await notificationService.notifyTaskCreated(userId, task);
@@ -105,6 +113,7 @@ export async function resolveMissedTask(userId, id, resolution, reason) {
     updated_at: now,
   });
   await notificationService.notifyTaskCompleted(userId, updated);
+  await recurrenceService.maybeSpawnNextOccurrence(userId, updated);
   return updated;
 }
 
@@ -152,6 +161,7 @@ export async function completeTask(userId, id) {
   });
   await workSessionsService.autoCloseOpenSession(id);
   await notificationService.notifyTaskCompleted(userId, updated);
+  await recurrenceService.maybeSpawnNextOccurrence(userId, updated);
   return updated;
 }
 

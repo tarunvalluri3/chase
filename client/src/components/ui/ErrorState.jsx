@@ -8,7 +8,7 @@ export function ErrorState({
 }) {
   return (
     <div className="flex flex-col items-center gap-3 px-gutter pt-16 text-center">
-      <p className="font-serif text-section text-ink">{title}</p>
+      <p className="text-section text-ink">{title}</p>
       <p className="max-w-xs text-body text-ink-2">{description}</p>
       <Button size="sm" variant="secondary" onClick={onRetry} className="mt-1">
         Retry

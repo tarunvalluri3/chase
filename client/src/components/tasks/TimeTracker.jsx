@@ -29,7 +29,7 @@ export function TimeTracker({ taskId, compact = false, readOnly = false }) {
 
       {hasElapsed && (
         <span
-          className={`font-mono tabular-nums ${compact ? 'text-meta' : 'text-task'}`}
+          className={`font-tabular ${compact ? 'text-meta' : 'text-task'}`}
           style={{ color: isRunning ? 'var(--color-active)' : 'var(--color-ink-2)' }}
           aria-live={isRunning ? 'off' : undefined}
         >

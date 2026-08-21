@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Check } from 'lucide-react';
 import { PriorityRail } from './PriorityRail';
 import { PriorityLabel } from './PriorityLabel';
 import { priorityText } from './priorityConfig';
@@ -79,7 +80,7 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
     <motion.article
       layout
       aria-label={accessibleName}
-      className="relative flex gap-3 overflow-hidden rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+      className="relative flex gap-3 overflow-hidden rounded-(--radius-lg) border border-(--border-hairline) bg-surface p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
       animate={{ opacity: isExiting ? 0 : 1, scale: isPressed ? 0.97 : 1 }}
       whileHover={reducedMotion ? undefined : { y: -2 }}
       transition={{
@@ -119,6 +120,17 @@ export function TaskCard({ task, sectionStatus, onSettled }) {
       )}
 
       <PriorityRail priority={task.priority} className="relative" />
+      <span
+        aria-hidden="true"
+        className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-(--radius-pill) border-2"
+        style={
+          task.status === 'COMPLETED'
+            ? { borderColor: 'var(--color-completed)', backgroundColor: 'var(--color-completed)' }
+            : { borderColor: 'var(--border-strong)', backgroundColor: 'transparent' }
+        }
+      >
+        {task.status === 'COMPLETED' && <Check size={13} strokeWidth={3} color="var(--color-canvas)" />}
+      </span>
       <div className="relative flex min-w-0 flex-1 flex-col gap-2">
         <Link to={`/tasks/${sectionStatus}/${task.id}`} className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-2">

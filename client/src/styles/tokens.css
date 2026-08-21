@@ -1,109 +1,117 @@
 /* client/src/styles/tokens.css
- * Chase design tokens — DESIGN.md v2 ("The Ledger") §2–5, §10.1.
+ * Chase design tokens — DESIGN.md v3 ("Dark Navy") §2–5.
  * No component may write a hex value. Every color, size, and motion
  * value used anywhere in the app must come from a token defined here.
  */
 @theme {
   /* ---- ground (§2.1) ---- */
-  --color-canvas: #f6f1e5; /* warm parchment app background */
-  --color-surface: #fffdf7; /* cards, sheets, inputs, nav active capsule */
-  --color-surface-sunken: #efe8d8; /* pressed states, nav track, sunken inputs */
+  --color-canvas: #06111b; /* app background */
+  --color-surface: #0b1a27; /* cards, sheets, inputs */
+  --color-surface-sunken: #102235; /* elevated surface (nav bars, panels) */
+  --color-surface-hover: #142a40; /* hover/pressed surface */
 
   /* ---- ink (§2.1) ---- */
-  --color-ink: #241f18; /* titles, primary text — warm near-black */
-  --color-ink-2: #6b6255; /* body copy, descriptions, reasons */
-  --color-ink-3: #99907e; /* timestamps, inactive nav, helper text */
-  --color-ink-disabled: #b7af9c; /* disabled labels only */
+  --color-ink: #f2f6fa; /* titles, primary text */
+  --color-ink-2: #a7b5c2; /* body copy, descriptions, reasons */
+  --color-ink-3: #6f8190; /* timestamps, inactive nav, helper text */
+  --color-ink-disabled: #4a5a68; /* disabled labels only */
 
-  /* ---- brand / priority (§2.2) ---- */
-  --color-pine: #24473e; /* brand accent · ACTIVE status · Low priority */
-  --color-pine-press: #1a342d; /* primary button pressed/hover */
-  --color-pine-tint: #e4ebe6; /* 14% tint background for Pine chips/pills */
-  --color-dusk: #4f6e85; /* Medium priority — the one place blue appears */
-  --color-dusk-tint: #e7edf1;
-  --color-clay: #ad5133; /* High priority + the only destructive-action color */
-  --color-clay-tint: #f5e7df;
+  /* ---- brand (§2.2) ---- */
+  --color-brand: #1683f7; /* primary ocean blue */
+  --color-brand-hover: #0874e5;
+  --color-brand-soft: #0d2c4a;
 
-  /* ---- status (§2.3) — unchanged roles from v1, new values ---- */
-  --color-moss: #62793f; /* COMPLETED */
-  --color-moss-tint: #ebeee0;
-  --color-ochre: #a87a2e; /* MISSED — "Needs review" */
-  --color-ochre-tint: #f3eada;
-  --color-sand: #8e7a4f; /* INCOMPLETE — "Not done" */
-  --color-sand-tint: #f0ead9;
-  --color-stone: #8b8474; /* DELETED */
-  --color-stone-tint: #ece9de;
+  /* aliases kept for consumer stability across the redesign (see below) */
+  --color-pine: var(--color-brand);
+  --color-pine-press: var(--color-brand-hover);
+  --color-pine-tint: var(--color-brand-soft);
+  --color-dusk: #3b9cff; /* info / Medium priority */
+  --color-dusk-tint: #0b2943;
+  --color-clay: #ff6262; /* danger / High priority */
+  --color-clay-tint: #3a171c;
+
+  /* ---- status (§2.3) ---- */
+  --color-moss: #52d273; /* COMPLETED / success */
+  --color-moss-tint: #103522;
+  --color-ochre: #f2b84b; /* MISSED — "Needs review" / warning */
+  --color-ochre-tint: #382a12;
+  --color-sand: #8fa1b3; /* INCOMPLETE — "Not done" — muted neutral, distinct from warning/danger */
+  --color-sand-tint: #14212c;
+  --color-stone: #6b7a89; /* DELETED — most-muted neutral */
+  --color-stone-tint: #101a22;
 
   /* ---- semantic aliases — kept stable so components read by role, not
-   * by hue name; every alias below resolves to one of the tokens above,
-   * per DESIGN.md §2.2/§2.3. This is the only indirection layer: nothing
-   * outside this file ever writes a hex or a raw color literal. ---- */
-  --color-active: var(--color-pine); /* ACTIVE status */
+   * by hue name; every alias below resolves to one of the tokens above. ---- */
+  --color-active: var(--color-brand); /* ACTIVE status */
   --color-completed: var(--color-moss); /* COMPLETED status */
   --color-review: var(--color-ochre); /* MISSED — "Needs review" */
   --color-notdone: var(--color-sand); /* INCOMPLETE — "Not done" */
   --color-deleted: var(--color-stone); /* DELETED status */
   --color-danger: var(--color-clay); /* destructive action only, never a resting status */
 
-  --color-accent: var(--color-pine); /* links, focus ring, selected state */
-  --color-accent-solid: var(--color-pine); /* primary button fill */
-  --color-accent-press: var(--color-pine-press); /* primary button pressed/hover */
+  --color-accent: var(--color-brand); /* links, focus ring, selected state */
+  --color-accent-solid: var(--color-brand); /* primary button fill */
+  --color-accent-press: var(--color-brand-hover); /* primary button pressed/hover */
 
-  /* ---- priority — now colored (§2.2, reverses v1's monochrome rule) ---- */
+  /* ---- priority (§7) — Low green, Medium blue, High red. Low deliberately
+   * aliases --color-moss (success), NOT --color-brand/--color-pine — brand
+   * blue and "low priority" are unrelated concepts in v3, unlike v2 where
+   * pine served both roles. ---- */
   --color-priority-high: var(--color-clay);
   --color-priority-high-tint: var(--color-clay-tint);
   --color-priority-medium: var(--color-dusk);
   --color-priority-medium-tint: var(--color-dusk-tint);
-  --color-priority-low: var(--color-pine);
-  --color-priority-low-tint: var(--color-pine-tint);
+  --color-priority-low: var(--color-moss);
+  --color-priority-low-tint: var(--color-moss-tint);
 
   /* ---- borders / rules (§2.1) ---- */
-  --color-rule: rgba(36, 31, 24, 0.09); /* ledger hairlines between rows */
-  --border-hairline: rgba(36, 31, 24, 0.1); /* card borders */
-  --border-strong: rgba(36, 31, 24, 0.18); /* input borders (focus/error), dividers */
+  --color-rule: #1b344a;
+  --border-hairline: #1b344a; /* default border */
+  --border-strong: #254761; /* strong/focused border */
 
-  /* ---- font families (§3, §11.1) — self-hosted via @fontsource, no CDN ---- */
-  --font-serif: 'Literata', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Manrope Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* ---- font family (§3) — Inter only, self-hosted via @fontsource ---- */
+  --font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* ---- type scale (§3.1) — size / line-height / tracking / weight ---- */
-  --text-display: 2.375rem;
+  /* ---- type scale (§3) — size / line-height / tracking / weight.
+   * Token names kept stable from v2; values remapped to the new spec's
+   * closest role (Tailwind v4 auto-generates text-display/text-title/etc.
+   * utilities from these, used pervasively across components). ---- */
+  --text-display: 2.5rem; /* 40px — Large KPI */
   --text-display--line-height: 2.75rem;
-  --text-display--letter-spacing: -0.015em;
-  --text-display--font-weight: 500;
+  --text-display--letter-spacing: 0em;
+  --text-display--font-weight: 600;
 
-  --text-title: 1.6875rem;
-  --text-title--line-height: 2.125rem;
-  --text-title--letter-spacing: -0.01em;
-  --text-title--font-weight: 500;
+  --text-title: 2rem; /* 32px — Screen title */
+  --text-title--line-height: 2.375rem;
+  --text-title--letter-spacing: 0em;
+  --text-title--font-weight: 600;
 
-  --text-section: 1.1875rem;
-  --text-section--line-height: 1.625rem;
-  --text-section--letter-spacing: -0.008em;
-  --text-section--font-weight: 500;
+  --text-section: 1.25rem; /* 20px — page-section headers ("Due soon" etc.) */
+  --text-section--line-height: 1.75rem;
+  --text-section--letter-spacing: 0em;
+  --text-section--font-weight: 600;
 
-  --text-task: 1rem;
-  --text-task--line-height: 1.4375rem;
-  --text-task--letter-spacing: -0.006em;
+  --text-task: 1.0625rem; /* 17px — Card/task title */
+  --text-task--line-height: 1.5rem;
+  --text-task--letter-spacing: 0em;
   --text-task--font-weight: 600;
 
-  --text-body: 0.96875rem;
-  --text-body--line-height: 1.5625rem;
+  --text-body: 1rem; /* 16px — Body */
+  --text-body--line-height: 1.5rem;
   --text-body--letter-spacing: 0em;
   --text-body--font-weight: 400;
 
-  --text-meta: 0.78125rem;
-  --text-meta--line-height: 1.125rem;
+  --text-meta: 0.875rem; /* 14px — Secondary */
+  --text-meta--line-height: 1.25rem;
   --text-meta--letter-spacing: 0em;
   --text-meta--font-weight: 400;
 
-  --text-micro: 0.65625rem;
-  --text-micro--line-height: 0.875rem;
-  --text-micro--letter-spacing: 0.09em;
-  --text-micro--font-weight: 500;
+  --text-micro: 0.75rem; /* 12px — Labels/badges/section-labels */
+  --text-micro--line-height: 1rem;
+  --text-micro--letter-spacing: 0.06em;
+  --text-micro--font-weight: 600;
 
-  /* ---- space (§4) ---- */
+  /* ---- space (§4) — already an 8px scale, values unchanged from v2 ---- */
   --spacing-1: 0.25rem; /* 4px */
   --spacing-2: 0.5rem; /* 8px */
   --spacing-3: 0.75rem; /* 12px */
@@ -115,27 +123,28 @@
   --spacing-9: 3rem; /* 48px */
   --spacing-10: 4rem; /* 64px */
 
-  --spacing-gutter: 1rem; /* 16px */
-  --spacing-stack-gap: 0.5625rem; /* 9px, card-gap §4 */
+  --spacing-gutter: 1.5rem; /* 24px screen h-padding */
+  --spacing-stack-gap: 0.75rem; /* 12px inter-card gap */
 
   /* ---- shape (§4) ---- */
-  --radius-sm: 0.625rem; /* 10px */
-  --radius-md: 0.875rem; /* 14px */
-  --radius-lg: 1.125rem; /* 18px */
-  --radius-xl: 1.375rem; /* 22px */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-md: 0.75rem; /* 12px */
+  --radius-lg: 1rem; /* 16px */
+  --radius-xl: 1.25rem; /* 20px */
+  --radius-xxl: 1.5rem; /* 24px */
   --radius-pill: 999px;
 
-  /* ---- motion easing (§5, §10.1) — default curve is gentler in v2 ---- */
+  /* ---- motion easing (§5) ---- */
   --ease-out: cubic-bezier(0.25, 0.7, 0.4, 1);
   --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
-  /* ---- motion duration (§5, §10.1) ---- */
+  /* ---- motion duration (§5) ---- */
   --dur-instant: 90ms;
-  --dur-fast: 140ms;
+  --dur-fast: 150ms;
   --dur-base: 200ms;
-  --dur-slow: 280ms;
-  --dur-sheet: 320ms;
+  --dur-slow: 260ms;
+  --dur-sheet: 280ms;
 }
 
 /* Tap-target floors (§4) — referenced via arbitrary-value utilities,
@@ -144,27 +153,18 @@
   --size-tap-min: 2.75rem; /* 44px absolute floor */
   --size-tap-nav: 3rem; /* 48px in the bottom nav */
 
-  /* ---- elevation (§4.2) — soft, warm-toned shadows only. Every value here
-   * is the literal shadow recipe from DESIGN.md §4.1/§6.1; kept as a token
-   * so no component ever writes its own rgba() shadow. ---- */
-  --shadow-card: 0 1px 2px rgba(36, 31, 24, 0.03), 0 8px 18px rgba(36, 31, 24, 0.045);
-  --shadow-card-hover: 0 2px 4px rgba(36, 31, 24, 0.04), 0 14px 28px rgba(36, 31, 24, 0.07);
-  --shadow-panel: 0 1px 2px rgba(36, 31, 24, 0.03), 0 10px 24px rgba(36, 31, 24, 0.05);
-  --shadow-nav-pill: 0 4px 16px rgba(36, 31, 24, 0.1);
-  --shadow-fab: 0 6px 18px rgba(173, 81, 51, 0.35);
-  --shadow-sheet: 0 -12px 40px rgba(36, 31, 24, 0.14);
-  --shadow-toast: 0 6px 24px rgba(36, 31, 24, 0.16);
-
-  /* ---- gradients (§6.1/§8) — the FAB's radial Clay fill and the Profile
-   * avatar's radial Pine fill, kept here so no component writes a hex. ---- */
-  --gradient-fab: radial-gradient(circle at 32% 28%, #c36a46, var(--color-clay) 72%);
-  --gradient-avatar: radial-gradient(circle at 32% 28%, var(--color-pine-press), var(--color-pine) 75%);
+  /* ---- elevation (§4/§1 "minimal shadow") — flat, low-alpha black shadows;
+   * hierarchy comes from surface contrast, not heavy shadow. ---- */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 8px 20px rgba(0, 0, 0, 0.28);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 16px rgba(0, 0, 0, 0.22);
+  --shadow-nav-pill: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-fab: 0 6px 18px rgba(22, 131, 247, 0.35);
+  --shadow-sheet: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-toast: 0 6px 24px rgba(0, 0, 0, 0.4);
 
   /* ---- chart (§12) — derived from existing status/priority/accent tokens.
-   * No new hues: every chart color is one of these already-approved values,
-   * optionally desaturated via color-mix for secondary-encoding purposes
-   * (e.g. distinguishing resolved-from-missed completions from on-time ones
-   * without inventing a new categorical hue). ---- */
+   * No new hues: every chart color is one of these already-approved values. ---- */
   --color-chart-grid: var(--border-hairline);
   --color-chart-axis-label: var(--color-ink-3);
   --color-chart-ranked-bar: var(--color-accent);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { Activity } from 'lucide-react';
 import { StatTile } from '../StatTile';
 import { StatusCounts } from '../StatusCounts';
 import { DueSoon } from '../DueSoon';
@@ -19,10 +20,18 @@ function renderRecentActivity(ui) {
 }
 
 describe('StatTile', () => {
-  it('renders the count and label with the given color', () => {
+  it('renders the count and label', () => {
     render(<StatTile label="Active" count={5} color="var(--color-active)" />);
     expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('Active')).toHaveStyle({ color: 'var(--color-active)' });
+    expect(screen.getByText('Active')).toBeInTheDocument();
+  });
+
+  it('colors the icon bubble with the given color when an icon is provided', () => {
+    const { container } = render(
+      <StatTile label="Active" count={5} color="var(--color-active)" icon={Activity} />,
+    );
+    const bubble = container.querySelector('svg')?.parentElement;
+    expect(bubble).toHaveStyle({ color: 'var(--color-active)' });
   });
 });
 

@@ -53,6 +53,23 @@ export function computeOnTimeRate(tasks) {
   return Math.round((onTime / completed.length) * 100);
 }
 
+const PRIORITY_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+
+// Client-side sort for a single status list (FilterRow's sort control) — no
+// new API param, since the full section's tasks are already fetched.
+export function sortTasks(tasks, sortBy) {
+  const sorted = [...tasks];
+  if (sortBy === 'priority') {
+    sorted.sort((a, b) => (PRIORITY_RANK[a.priority] ?? 3) - (PRIORITY_RANK[b.priority] ?? 3));
+  } else if (sortBy === 'created') {
+    sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } else {
+    // 'deadline' (default) — soonest first.
+    sorted.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
+  }
+  return sorted;
+}
+
 const DUE_SOON_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 // Active tasks whose deadline is still ahead but within the next 24h.

@@ -1,3 +1,4 @@
+import { Activity, CheckCircle2, Clock, FileText, Trash2 } from 'lucide-react';
 import { LedgerStrip, StatTile } from './StatTile';
 import { statusLabel } from '../tasks/StatusChip';
 import { computeStatusCounts, STATUS_ORDER } from '../../lib/taskStats';
@@ -13,15 +14,28 @@ const STATUS_COLOR = {
   DELETED: 'var(--color-deleted)',
 };
 
-// A single ledger strip of five StatTile cells (DESIGN.md §4.1/§7/§9) —
-// replaces v1's bordered 2-up tile grid.
+const STATUS_ICON = {
+  ACTIVE: Activity,
+  MISSED: FileText,
+  COMPLETED: CheckCircle2,
+  INCOMPLETE: Clock,
+  DELETED: Trash2,
+};
+
+// A single stat card of five icon-bubble StatTile cells (DESIGN.md v3 §7).
 export function StatusCounts({ tasks }) {
   const counts = computeStatusCounts(tasks);
   return (
     <div className="px-gutter">
       <LedgerStrip className="overflow-x-auto">
         {STATUS_ORDER.map((status) => (
-          <StatTile key={status} label={statusLabel(status)} count={counts[status]} color={STATUS_COLOR[status]} />
+          <StatTile
+            key={status}
+            label={statusLabel(status)}
+            count={counts[status]}
+            color={STATUS_COLOR[status]}
+            icon={STATUS_ICON[status]}
+          />
         ))}
       </LedgerStrip>
     </div>
